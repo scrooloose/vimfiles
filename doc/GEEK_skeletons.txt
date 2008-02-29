@@ -1,0 +1,331 @@
+*GEEK_skeletons.txt*                                                  v13
+
+
+                       GEEK_SKELETONS REFERENCE MANUAL~
+
+
+
+
+
+==============================================================================
+CONTENTS                                              *GEEK_skels-contents* 
+
+    1.Intro                               : |GEEK_skels|
+    2.Functionality provided              : |GEEK_skels-Functionality|
+     2.1. Reading/processing skeletons    : |GEEK_skels-processing-skels|
+     2.2. Parsing skeletons               : |GEEK_skels-parsing|
+    3.Writing skeleton files              : |GEEK_skels-writing-skels|
+     3.1. Comment markup                  : |GEEK_skels-comments|
+     3.2. Yes/no option markup            : |GEEK_skels-yes-no-options|
+     3.3. Switch markup                   : |GEEK_skels-switch-options|
+     3.4. Value markup                    : |GEEK_skels-value-options|
+     3.5. Multiple markup                 : |GEEK_skels-multiple|
+     3.6. Multiple unique markup          : |GEEK_skels-multiple-unique|
+     3.7. Nesting options                 : |GEEK_skels-nesting|
+     3.8. Syntax hightlighting .geek files: |GEEK_skels-highlighting|
+    4.Customisation options               : |GEEK_skels-options|
+    5.Credits                             : |GEEK_skels-credits|
+
+==============================================================================
+1. Intro                                                          *GEEK_skels*
+
+Geek skeletons is a utility that reads in a chosen skeleton file and
+preprocesses it according to markup in the file. The script uses this markup
+to get input from the user which it uses to alter the skeleton before copying
+it into the current buffer. The markup allows the skeleton files to act kind of
+like little wizards.
+
+==============================================================================
+2. Functionality provided                           *GEEK_skels-Functionality*
+
+Currently there are two major pieces of functionality that GEEK_skeletons
+provides: the reading and processing of skeleton files and parsing of skeleton
+files.
+
+------------------------------------------------------------------------------
+2.1. Reading/processing skeletons                *GEEK_skels-processing-skels*
+
+This functionality is accessed with the <leader>gg mapping while in normal
+mode. This causes the script to for all available skeletons in a directory
+called GEEK_skel which is in the same directory as the plugin file. Inside
+this directory the script looks for a directory matching the filetype of the
+current buffer as given by the vim option: &filetype. Then, from this
+directory it gets all files with an extension of .geek and presents these to
+the user to choose the desired skeleton file. For example, if we are editing a
+c++ file and the script is in ~/.vim/plugin then, when <leader>gg is pressed,
+the script will get all .geek files in ~/.vim/plugin/GEEK_skel/cpp and, after
+filtering some files out, present this list of files to the user who will
+select the desired skeleton.
+
+When a file is selected from the list it is parsed for syntactical correctness
+and, if no errors are detected, preprocessed according to markup contained in
+it (see |GEEK_skels-writing-skels| for a detailed description of this markup).
+The script processes the file line by line asking the user questions according
+to the markup as needed and then copies a version of the skeleton file into
+the file being edited. This version of the skeleton will change depending on
+the users input.
+
+------------------------------------------------------------------------------
+2.2. Parsing skeletons                                    *GEEK_skels-parsing*
+
+When editing a .geek file you may get GEEK_skeletons to parse the file to
+check for syntax errors. This is done by pressing <leader>gp
+
+==============================================================================
+3. Writing skeleton files                           *GEEK_skels-writing-skels*
+
+Writing a skeleton consists of two parts. Firstly you have to write the actual
+code/text that will be in it and secondly you have to write the markup. The
+markup will be used by the script to ask the user for input in order to
+customise the skeleton file that will be added to their current file.
+
+There are four types of markup which are explained in subsequent sections.
+
+----------------------------------------------------------------------------~
+3.1 Comment markup                                     *GEEK_skels-comments*
+
+This is the simplest markup and is designed to be used to comment skelton
+files in the same way as people comment their code. The syntax is: >
+    GEEK_COMMENT <comment>
+<
+All lines containing GEEK_COMMENT are not included in the final skeleton.
+
+----------------------------------------------------------------------------~
+3.2. Yes/no option markup                        *GEEK_skels-yes-no-options*
+
+Yes or no options are used to simply include parts of the skeleton file or not
+at the users discretion.
+The syntax is: >
+    GEEK_YN:<name of option>
+    <lines that will be included>
+    GEEK_END_YN
+<
+Note that <name of option> must be all one word as recognised by vim.
+
+For example: >
+    GEEK_YN:include_foo_and_bar
+    FOO
+    BAR!!
+    GEEK_END_YN
+<
+Will cause the script to ask the user if they want to use the option
+"include_foo_and_bar" and if they type "y" then the lines: >
+    FOO
+    BAR!!
+<
+will be included in the final skeleton. If the user enters anything other than
+"y" or "n" then "n" will be assumed.
+The script remembers what the users response was so if the same yes or no
+option is later encountered the same response will be assumed automatically.
+
+In the final version of the skeleton that is included in the file being
+edited, the lines containing the GEEK_YN: and GEEK_END_YN will be removed.
+
+----------------------------------------------------------------------------~
+3.3. Switch markup                               *GEEK_skels-switch-options*
+
+The switch markup is like a yes or no option |GEEK_skels-yes-no-options| but
+with an arbitrary number of possible choices. 
+
+The syntax is: >
+    GEEK_BEGIN_SWITCH:<option name>
+        GEEK_CASE:<case name 1>
+        <lines to be included for case 1>
+        GEEK_CASE:<case name 2>
+        <lines to be included for case 2>
+         ...
+    GEEK_END_SWITCH
+<
+Note that both <option name> and <case name .*> must be one word each as
+recognised by vim.
+
+For example if we have the following: >
+    GEEK_BEGIN_SWITCH:favourite_super_hero
+        GEEK_CASE:superman
+        nice choice!
+        superman is cool
+        GEEK_CASE:wonderwoman
+        ohhh yeah WONDERWOMAN!!
+        whip me baby!!
+        GEEK_CASE:batman
+        I dont like men who dress up in latex
+    GEEK_END_SWITCH
+<
+Then the user will be given a list of options corresponding to the GEEK_CASEs.
+So in this example the user will be given a list of 3 things: superman,
+wonderwoman and batman. The text that will be included for each option is
+simply the text under the GEEK_CASE and before the next GEEK_CASE (or
+GEEK_END_SWITCH if it is the last CASE). So if they choose wonderwoman from
+the list then >
+        ohhh yeah WONDERWOMAN!!
+        whip me baby!!
+<
+will be included in the final skeleton. If the user enters an invalid choice
+then the first of the cases will be included in the final skeleton.
+
+Similarly to yes or no options |GEEK_skels-yes-no-options| the script
+remembers what the users choice was and, if another switch with the same name
+(favourite_super_hero in the example) is encountered then the same choice is
+assumed.
+
+In the final version of the skeleton that is included in the file being
+edited, the lines containing the GEEK_BEGIN_SWITCH:, GEEK_CASE: and
+GEEK_END_SWITCH are removed.
+
+----------------------------------------------------------------------------~
+3.4. Value markup                                  *GEEK_skels-value-options*
+
+This markup is used just to substitute a value into the skeleton. The syntax is:>
+    GEEK_VAL_<option name>
+<
+Note that <option name> must be one word as recognised by vim.
+
+For example: >
+    class GEEK_VAL_class_name{
+        public:
+            GEEK_VAL_class_name();
+            virtual ~GEEK_VAL_class_name();
+    };
+<
+will cause the user to be asked to enter a value for "class_name" which will
+be substituted where ever GEEK_VAL_class_name is found in the skeleton.
+
+----------------------------------------------------------------------------~
+3.5. Multiple markup                             *GEEK_skels-multiple*
+
+Multiple markup, as the name suggests, is used to make multiple copies of
+text. They syntax is: >
+    GEEK_MULTIPLE:<option name>
+    <text>
+    GEEK_END_MULTIPLE
+<
+Note that <option name> must be one word as recognised by vim.
+
+For example the following code: >
+    GEEK_MULTIPLE:how_many_foos
+    foo
+    GEEK_END_MULTIPLE
+<
+will ask prompt the user to enter a number for the option "how many foos"
+and will then include <text> that many times. For this example if the user
+typed 5 then the text: >
+    foo
+    foo
+    foo
+    foo
+    foo
+<
+would be included in the final skeleton.
+
+The script remembers the user response so if another multiple is found with
+the same <option name> then the same response will be assumed.
+
+----------------------------------------------------------------------------~
+3.6. Multiple unique markup               *GEEK_skels-multiple-unique*
+
+Multiple unique markup is exactly the same as normal multiple markup except
+that all option names in the markup in resulting copies are made unique. This
+is done my just appending a number to the end of the copied option names.
+
+The syntax is: >
+    GEEK_MULTIPLE_UNIQUE:<option name>
+    <text>
+    GEEK_END_MULTIPLE_UNIQUE
+<
+Note that <option name> must be one word as recognised by vim.
+
+So if we have the following code: >
+    GEEK_MULTIPLE_UNIQUE:how_many_classes
+    GEEK_BEGIN_SWITCH:is_class_public
+        GEEK_CASE:yes
+    public abstract class GEEK_VAL:class_name{
+        GEEK_CASE:no
+    abstract class GEEK_VAL:class_name{
+    GEEK_END_SWITCH
+    }
+    GEEK_END_MULTIPLE_UNIQUE
+<
+The user will be prompted for a value of "how_many_classes" and if they type 2
+then the script will expand the above code to: >
+    GEEK_BEGIN_SWITCH:is_class_public
+        GEEK_CASE:yes
+    public abstract class GEEK_VAL:class_name{
+        GEEK_CASE:no
+    abstract class GEEK_VAL:class_name{
+    GEEK_END_SWITCH
+    }
+    GEEK_BEGIN_SWITCH:is_class_public_1
+        GEEK_CASE:yes
+    public abstract class GEEK_VAL:class_name_1{
+        GEEK_CASE:no
+    abstract class GEEK_VAL:class_name_1{
+    GEEK_END_SWITCH
+    }
+<
+Note that the option names in the second copy are different from that of the
+first in that they have "_1" appended to them. If 3 copies were made then the
+3rd copy would have "_2" appended to the options and so on. This is useful
+because the script will consider the options in each copy to have different
+names and will hence not assume the same value for all options. In the above
+example this will allow us specify FOR EACH COPY a different value for
+class_name and is_class_public.
+
+----------------------------------------------------------------------------~
+3.7. Nesting options                                    *GEEK_skels-nesting*
+
+Yes/no and switch options can be nested. For example if we have: >
+
+    GEEK_BEGIN_SWITCH:favourite_gun
+        GEEK_CASE:submachine_gun
+            GEEK_BEGIN_SWITCH:favourite_submachine_gun
+                GEEK_CASE:mp40
+                    fast fire rate, low stability
+                GEEK_CASE:uzi
+                    very stable with good recovery...
+                GEEK_CASE:UMP
+                    stable, med firerate and accuracy, not bad
+            GEEK_END_SWITCH
+        
+        GEEK_CASE:pistol
+            pussy
+        GEEK_CASE:rocket_launcher
+            HARCORE!!
+    GEEK_END_SWITCH
+<
+Then the user will be prompted as to what their favourite gun is and if (and
+only if) they choose submachinegun they will be further prompted as to their
+favourite submachine gun.
+
+----------------------------------------------------------------------------~
+3.8. Syntax hightlighting .geek files              *GEEK_skels-highlighting*
+
+Support for syntax highlighting of .geek files is included in the script. This
+is to make editing skeleton files easier. Just thought i'd mention it to show
+off!! :P
+
+==============================================================================
+4.Customisation options                                   *GEEK_skels-options*
+
+To set these options just put the given line in your .vimrc.
+
+The Skeleton Directory~
+To change where the script looks for the skeletons stick use this line: >
+    let g:skelsDir='<new location>'
+<
+This will cause the script to look in <new location>/&filetype/ for skeleton
+files.
+
+
+==============================================================================
+5. Credits                                                *GEEK_skels-credits*
+
+Nick Brettell for being my experimental monkey boy and writing templates to
+test my crap.
+
+Igor Prischepoff for pointing out bugs and making suggestions.
+
+Coldplay (im listening to them right now).
+==============================================================================
+
+
+ vim:tw=78:ts=8:ft=help:norl:

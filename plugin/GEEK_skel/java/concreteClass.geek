@@ -1,0 +1,52 @@
+GEEK_COMMENT a skeleton for concrete java class files
+GEEK_COMMENT written by marty v1.0
+GEEK_YN:comments_at_top_of_file
+//-----------------------------
+    GEEK_COMMENT put all this crap here so the script asks the user the
+    GEEK_COMMENT questions first then they fill in the values second
+    GEEK_YN:include_author_in_comment
+    GEEK_END_YN
+    GEEK_YN:include_version_in_comment
+    GEEK_END_YN
+    GEEK_YN:include_date_created_in_comment
+    GEEK_END_YN
+    GEEK_YN:include_date_modified_in_comment
+    GEEK_END_YN
+    GEEK_YN:include_author_in_comment
+//Created by: GEEK_VAL:author_name
+    GEEK_END_YN
+    GEEK_YN:include_version_in_comment
+//Version: 1.0
+    GEEK_END_YN
+    GEEK_YN:include_date_created_in_comment
+//Date Created: GEEK_VAL:date
+    GEEK_END_YN
+    GEEK_YN:include_date_modified_in_comment
+//Last modified: GEEK_VAL:date
+    GEEK_END_YN
+//-----------------------------
+GEEK_END_YN
+
+GEEK_BEGIN_SWITCH:is_class_public
+    GEEK_CASE:yes
+public class GEEK_VAL:class_name{
+    GEEK_CASE:no
+class GEEK_VAL:class_name{
+GEEK_END_SWITCH
+
+GEEK_BEGIN_SWITCH:is_class_public
+    GEEK_CASE:yes
+    public GEEK_VAL:class_name(){
+    }
+    GEEK_CASE:no
+    GEEK_VAL:class_name(){
+    }
+GEEK_END_SWITCH
+
+GEEK_YN:include_a_main_method
+    public static void main(String args[]){
+    }
+GEEK_END_YN
+}
+
+

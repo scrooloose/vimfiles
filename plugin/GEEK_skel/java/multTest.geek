@@ -1,0 +1,8 @@
+GEEK_MULTIPLE:foo
+bar
+bar biznatch! GEEK_VAL:crud
+GEEK_END_MULTIPLE
+
+GEEK_MULTIPLE_UNIQUE:mult_unique
+bar biznatch! GEEK_VAL:crud
+GEEK_END_MULTIPLE_UNIQUE

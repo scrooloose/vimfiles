@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage{a4wide}
+\twocolumn
+
+\title{Commentary of GEEK_VAL:book_title}
+\author{GEEK_VAL:author}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{General info about GEEK_VAL:book_title}
+
+\section*{Chapter 1}
+\section*{Chapter 2}
+\section*{Chapter 3}
+
+\end{document}

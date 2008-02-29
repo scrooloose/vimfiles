@@ -1,0 +1,431 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.5.4	//
+BibT	bibtex.vim	/^function BibT(type, options, prompt)$/;"	f
+Change	envmacros.vim	/^	function! s:Change(env, label, delete, putInNonumber)$/;"	f
+ChangeCommand	envmacros.vim	/^	function! s:ChangeCommand(newcom)$/;"	f
+ChooseMacro	custommacros.vim	/^function! s:ChooseMacro(ask)$/;"	f
+CommandSpec_	packages.vim	/^let s:CommandSpec_    = '\\<+replace+>'$/;"	v
+CommandSpec_bra	packages.vim	/^let s:CommandSpec_bra = '\\<+replace+>{<++>}<++>'$/;"	v
+CommandSpec_brd	packages.vim	/^let s:CommandSpec_brd = '\\<+replace+>{<++>}{<++>}<++>'$/;"	v
+CommandSpec_brs	packages.vim	/^let s:CommandSpec_brs = '\\<+replace+><++>'$/;"	v
+CommandSpec_eno	packages.vim	/^let s:CommandSpec_eno = '\\begin[<++>]{<+replace+>}'."\\<CR><++>\\<CR>".'\\end{<+replace+>}'$/;"	v
+CommandSpec_ens	packages.vim	/^let s:CommandSpec_ens = '\\begin{<+replace+>}<+extra+>'."\\<CR><++>\\<CR>".'\\end{<+replace+>}<++>'$/;"	v
+CommandSpec_env	packages.vim	/^let s:CommandSpec_env = '\\begin{<+replace+>}'."\\<CR><++>\\<CR>".'\\end{<+replace+>}<++>'$/;"	v
+CommandSpec_nob	packages.vim	/^let s:CommandSpec_nob = '\\<+replace+>[<++>]{<++>}{<++>}<++>'$/;"	v
+CommandSpec_noo	packages.vim	/^let s:CommandSpec_noo = '\\<+replace+>[<++>]'$/;"	v
+CommandSpec_nor	packages.vim	/^let s:CommandSpec_nor = '\\<+replace+>'$/;"	v
+CommandSpec_spe	packages.vim	/^let s:CommandSpec_spe = '<+replace+>'$/;"	v
+Compute	templates.vim	/^function! <SID>Compute(what)$/;"	f
+DeleteMacro	custommacros.vim	/^function! <SID>DeleteMacro(...)$/;"	f
+DoubleDollars	envmacros.vim	/^	let b:DoubleDollars = 0$/;"	v
+EditMacro	custommacros.vim	/^function! <SID>EditMacro(...)$/;"	f
+Exec	templates.vim	/^function! <SID>Exec(what)$/;"	f
+FilterPackageMenuLHS	packages.vim	/^function! <SID>FilterPackageMenuLHS(command)$/;"	f
+GroupPackageMenuItems	packages.vim	/^function! <SID>GroupPackageMenuItems(menuList, menuName, $/;"	f
+Input	bibtex.vim	/^function! s:Input(prompt, ask) " {{{$/;"	f
+LatexSuite	brackets.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	compiler.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	envmacros.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	folding.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	main.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	packages.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	texproject.vim	/^augroup LatexSuite$/;"	a
+LatexSuite	texviewer.vim	/^augroup LatexSuite$/;"	a
+MakeTexFolds	folding.vim	/^function! MakeTexFolds(force)$/;"	f
+MathMenuName	mathmacros-utf.vim	/^let s:MathMenuName = g:Tex_MenuPrefix.'Ma&th.'$/;"	v
+MathMenuName	mathmacros.vim	/^let s:MathMenuName = g:Tex_MenuPrefix.'&Math.'$/;"	v
+MenuLHS_	packages.vim	/^let s:MenuLHS_    = '\\\\&<+replace+>'$/;"	v
+MenuLHS_bra	packages.vim	/^let s:MenuLHS_bra = '\\\\&<+replace+>{}'$/;"	v
+MenuLHS_brd	packages.vim	/^let s:MenuLHS_brd = '\\\\&<+replace+>{}{}'$/;"	v
+MenuLHS_brs	packages.vim	/^let s:MenuLHS_brs = '\\\\&<+replace+>{}'$/;"	v
+MenuLHS_eno	packages.vim	/^let s:MenuLHS_eno = '&<+replace+>\\ (E)'$/;"	v
+MenuLHS_ens	packages.vim	/^let s:MenuLHS_ens = '&<+replace+>\\ (E)'$/;"	v
+MenuLHS_env	packages.vim	/^let s:MenuLHS_env = '&<+replace+>\\ (E)'$/;"	v
+MenuLHS_nob	packages.vim	/^let s:MenuLHS_nob = '\\\\&<+replace+>[]{}{}'$/;"	v
+MenuLHS_noo	packages.vim	/^let s:MenuLHS_noo = '\\\\&<+replace+>[]'$/;"	v
+MenuLHS_nor	packages.vim	/^let s:MenuLHS_nor = '\\\\&<+replace+>'$/;"	v
+MenuLHS_sep	packages.vim	/^let s:MenuLHS_sep = '-sep<+replace+>-'$/;"	v
+MenuLHS_spe	packages.vim	/^let s:MenuLHS_spe = '&<+replace+>'$/;"	v
+NewMacro	custommacros.vim	/^function! <SID>NewMacro(...)$/;"	f
+ProcessTemplate	templates.vim	/^function! <SID>ProcessTemplate()$/;"	f
+PromptForCommand	envmacros.vim	/^function! PromptForCommand(ask)$/;"	f
+PromptForEnvironment	envmacros.vim	/^function! PromptForEnvironment(ask)$/;"	f
+ProtectLetters	main.vim	/^	function! s:ProtectLetters(first, last)$/;"	f
+ReadMacro	custommacros.vim	/^function! <SID>ReadMacro(...)$/;"	f
+ReadTemplate	templates.vim	/^function! <SID>ReadTemplate(...)$/;"	f
+RedrawMacro	custommacros.vim	/^function! RedrawMacro()$/;"	f
+RemoveTmpFiles	compiler.vim	/^		augroup RemoveTmpFiles$/;"	a
+SetCustomMacrosMenu	custommacros.vim	/^function! <SID>SetCustomMacrosMenu()$/;"	f
+SetEnvMacrosOptions	envmacros.vim	/^function! <SID>SetEnvMacrosOptions()$/;"	f
+SetTeXOptions	main.vim	/^function! <SID>SetTeXOptions()$/;"	f
+SetTeXTarget	compiler.vim	/^function! SetTeXTarget(...)$/;"	f
+SetTemplateMenu	templates.vim	/^function! <SID>SetTemplateMenu()$/;"	f
+SetUpHotKeys	envmacros.vim	/^	function! <SID>SetUpHotKeys()$/;"	f
+SmartBS	main.vim	/^	function! s:SmartBS(pat)$/;"	f
+SmartBS_pat	main.vim	/^	fun! s:SmartBS_pat()$/;"	f
+SmartDots	main.vim	/^	function! <SID>SmartDots()$/;"	f
+TexFill	smartspace.vim	/^function! s:TexFill(width) $/;"	f
+TexFoldTextFunction	folding.vim	/^function! TexFoldTextFunction()$/;"	f
+TexFormatLine	smartspace.vim	/^function! s:TexFormatLine(width, current_line, current_column)    " {{{$/;"	f
+TexHelp	wizardfuncs.vim	/^function! s:TexHelp()$/;"	f
+TexQuotes	main.vim	/^	function! s:TexQuotes()$/;"	f
+Tex_CD	main.vim	/^function! Tex_CD(dirname)$/;"	f
+Tex_CatFile	main.vim	/^	function! Tex_CatFile(filename)$/;"	f
+Tex_ChangeCommand	envmacros.vim	/^	function! Tex_ChangeCommand(isvisual) $/;"	f
+Tex_ChangeEnvironments	envmacros.vim	/^	function! Tex_ChangeEnvironments() $/;"	f
+Tex_ChooseFile	main.vim	/^function! Tex_ChooseFile(dialog)$/;"	f
+Tex_ChooseFromPrompt	main.vim	/^function! Tex_ChooseFromPrompt(dialog, list, sep)$/;"	f
+Tex_CleanSearchHistory	main.vim	/^function! Tex_CleanSearchHistory()$/;"	f
+Tex_ClearDebug	main.vim	/^function! Tex_ClearDebug(...)$/;"	f
+Tex_CloseSmallWindows	texviewer.vim	/^function! Tex_CloseSmallWindows()$/;"	f
+Tex_Common	texviewer.vim	/^function! s:Tex_Common(path1, path2)$/;"	f
+Tex_CompileLatex	compiler.vim	/^function! Tex_CompileLatex()$/;"	f
+Tex_CompileMultipleTimes	compiler.vim	/^function! Tex_CompileMultipleTimes()$/;"	f
+Tex_Complete	texviewer.vim	/^function! Tex_Complete(what, where)$/;"	f
+Tex_CompleteFileName	texviewer.vim	/^function! Tex_CompleteFileName(filename, ext)$/;"	f
+Tex_CompleteMacroName	custommacros.vim	/^	function! Tex_CompleteMacroName(A,P,L)$/;"	f
+Tex_CompletePackageName	packages.vim	/^	function! Tex_CompletePackageName(A,P,L)$/;"	f
+Tex_CompleteRefCiteCustom	texviewer.vim	/^function! s:Tex_CompleteRefCiteCustom(type)$/;"	f
+Tex_CompleteTemplateName	templates.vim	/^	function! Tex_CompleteTemplateName(A,P,L)$/;"	f
+Tex_CompleteWord	texviewer.vim	/^function! Tex_CompleteWord(completeword)$/;"	f
+Tex_CounterMenus	elementmacros.vim	/^	function! <SID>Tex_CounterMenus(submenu, rhs)$/;"	f
+Tex_CreatePrompt	main.vim	/^function! Tex_CreatePrompt(promptList, cols, sep)$/;"	f
+Tex_Debug	main.vim	/^	let g:Tex_Debug = 0$/;"	v
+Tex_Debug	main.vim	/^function! Tex_Debug(str, ...)$/;"	f
+Tex_DeleteFile	main.vim	/^	function! Tex_DeleteFile(filename)$/;"	f
+Tex_DimMenus	elementmacros.vim	/^	function! <SID>Tex_DimMenus(submenu, rhs)$/;"	f
+Tex_DoCommand	envmacros.vim	/^function! Tex_DoCommand(...)$/;"	f
+Tex_DoCompletion	texviewer.vim	/^function! s:Tex_DoCompletion(texcommand)$/;"	f
+Tex_DoEnvironment	envmacros.vim	/^function! Tex_DoEnvironment(...)$/;"	f
+Tex_ElementsMenuLocation	texmenuconf.vim	/^	let g:Tex_ElementsMenuLocation = (g:Tex_NextMenuLocation).'.20 '.g:Tex_MenuPrefix$/;"	v
+Tex_ElementsMenuLocation	texmenuconf.vim	/^	let g:Tex_ElementsMenuLocation = (g:Tex_NextMenuLocation).'.20 '.g:Tex_MenuPrefix.'E&lements.'$/;"	v
+Tex_EnvMacros	envmacros.vim	/^function! <SID>Tex_EnvMacros(lhs, submenu, name)$/;"	f
+Tex_EnvMenuLocation	texmenuconf.vim	/^let g:Tex_EnvMenuLocation = (g:Tex_NextMenuLocation).'.20 '.g:Tex_MenuPrefix.'E&nvironments.'$/;"	v
+Tex_EscapeForGrep	main.vim	/^function! Tex_EscapeForGrep(string)$/;"	f
+Tex_EscapeSpaces	main.vim	/^function! Tex_EscapeSpaces(path)$/;"	f
+Tex_FastCommandInsert	envmacros.vim	/^	function! Tex_FastCommandInsert(isvisual)$/;"	f
+Tex_FastEnvironmentInsert	envmacros.vim	/^	function! Tex_FastEnvironmentInsert(isvisual)$/;"	f
+Tex_FindInRtp	main.vim	/^function! Tex_FindInRtp(filename, directory, ...)$/;"	f
+Tex_FoldSections	folding.vim	/^function! Tex_FoldSections(lst, endpat)$/;"	f
+Tex_FontDiacritics	elementmacros.vim	/^	function! <SID>Tex_FontDiacritics(name, rhs)$/;"	f
+Tex_FontFamily	elementmacros.vim	/^	function! <SID>Tex_FontFamily(font,fam)$/;"	f
+Tex_FontSize	elementmacros.vim	/^	function! <SID>Tex_FontSize(name)$/;"	f
+Tex_Fontfont	elementmacros.vim	/^	function! <SID>Tex_Fontfont(desc, lhs)$/;"	f
+Tex_ForwardSearchLaTeX	compiler.vim	/^function! Tex_ForwardSearchLaTeX()$/;"	f
+Tex_GetCurrentEnv	envmacros.vim	/^function! Tex_GetCurrentEnv()$/;"	f
+Tex_GetErrorList	main.vim	/^function! Tex_GetErrorList()$/;"	f
+Tex_GetMainFileName	main.vim	/^function! Tex_GetMainFileName(...)$/;"	f
+Tex_GetTempName	main.vim	/^function! Tex_GetTempName(dirname)$/;"	f
+Tex_GetVarValue	main.vim	/^function! Tex_GetVarValue(varname)$/;"	f
+Tex_GoToLocation	texviewer.vim	/^function! s:Tex_GoToLocation()$/;"	f
+Tex_GotoErrorLocation	compiler.vim	/^function! Tex_GotoErrorLocation(filename)$/;"	f
+Tex_GotoTempFile	main.vim	/^function! Tex_GotoTempFile()$/;"	f
+Tex_GrepHelper	texviewer.vim	/^function! Tex_GrepHelper(prefix, what)$/;"	f
+Tex_IncrementNumber	main.vim	/^function! Tex_IncrementNumber(increm)$/;"	f
+Tex_InsSecAdv	wizardfuncs.vim	/^function! Tex_InsSecAdv(structure)$/;"	f
+Tex_InsertItem	envmacros.vim	/^function! Tex_InsertItem()$/;"	f
+Tex_IsPresentInFile	main.vim	/^	function! Tex_IsPresentInFile(regexp, filename)$/;"	f
+Tex_LeftRight	brackets.vim	/^function! Tex_LeftRight()$/;"	f
+Tex_MacrosMenuLocation	texmenuconf.vim	/^let g:Tex_MacrosMenuLocation = g:Tex_MainMenuLocation.'.20 '.s:mainmenuname.'&Macros.'$/;"	v
+Tex_MakeMap	main.vim	/^function! Tex_MakeMap(lhs, rhs, mode, extraargs)$/;"	f
+Tex_MakeSubmenu	packages.vim	/^function! Tex_MakeSubmenu(menuList, mainMenuName, $/;"	f
+Tex_MathBF	brackets.vim	/^function! Tex_MathBF()$/;"	f
+Tex_MathCal	brackets.vim	/^function! Tex_MathCal()$/;"	f
+Tex_MathMenuRemove	mathmacros-utf.vim	/^function! Tex_MathMenuRemove()$/;"	f
+Tex_MathMenuRemove	mathmacros.vim	/^function! Tex_MathMenuRemove()$/;"	f
+Tex_MenuConfigure	texmenuconf.vim	/^function! Tex_MenuConfigure(type, action) " {{{$/;"	f
+Tex_NextMenuLocation	mathmacros.vim	/^let g:Tex_NextMenuLocation = g:Tex_NextMenuLocation + 1$/;"	v
+Tex_NextMenuLocation	texmenuconf.vim	/^	let g:Tex_NextMenuLocation = g:Tex_NextMenuLocation + 1$/;"	v
+Tex_NextMenuLocation	texmenuconf.vim	/^let g:Tex_NextMenuLocation = g:Tex_MainMenuLocation$/;"	v
+Tex_NextMenuLocation	texmenuconf.vim	/^let g:Tex_NextMenuLocation = g:Tex_NextMenuLocation + 1$/;"	v
+Tex_NormalizePath	texviewer.vim	/^function! Tex_NormalizePath(path)$/;"	f
+Tex_PackagesMenuLocation	texmenuconf.vim	/^	let g:Tex_PackagesMenuLocation = (g:Tex_MainMenuLocation).'.10 '.s:mainmenuname.'&Packages.'$/;"	v
+Tex_PackagesMenuLocation	texmenuconf.vim	/^	let g:Tex_PackagesMenuLocation = (g:Tex_NextMenuLocation).'.10 '.g:Tex_MenuPrefix.'Packages.'$/;"	v
+Tex_PartCompile	compiler.vim	/^function! Tex_PartCompile() range$/;"	f
+Tex_PositionPreviewWindow	compiler.vim	/^function! Tex_PositionPreviewWindow(filename)$/;"	f
+Tex_PrintDebug	main.vim	/^function! Tex_PrintDebug(...)$/;"	f
+Tex_ProcessPackageCommand	packages.vim	/^function! Tex_ProcessPackageCommand(command)$/;"	f
+Tex_ProjectEdit	texproject.vim	/^function! s:Tex_ProjectEdit()$/;"	f
+Tex_ProjectLoad	texproject.vim	/^function! Tex_ProjectLoad()$/;"	f
+Tex_PromptForCompletion	texviewer.vim	/^function! s:Tex_PromptForCompletion(texcommand,ask)$/;"	f
+Tex_PromptedCommandsDefault	packages.vim	/^let g:Tex_PromptedCommandsDefault = g:Tex_PromptedCommands$/;"	v
+Tex_PromptedEnvironmentsDefault	packages.vim	/^let g:Tex_PromptedEnvironmentsDefault = g:Tex_PromptedEnvironments$/;"	v
+Tex_PutCommand	envmacros.vim	/^function! Tex_PutCommand(com)$/;"	f
+Tex_PutEnvironment	envmacros.vim	/^function! Tex_PutEnvironment(env)$/;"	f
+Tex_PutLeftRight	brackets.vim	/^function! Tex_PutLeftRight()$/;"	f
+Tex_RelPath	texviewer.vim	/^function! Tex_RelPath(explfilename,texfilename)$/;"	f
+Tex_RemoveElementMenus	elementmacros.vim	/^	function! Tex_RemoveElementMenus()$/;"	f
+Tex_RemoveTempFiles	compiler.vim	/^function! Tex_RemoveTempFiles()$/;"	f
+Tex_ResetIncrementNumber	main.vim	/^function! Tex_ResetIncrementNumber(val)$/;"	f
+Tex_RunLaTeX	compiler.vim	/^function! Tex_RunLaTeX()$/;"	f
+Tex_ScanFileForCite	texviewer.vim	/^function! Tex_ScanFileForCite(prefix)$/;"	f
+Tex_ScanFileForLabels	texviewer.vim	/^function! Tex_ScanFileForLabels(prefix)$/;"	f
+Tex_ScanForPackages	packages.vim	/^function! Tex_ScanForPackages(...)$/;"	f
+Tex_SectionMacros	envmacros.vim	/^function! <SID>Tex_SectionMacros(lhs, name)$/;"	f
+Tex_SetBracketingMaps	brackets.vim	/^function! <SID>Tex_SetBracketingMaps()$/;"	f
+Tex_SetCompilerMaps	compiler.vim	/^function! <SID>Tex_SetCompilerMaps()$/;"	f
+Tex_SetFastCommandMaps	envmacros.vim	/^function! Tex_SetFastCommandMaps()$/;"	f
+Tex_SetFastEnvironmentMaps	envmacros.vim	/^function! Tex_SetFastEnvironmentMaps()$/;"	f
+Tex_SetFoldOptions	folding.vim	/^function! Tex_SetFoldOptions()$/;"	f
+Tex_SetItemMaps	envmacros.vim	/^function! Tex_SetItemMaps()$/;"	f
+Tex_SetTeXCompilerTarget	compiler.vim	/^function! Tex_SetTeXCompilerTarget(type, target)$/;"	f
+Tex_SetTexViewerMaps	texviewer.vim	/^function! Tex_SetTexViewerMaps()$/;"	f
+Tex_SetupCWindow	texviewer.vim	/^function! s:Tex_SetupCWindow(...)$/;"	f
+Tex_SetupErrorWindow	compiler.vim	/^function! Tex_SetupErrorWindow()$/;"	f
+Tex_SetupFileCompletion	texviewer.vim	/^function! Tex_SetupFileCompletion(accept, reject, ext)$/;"	f
+Tex_ShowVariableValue	main.vim	/^function! Tex_ShowVariableValue(...)$/;"	f
+Tex_SpecialMacros	envmacros.vim	/^function! <SID>Tex_SpecialMacros(lhs, submenu, name, irhs, ...)$/;"	f
+Tex_Strntok	main.vim	/^fun! Tex_Strntok(s, tok, n)$/;"	f
+Tex_SyncPreviewWindow	texviewer.vim	/^function! s:Tex_SyncPreviewWindow()$/;"	f
+Tex_TemplatesMenuLocation	texmenuconf.vim	/^let g:Tex_TemplatesMenuLocation = g:Tex_MainMenuLocation.'.20 '.s:mainmenuname.'&Templates.'$/;"	v
+Tex_UpdatePreviewWindow	compiler.vim	/^function! Tex_UpdatePreviewWindow(filename)$/;"	f
+Tex_VariousMenus	elementmacros.vim	/^	function! <SID>Tex_VariousMenus(desc, lhs)$/;"	f
+Tex_Version	main.vim	/^function! Tex_Version()$/;"	f
+Tex_ViewLaTeX	compiler.vim	/^function! Tex_ViewLaTeX()$/;"	f
+Tex_VisSecAdv	wizardfuncs.vim	/^function! Tex_VisSecAdv(section)$/;"	f
+Tex_completion_addcontentsline	texviewer.vim	/^let g:Tex_completion_addcontentsline = 'lof}{figure}{,lot}{table}{,toc}{chapter}{,toc}{part}{,'.$/;"	v
+Tex_completion_addtocontents	texviewer.vim	/^let g:Tex_completion_addtocontents = 'lof}{,lot}{,toc}{'$/;"	v
+Tex_completion_bibliographystyle	texviewer.vim	/^let g:Tex_completion_bibliographystyle = 'abbr,alpha,plain,unsrt'$/;"	v
+Tex_completion_explorer	main.vim	/^let g:Tex_completion_explorer = ','$/;"	v
+Tex_description	envmacros.vim	/^function! Tex_description(env)$/;"	f
+Tex_document	envmacros.vim	/^function! Tex_document(env)$/;"	f
+Tex_eqnarray	envmacros.vim	/^function! Tex_eqnarray(env)$/;"	f
+Tex_figure	envmacros.vim	/^function! Tex_figure(env)$/;"	f
+Tex_itemize	envmacros.vim	/^function! Tex_itemize(env)$/;"	f
+Tex_list	envmacros.vim	/^function! Tex_list(env)$/;"	f
+Tex_minipage	envmacros.vim	/^function! Tex_minipage(env)$/;"	f
+Tex_pack	packages.vim	/^function! Tex_pack(pack)$/;"	f
+Tex_pack_check	packages.vim	/^function! Tex_pack_check(package)$/;"	f
+Tex_pack_one	packages.vim	/^function! Tex_pack_one(...)$/;"	f
+Tex_pack_supp_menu	packages.vim	/^function! Tex_pack_supp_menu()$/;"	f
+Tex_pack_uncheck	packages.vim	/^function! Tex_pack_uncheck(package)$/;"	f
+Tex_pack_updateall	packages.vim	/^function! Tex_pack_updateall(force)$/;"	f
+Tex_package_detected	packages.vim	/^let g:Tex_package_detected = ''$/;"	v
+Tex_package_from_line	envmacros.vim	/^	function! Tex_package_from_line()$/;"	f
+Tex_package_supported	packages.vim	/^let g:Tex_package_supported = ''$/;"	v
+Tex_section	wizardfuncs.vim	/^function! Tex_section(...) "{{{$/;"	f
+Tex_section_adv	wizardfuncs.vim	/^function! Tex_section_adv(...) "{{{$/;"	f
+Tex_section_call	wizardfuncs.vim	/^function! s:Tex_section_call(section_name) "{{{$/;"	f
+Tex_section_curr_rel_value	wizardfuncs.vim	/^function! s:Tex_section_curr_rel_value(sec_arg, last_section_value) "{{{$/;"	f
+Tex_section_curr_value	wizardfuncs.vim	/^function! s:Tex_section_curr_value(sec_arg) "{{{$/;"	f
+Tex_section_detection	wizardfuncs.vim	/^function! s:Tex_section_detection() "{{{$/;"	f
+Tex_section_name	wizardfuncs.vim	/^function! s:Tex_section_name(section_value) "{{{$/;"	f
+Tex_shortcuts	wizardfuncs.vim	/^function! Tex_shortcuts(...)$/;"	f
+Tex_table	envmacros.vim	/^function! Tex_table(env)$/;"	f
+Tex_tabular	envmacros.vim	/^function! Tex_tabular(env)$/;"	f
+Tex_thebibliography	envmacros.vim	/^function! Tex_thebibliography(env)$/;"	f
+Tlist_Ctags_Cmd	main.vim	/^		let Tlist_Ctags_Cmd = s:tex_ctags ." --langdef=tex --langmap=tex:.tex.ltx.latex"$/;"	v
+a_standsfor	bibtex.vim	/^let s:a_standsfor = 'author'$/;"	v
+array	envmacros.vim	/^let s:array =      "\\\\left<++>\\<cr>\\\\begin{array}{<+dimension+>}\\<cr><+elements+>\\<cr>\\\\end{array}\\<cr>\\\\right<++>"$/;"	v
+b_standsfor	bibtex.vim	/^let s:b_standsfor = 'booktitle'$/;"	v
+c_standsfor	bibtex.vim	/^let s:c_standsfor = 'chapter'$/;"	v
+catFile	pytools.py	/^def catFile(filename):$/;"	f
+counterMenuLoc	elementmacros.vim	/^let s:counterMenuLoc    = g:Tex_ElementsMenuLocation.'Counters.'$/;"	v
+cpo	main.vim	/^let &cpo = s:save_cpo$/;"	v
+d_standsfor	bibtex.vim	/^let s:d_standsfor = 'edition'$/;"	v
+definedFuncs	elementmacros.vim	/^	let s:definedFuncs = 1$/;"	v
+deleteFile	pytools.py	/^def deleteFile(filepattern):$/;"	f
+description	envmacros.vim	/^let s:description ="\\\\begin{description}\\<cr>\\\\item[<+label+>]<++>\\<cr>\\\\end{description}<++>"$/;"	v
+did_brackets	brackets.vim	/^let b:did_brackets = 1$/;"	v
+dimensionMenuLoc	elementmacros.vim	/^let s:dimensionMenuLoc  = g:Tex_ElementsMenuLocation.'Dimension.'$/;"	v
+document	envmacros.vim	/^let s:document =   "\\\\documentclass[<+options+>]{<+class+>}\\<cr>\\<cr>\\\\begin{document}\\<cr><++>\\<cr>\\\\end{document}"$/;"	v
+done	bibtex.vim	/^let s:done = 1$/;"	v
+doneFunctionDefinitions	main.vim	/^let s:doneFunctionDefinitions = 1$/;"	v
+doneMappings	main.vim	/^	let s:doneMappings = 1$/;"	v
+doneOnce	elementmacros.vim	/^let s:doneOnce = 1$/;"	v
+doneOnce	envmacros.vim	/^let s:doneOnce = 1$/;"	v
+doneOnce	packages.vim	/^let s:doneOnce = 1$/;"	v
+doneOnce	texviewer.vim	/^let s:doneOnce = 1$/;"	v
+doneOnce	wizardfuncs.vim	/^let s:doneOnce = 1$/;"	v
+done_smartspace	smartspace.vim	/^let b:done_smartspace = 1$/;"	v
+e_standsfor	bibtex.vim	/^let s:e_standsfor = 'editor'$/;"	v
+environmentshortcuts	wizardfuncs.vim	/^let g:environmentshortcuts = ''$/;"	v
+figure	envmacros.vim	/^let s:figure =     "\\\\begin{figure}[<+htpb+>]\\<cr>\\\\begin{center}\\<cr>\\\\psfig{figure=<+eps file+>}\\<cr>\\\\end{center}\\<cr>\\\\caption{<+caption text+>}\\<cr>\\\\label{fig:<+label+>}\\<cr>\\\\end{figure}<++>"$/;"	v
+figure_graphicx	envmacros.vim	/^let s:figure_graphicx =    "\\\\begin{figure}[<+htpb+>]\\<cr>\\\\begin{center}\\<cr>\\\\includegraphics{<+file+>}\\<cr>\\\\end{center}\\<cr>\\\\caption{<+caption text+>}\\<cr>\\\\label{fig:<+label+>}\\<cr>\\\\end{figure}<++>"$/;"	v
+fontMenuLoc	elementmacros.vim	/^let s:fontMenuLoc       = g:Tex_ElementsMenuLocation.'Font.'$/;"	v
+fontshortcuts	wizardfuncs.vim	/^let g:fontshortcuts = ''$/;"	v
+generalshortcuts	wizardfuncs.vim	/^let g:generalshortcuts = ''$/;"	v
+h_standsfor	bibtex.vim	/^let s:h_standsfor = 'howpublished'$/;"	v
+i_standsfor	bibtex.vim	/^let s:i_standsfor = 'institution'$/;"	v
+incnum	main.vim	/^let s:incnum = 0$/;"	v
+isPresentInFile	pytools.py	/^def isPresentInFile(regexp, filename):$/;"	f
+j_standsfor	bibtex.vim	/^let s:j_standsfor = 'journal'$/;"	v
+k_standsfor	bibtex.vim	/^let s:k_standsfor = 'isbn'$/;"	v
+key	bibtex.vim	/^let s:key='<+key+>'$/;"	v
+lastElementsLocation	elementmacros.vim	/^let s:lastElementsLocation = g:Tex_ElementsMenuLocation$/;"	v
+list	envmacros.vim	/^let s:list =       "\\\\begin{list}{<+label+>}{<+spacing+>}\\<cr>\\\\item <++>\\<cr>\\\\end{list}<++>"$/;"	v
+m_standsfor	bibtex.vim	/^let s:m_standsfor = 'month'$/;"	v
+macrodirpath	custommacros.vim	/^		let s:macrodirpath = $HOME."\/vimfiles\/ftplugin\/latex-suite\/macros\/"$/;"	v
+macrodirpath	custommacros.vim	/^		let s:macrodirpath = $VIM."\/vimfiles\/ftplugin\/latex-suite\/macros\/"$/;"	v
+macrodirpath	custommacros.vim	/^	let s:macrodirpath = $HOME."\/.vim\/ftplugin\/latex-suite\/macros\/"$/;"	v
+mainmenuname	texmenuconf.vim	/^let s:mainmenuname = g:Tex_MenuPrefix.'S&uite.'$/;"	v
+mapleader	texmenuconf.vim	/^let s:mapleader = exists('mapleader') ? mapleader : "\\\\"$/;"	v
+mapleader	wizardfuncs.vim	/^let s:mapleader = exists('mapleader') ? mapleader : "\\\\"$/;"	v
+mathshortcuts	wizardfuncs.vim	/^let g:mathshortcuts = ''$/;"	v
+menu_div	packages.vim	/^let s:menu_div = 20$/;"	v
+minipage	envmacros.vim	/^let s:minipage =   "\\\\begin{minipage}[<+tb+>]{<+width+>}\\<cr><++>\\<cr>\\\\end{minipage}<++>"$/;"	v
+ml	main.vim	/^let s:ml = exists('g:mapleader') ? g:mapleader : '\\'$/;"	v
+n_standsfor	bibtex.vim	/^let s:n_standsfor = 'number'$/;"	v
+o_standsfor	bibtex.vim	/^let s:o_standsfor = 'organization'$/;"	v
+pA	mathmacros-utf.vim	/^let s:pA = 'amenu <silent> 85 '.s:MathMenuName$/;"	v
+pA	mathmacros.vim	/^let s:pA = 'amenu <silent> '.g:Tex_NextMenuLocation.' '.s:MathMenuName$/;"	v
+pA1	mathmacros-utf.vim	/^let s:pA1 = s:pA."&Arrows."$/;"	v
+pA1	mathmacros.vim	/^let s:pA1 = s:pA."&Arrows."$/;"	v
+pA10	mathmacros-utf.vim	/^let s:pA10 = s:pA."&MathCreating."$/;"	v
+pA10	mathmacros.vim	/^let s:pA10 = s:pA."&MathCreating."$/;"	v
+pA11	mathmacros-utf.vim	/^let s:pA11 = s:pA."&Styles."$/;"	v
+pA11	mathmacros.vim	/^let s:pA11 = s:pA."&Styles."$/;"	v
+pA12	mathmacros-utf.vim	/^let s:pA12 = s:pA."&MathDiacritics."$/;"	v
+pA12	mathmacros.vim	/^let s:pA12 = s:pA."&MathDiacritics."$/;"	v
+pA13	mathmacros-utf.vim	/^let s:pA13 = s:pA."&OverlineAndCo."$/;"	v
+pA13	mathmacros.vim	/^let s:pA13 = s:pA."&OverlineAndCo."$/;"	v
+pA14a	mathmacros-utf.vim	/^let s:pA14a = s:pA."&Symbols1."$/;"	v
+pA14a	mathmacros.vim	/^let s:pA14a = s:pA."&Symbols1."$/;"	v
+pA14b	mathmacros-utf.vim	/^let s:pA14b = s:pA."&Symbols2."$/;"	v
+pA14b	mathmacros.vim	/^let s:pA14b = s:pA."&Symbols2."$/;"	v
+pA14c	mathmacros-utf.vim	/^let s:pA14c = s:pA."&Symbols3."$/;"	v
+pA14c	mathmacros.vim	/^let s:pA14c = s:pA."&Symbols3."$/;"	v
+pA15	mathmacros-utf.vim	/^let s:pA15 = s:pA."&Logic."$/;"	v
+pA15	mathmacros.vim	/^let s:pA15 = s:pA."&Logic."$/;"	v
+pA16	mathmacros-utf.vim	/^let s:pA16 = s:pA."&Limits1."$/;"	v
+pA16	mathmacros.vim	/^let s:pA16 = s:pA."&Limits1."$/;"	v
+pA16a	mathmacros-utf.vim	/^let s:pA16a = s:pA."&Limits2."$/;"	v
+pA16a	mathmacros.vim	/^let s:pA16a = s:pA."&Limits2."$/;"	v
+pA17	mathmacros-utf.vim	/^let s:pA17 = s:pA."Lo&g-likes."$/;"	v
+pA17	mathmacros.vim	/^let s:pA17 = s:pA."Lo&g-likes."$/;"	v
+pA18	mathmacros-utf.vim	/^let s:pA18 = s:pA."MathSpacing."$/;"	v
+pA18	mathmacros.vim	/^let s:pA18 = s:pA."MathSpacing."$/;"	v
+pA1a	mathmacros-utf.vim	/^let s:pA1a = s:pA."Arrows2."$/;"	v
+pA1a	mathmacros.vim	/^let s:pA1a = s:pA."&nArrows."$/;"	v
+pA1a	mathmacros.vim	/^let s:pA1a = s:pA."Arrows2."$/;"	v
+pA1b	mathmacros-utf.vim	/^let s:pA1b = s:pA."&nArrows."$/;"	v
+pA2	mathmacros-utf.vim	/^let s:pA2 = s:pA."&Greek.&Small."$/;"	v
+pA2	mathmacros.vim	/^let s:pA2 = s:pA."&Greek.&Small."$/;"	v
+pA2a	mathmacros-utf.vim	/^let s:pA2a = s:pA."&MathFonts."$/;"	v
+pA2a	mathmacros.vim	/^let s:pA2a = s:pA."&MathFonts."$/;"	v
+pA3	mathmacros-utf.vim	/^let s:pA3 = s:pA.'&Greek.&Big.' $/;"	v
+pA3	mathmacros.vim	/^let s:pA3 = s:pA.'&Greek.&Big.' $/;"	v
+pA4	mathmacros-utf.vim	/^let s:pA4 = s:pA."&BinaryRel1."  $/;"	v
+pA4	mathmacros.vim	/^let s:pA4 = s:pA."&BinaryRel1."  $/;"	v
+pA4a	mathmacros-utf.vim	/^let s:pA4a = s:pA."&nBinaryRel1."  $/;"	v
+pA4a	mathmacros.vim	/^let s:pA4a = s:pA."&nBinaryRel1."  $/;"	v
+pA5	mathmacros-utf.vim	/^let s:pA5 = s:pA."&BinaryRel2."  $/;"	v
+pA5	mathmacros.vim	/^let s:pA5 = s:pA."&BinaryRel2."  $/;"	v
+pA5a	mathmacros-utf.vim	/^let s:pA5a = s:pA."n&BinaryRel2."  "TODO: dorobiÃ¦ logarytmy$/;"	v
+pA5a	mathmacros.vim	/^let s:pA5a = s:pA."n&BinaryRel2."  "TODO: dorobiæ logarytmy$/;"	v
+pA6	mathmacros-utf.vim	/^let s:pA6 = s:pA."&BinaryRel3."  $/;"	v
+pA6	mathmacros.vim	/^let s:pA6 = s:pA."&BinaryRel3."  $/;"	v
+pA6a	mathmacros-utf.vim	/^let s:pA6a = s:pA."&nBinaryRel3."$/;"	v
+pA6a	mathmacros.vim	/^let s:pA6a = s:pA."&nBinaryRel3."$/;"	v
+pA7	mathmacros-utf.vim	/^let s:pA7 = s:pA."&BinaryRel4."  $/;"	v
+pA7	mathmacros.vim	/^let s:pA7 = s:pA."&BinaryRel4."  $/;"	v
+pA8	mathmacros-utf.vim	/^let s:pA8 = s:pA."&BinaryOp."$/;"	v
+pA8	mathmacros.vim	/^let s:pA8 = s:pA."&BinaryOp."$/;"	v
+pA8a	mathmacros-utf.vim	/^let s:pA8a = s:pA."&BigOp."$/;"	v
+pA8a	mathmacros.vim	/^let s:pA8a = s:pA."&BigOp."$/;"	v
+pA9	mathmacros-utf.vim	/^let s:pA9 = s:pA."&Other1."$/;"	v
+pA9	mathmacros.vim	/^let s:pA9 = s:pA."&Other1."$/;"	v
+p_standsfor	bibtex.vim	/^let s:p_standsfor = 'pages'$/;"	v
+path	custommacros.vim	/^let s:path = expand('<sfile>:p:h')$/;"	v
+path	main.vim	/^let s:path = expand('<sfile>:p:h')$/;"	v
+path	packages.vim	/^let s:path = expand("<sfile>:p:h")$/;"	v
+path	templates.vim	/^let s:path = expand("<sfile>:p:h")$/;"	v
+path	texmenuconf.vim	/^let s:path = expand("<sfile>:p:h")$/;"	v
+path	texproject.vim	/^let s:path = expand("<sfile>:p:h")$/;"	v
+picture	envmacros.vim	/^let s:picture =    "\\\\begin{picture}(<+width+>, <+height+>)(<+xoff+>,<+yoff+>)\\<cr>\\\\put(<+xoff+>,<+yoff+>){\\\\framebox(<++>,<++>){<++>}}\\<cr>\\\\end{picture}<++>"$/;"	v
+q_standsfor	bibtex.vim	/^let s:q_standsfor = 'publisher'$/;"	v
+r_standsfor	bibtex.vim	/^let s:r_standsfor = 'school'$/;"	v
+s_standsfor	bibtex.vim	/^let s:s_standsfor = 'series'$/;"	v
+save_cpo	main.vim	/^let s:save_cpo = &cpo$/;"	v
+sectionshortcuts	wizardfuncs.vim	/^let g:sectionshortcuts = ''$/;"	v
+smartBS_pat	main.vim	/^	let s:smartBS_pat = Tex_GetVarValue('Tex_SmartBSPattern')$/;"	v
+t_standsfor	bibtex.vim	/^let s:t_standsfor = 'title'$/;"	v
+table	envmacros.vim	/^let s:table =      "\\\\begin{table}\\<cr>\\\\centering\\<cr>\\\\begin{tabular}{<+dimensions+>}\\<cr><++>\\<cr>\\\\end{tabular}\\<cr>\\\\caption{<+Caption text+>}\\<cr>\\\\label{tab:<+label+>}\\<cr>\\\\end{table}<++>"$/;"	v
+tabular	envmacros.vim	/^let s:tabular = "\\\\begin{tabular}[<+hbtp+>]{<+format+>}\\<cr><++>\\<cr>\\\\end{tabular}"$/;"	v
+tabular_star	envmacros.vim	/^let s:tabular_star = "\\\\begin{tabular*}[<+hbtp+>]{<+format+>}\\<cr><++>\\<cr>\\\\end{tabular*}"$/;"	v
+tex_ctags	main.vim	/^		let s:tex_ctags = 'ctags' " Configurable in texrc?$/;"	v
+tex_ctags	main.vim	/^		let s:tex_ctags = Tlist_Ctags_Cmd$/;"	v
+tlist_tex_settings	main.vim	/^		let g:tlist_tex_settings = 'tex;s:section;c:chapter;l:label;r:ref'$/;"	v
+tw	smartspace.vim	/^let b:tw = &l:tw$/;"	v
+u_standsfor	bibtex.vim	/^let s:u_standsfor = 'type'$/;"	v
+up_path	texmenuconf.vim	/^let s:up_path = expand("<sfile>:p:h:h")$/;"	v
+v_standsfor	bibtex.vim	/^let s:v_standsfor = 'volume'$/;"	v
+variousMenuLoc	elementmacros.vim	/^let s:variousMenuLoc    = g:Tex_ElementsMenuLocation.'Various.'$/;"	v
+vis_center_left	envmacros.vim	/^	let s:vis_center_left = '\\centerline{'$/;"	v
+vis_center_right	envmacros.vim	/^	let s:vis_center_right = '}'$/;"	v
+vis_flushright_left	envmacros.vim	/^	let s:vis_flushright_left =  '{\\raggedright '$/;"	v
+vis_flushright_right	envmacros.vim	/^	let s:vis_flushright_right = '}'$/;"	v
+vis_fushleft_left	envmacros.vim	/^	let s:vis_fushleft_left = '{\\raggedleft '$/;"	v
+vis_fushleft_right	envmacros.vim	/^	let s:vis_fushleft_right = '}'$/;"	v
+vis_lrbox_left	envmacros.vim	/^	let s:vis_lrbox_left = '\\sbox{'$/;"	v
+vis_lrbox_right	envmacros.vim	/^	let s:vis_lrbox_right = '}'$/;"	v
+vis_verbatim_left	envmacros.vim	/^	let s:vis_verbatim_left = '\\verb\\|'$/;"	v
+vis_verbatim_right	envmacros.vim	/^	let s:vis_verbatim_right = '\\|'$/;"	v
+w_standsfor	bibtex.vim	/^let s:w_standsfor = 'address'$/;"	v
+y_standsfor	bibtex.vim	/^let s:y_standsfor = 'year'$/;"	v
+z_standsfor	bibtex.vim	/^let s:z_standsfor = 'note'$/;"	v
+{	bibtex.vim	/^let s:{'article'}_optional1="vnpm"$/;"	v
+{	bibtex.vim	/^let s:{'article'}_optional2="z" " z is note$/;"	v
+{	bibtex.vim	/^let s:{'article'}_required="atjy"$/;"	v
+{	bibtex.vim	/^let s:{'article'}_retval = '@ARTICLE{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'book'}_extras="k" " isbn$/;"	v
+{	bibtex.vim	/^let s:{'book'}_optional1="wd"$/;"	v
+{	bibtex.vim	/^let s:{'book'}_optional2="vnsmz" " w is address, d is edition$/;"	v
+{	bibtex.vim	/^let s:{'book'}_required="aetqy" " requires author *or* editor$/;"	v
+{	bibtex.vim	/^let s:{'book'}_retval = '@BOOK{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'booklet'}_optional1="ahy"$/;"	v
+{	bibtex.vim	/^let s:{'booklet'}_optional2="wmz" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'booklet'}_required="t"$/;"	v
+{	bibtex.vim	/^let s:{'booklet'}_retval = '@BOOKLET{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'conference'}_extras="k" " isbn$/;"	v
+{	bibtex.vim	/^let s:{'conference'}_optional1="epwoq" " w is address, q is publisher$/;"	v
+{	bibtex.vim	/^let s:{'conference'}_optional2="vnsmz"$/;"	v
+{	bibtex.vim	/^let s:{'conference'}_required="atby" " b is booktitle$/;"	v
+{	bibtex.vim	/^let s:{'conference'}_retval = '@CONFERENCE{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'inbook'}_extras="k" " isbn$/;"	v
+{	bibtex.vim	/^let s:{'inbook'}_optional1="w" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'inbook'}_optional2="vnsudmz" " d is edition$/;"	v
+{	bibtex.vim	/^let s:{'inbook'}_required="aetcpqy"$/;"	v
+{	bibtex.vim	/^let s:{'inbook'}_retval = '@INBOOK{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'incollection'}_extras="k" " isbn$/;"	v
+{	bibtex.vim	/^let s:{'incollection'}_optional1="cpw" " w is address, c is chapter$/;"	v
+{	bibtex.vim	/^let s:{'incollection'}_optional2="evnsudmz" " d is edition$/;"	v
+{	bibtex.vim	/^let s:{'incollection'}_required="atbqy" " b is booktitle$/;"	v
+{	bibtex.vim	/^let s:{'incollection'}_retval = '@INCOLLECTION{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'inproceedings'}_extras="k" " isbn$/;"	v
+{	bibtex.vim	/^let s:{'inproceedings'}_optional1="epwoq" " w is address, q is publisher$/;"	v
+{	bibtex.vim	/^let s:{'inproceedings'}_optional2="vnsmz"$/;"	v
+{	bibtex.vim	/^let s:{'inproceedings'}_required="atby" " b is booktitle$/;"	v
+{	bibtex.vim	/^let s:{'inproceedings'}_retval = '@INPROCEEDINGS{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'manual'}_optional1="ow"$/;"	v
+{	bibtex.vim	/^let s:{'manual'}_optional2="admyz" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'manual'}_required="t"$/;"	v
+{	bibtex.vim	/^let s:{'manual'}_retval = '@MANUAL{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'misc'}_optional1="ath"$/;"	v
+{	bibtex.vim	/^let s:{'misc'}_optional2="myz"$/;"	v
+{	bibtex.vim	/^let s:{'misc'}_required=""$/;"	v
+{	bibtex.vim	/^let s:{'misc'}_retval = '@MISC{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'msthesis'}_optional1="w" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'msthesis'}_optional2="umz" " u is type, w is address$/;"	v
+{	bibtex.vim	/^let s:{'msthesis'}_required="atry" " r is school$/;"	v
+{	bibtex.vim	/^let s:{'msthesis'}_retval = '@MASTERSTHESIS{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'phdthesis'}_optional1="w" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'phdthesis'}_optional2="umz" " u is type$/;"	v
+{	bibtex.vim	/^let s:{'phdthesis'}_required="atry" " r is school$/;"	v
+{	bibtex.vim	/^let s:{'phdthesis'}_retval = '@PHDTHESIS{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'proceedings'}_optional1="ewo" " w is address$/;"	v
+{	bibtex.vim	/^let s:{'proceedings'}_optional2="vnsmqz" " q is publisher$/;"	v
+{	bibtex.vim	/^let s:{'proceedings'}_required="ty"$/;"	v
+{	bibtex.vim	/^let s:{'proceedings'}_retval = '@PROCEEDINGS{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'techreport'}_optional1="unw" " u is type, w is address$/;"	v
+{	bibtex.vim	/^let s:{'techreport'}_optional2="mz"$/;"	v
+{	bibtex.vim	/^let s:{'techreport'}_required="atiy"$/;"	v
+{	bibtex.vim	/^let s:{'techreport'}_retval = '@TECHREPORT{' . s:key . ','."\\n"$/;"	v
+{	bibtex.vim	/^let s:{'unpublished'}_optional1="y"$/;"	v
+{	bibtex.vim	/^let s:{'unpublished'}_optional2="m"$/;"	v
+{	bibtex.vim	/^let s:{'unpublished'}_required="atz"$/;"	v
+{	bibtex.vim	/^let s:{'unpublished'}_retval = '@UNPUBLISHED{' . s:key . ','."\\n"$/;"	v

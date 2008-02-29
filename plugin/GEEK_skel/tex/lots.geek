@@ -1,0 +1,70 @@
+GEEK_COMMENT written my marty
+GEEK_COMMENT to test his POS skel thing
+\documentclass{article}
+GEEK_YN:ask_about_nit_picky_options
+    GEEK_YN:epsfig_usepackage_and_template_figure
+\usepackage{epsfig}
+    GEEK_END_YN
+    GEEK_YN:a4wide
+\usepackage{a4wide}
+    GEEK_END_YN
+    GEEK_YN:double_space
+\usepackage{setspace}
+\doublespacing
+    GEEK_END_YN
+    GEEK_BEGIN_SWITCH:number_of_columns
+        GEEK_CASE:one_column
+\onecolumn
+        GEEK_CASE:two_column
+\twocolumn
+    GEEK_END_SWITCH
+    GEEK_BEGIN_SWITCH:bibliography
+        GEEK_CASE:no_bibliography
+        GEEK_CASE:plain_bibliography
+\bibliographystyle{plain}
+    GEEK_END_SWITCH
+GEEK_END_YN
+
+\title{GEEK_VAL:title_of_doc}
+\author{GEEK_VAL:author_of_doc}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+GEEK_YN:ask_about_nit_picky_options
+    GEEK_YN:epsfig_usepackage_and_template_figure
+    GEEK_BEGIN_SWITCH:type_of_figure_template
+    GEEK_CASE:one_with_subfigures
+    \begin{figure}[h!]
+        \begin{center}
+        \subfigure{
+        \epsfig{file=a picture file, width = 0.8\linewidth}}
+        \subfigure{
+        \epsfig{file=a picture file, width = 0.8\linewidth}}
+        \subfigure{
+        \epsfig{file=a picture file, width = 0.8\linewidth}}
+
+        \caption{the caption}
+        \label{the label}
+        \end{center}
+    \end{figure}
+    GEEK_CASE:one_without_subfigures
+    \begin{figure}[h!]
+        \begin{center}
+        \epsfig{file=a picture file, width = 0.8\linewidth}
+        \caption{the caption}
+        \label{the label}
+        \end{center}
+    \end{figure}
+    GEEK_END_SWITCH
+    GEEK_END_YN
+GEEK_END_YN
+
+GEEK_YN:ask_about_nit_picky_options
+    GEEK_BEGIN_SWITCH:bibliography
+        GEEK_CASE:plain_bibliography
+\bibliography{biblio}
+    GEEK_END_SWITCH
+GEEK_END_YN
+\end{document}
