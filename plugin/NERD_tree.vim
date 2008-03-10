@@ -43,8 +43,9 @@ endif
 call s:InitVariable("g:NERDTreeHighlightCursorline", 1)
 call s:InitVariable("g:NERDTreeMouseMode", 1)
 call s:InitVariable("g:NERDTreeNotificationThreshold", 100)
-call s:InitVariable("g:NERDTreeShowHidden", 0)
 call s:InitVariable("g:NERDTreeShowFiles", 1)
+call s:InitVariable("g:NERDTreeShowHidden", 0)
+call s:InitVariable("g:NERDTreeShowLineNumbers", 0)
 call s:InitVariable("g:NERDTreeSortDirs", 1)
 
 if !exists("g:NERDTreeSortOrder")
@@ -1442,7 +1443,12 @@ function! s:CreateTreeWin()
     setlocal foldcolumn=0
     setlocal nobuflisted
     setlocal nospell
-    setlocal nonu
+    if g:NERDTreeShowLineNumbers
+        setlocal nu
+    else
+        setlocal nonu
+    endif
+
     iabc <buffer>
 
     if g:NERDTreeHighlightCursorline
@@ -2162,7 +2168,7 @@ function! s:SetupSyntaxHighlighting()
     if g:NERDChristmasTree
         hi def link treePart Special
         hi def link treePartFile Type
-        hi def link treeFile String
+        hi def link treeFile Macro
         hi def link treeDirSlash Identifier
         hi def link treeClosable Type
     else

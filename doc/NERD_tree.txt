@@ -477,6 +477,9 @@ NERD tree. These options should be set in your vimrc.
 |NERDTreeShowHidden|            Tells the NERD tree whether to display hidden
                                 files on startup.
 
+|NERDTreeShowLineNumbers|       Tells the NERD tree whether to display line
+                                numbers in the tree window.
+
 |NERDTreeSortOrder|             Tell the NERD tree how to sort the nodes in
                                 the tree.
 
@@ -658,6 +661,17 @@ Use one of the follow lines to set this option: >
     let NERDTreeShowHidden=0
     let NERDTreeShowHidden=1
 <
+
+------------------------------------------------------------------------------
+                                                     *NERDTreeShowLineNumbers*
+Values: 0 or 1.
+Default: 0.
+
+This option tells vim whether to display line numbers for the NERD tree
+window.  Use one of the follow lines to set this option: >
+    let NERDTreeShowLineNumbers=0
+    let NERDTreeShowLineNumbers=1
+<
                                                        
 ------------------------------------------------------------------------------
                                                            *NERDTreeSortOrder*
@@ -769,6 +783,10 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog* 
+
+2.something
+    - added an option to enable/disable line numbers in the NERD tree window,
+      thanks to Olivier Yiptong for the email.
 
 2.7.1
     - Changed the keys for the filesystem menu to be mnemonic rather than
@@ -978,3 +996,6 @@ in 2.6.0
 Thanks to  Niels Aan de Brugh for the suggestion that the script now split the
 window if you try to open a file in a window containing a modified buffer when
 the &hidden option is set.
+
+Thanks to Olivier Yiptong for prompting me to make line numbers in the
+NERD tree window optional.
