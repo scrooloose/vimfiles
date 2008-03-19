@@ -1,1 +1,0 @@
-syntax keyword geekKeyword GEEK_END_YN
