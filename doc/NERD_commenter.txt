@@ -860,6 +860,30 @@ to get illegal syntax when uncommenting them.
 ==============================================================================
 8. Changelog                                                *NERDComChangelog*
 
+2.x.x
+    - added support for rib files, thanks to spookypeanut for posting the
+      issue.
+    - added support for pyrex/cython, thanks to Greg Jandl for posting the
+      issue.
+    - added support for liquid templates.
+
+2.1.12
+    - added support for patran and dakota, thx to Jacobo Diaz for the email
+    - added support for gentoo-env-d, gentoo-init-d, gentoo-make-conf, grub,
+      modconf and sudoers filetypes, thx to Li Jin for the patch.
+    - added support for SVNdiff, gitAnnotate, gitdiff. Thx to nicothakis for
+      posting the issue
+
+2.1.11
+    - fixed a bug with the selection option and visual commenting (again).
+      Thanks to Ingo Karkat (again).
+
+2.1.10
+    - added support for Wikipedia (thanks to Chen Xing)
+    - added support for mplayerconf
+    - bugfixes (thanks to Ingo Karkat for the bug report/patch)
+    - added support for mkd (thanks to Stefano Zacchiroli)
+
 2.1.9
     - added support for mrxvtrc and aap, thx to Marco for the emails
     - added dummy support for SVNAnnotate, SVKAnnotate and CVSAnnotate, thx to
@@ -1149,6 +1173,8 @@ comments and the NERDSpaceDelims option.
 
 Thanks to marco for suggesting NERDDefaultNesting be set by default.
 
+Thanks to Ingo Karkat for the bug reports and the bugfix patch.
+
 Not to forget! Thanks to the following people for sending me new filetypes to
 support :D
 
@@ -1171,7 +1197,7 @@ Lizendir                            fstab
 Michael Böhler                      autoit, autohotkey and docbk
 Aaron Small                         cmake
 Ramiro                              htmldjango and django
-Stefano Zacchiroli                  debcontrol and debchangelog
+Stefano Zacchiroli                  debcontrol, debchangelog, mkd
 Alex Tarkovsky                      ebuild and eclass
 Jorge Rodrigues                     gams
 Rainer Müller                       Objective C
@@ -1190,11 +1216,18 @@ Greg Weber                          D, haml
 Bruce Sherrod                       velocity
 timberke                            cobol
 Aaron Schaefer                      factor 
-Laurent ARNOUD                      asterisk
+Laurent ARNOUD                      asterisk, mplayerconf
 Kuchma Michael                      plsql
 Brett Warneke                       spectre
 Pipp                                lhaskell
 Renald Buter                        scala
 Vladimir Lomov                      asymptote
 Marco                               mrxvtrc, aap
-nicothakis                          SVNAnnotate, CVSAnnotate, SVKAnnotate
+nicothakis                          SVNAnnotate, CVSAnnotate, SVKAnnotate,
+                                    SVNdiff, gitAnnotate, gitdiff
+Chen Xing                           Wikipedia
+Jacobo Diaz                         dakota, patran
+Li Jin                              gentoo-env-d, gentoo-init-d,
+                                    gentoo-make-conf, grub, modconf, sudoers
+SpookeyPeanut                       rib
+Greg Jandl                          pyrex/cython

@@ -1,7 +1,7 @@
 " vim global plugin that provides easy code commenting for various file types
-" Last Change:  18 jan 2008
+" Last Change:  31 March 2008
 " Maintainer:   Martin Grenfell <martin_grenfell at msn.com>
-let s:NERD_commenter_version = 2.1.9
+let s:NERD_commenter_version = 2.1.12
 
 " For help documentation type :help NERDCommenter. If this fails, Restart vim
 " and try again. If it sill doesnt work... the help page is at the bottom 
@@ -256,6 +256,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "dcl" 
         call s:MapDelimiters('$!', '')
+    elseif a:filetype == "dakota" 
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "debchangelog" 
         call s:MapDelimiters('', '')
     elseif a:filetype == "debcontrol" 
@@ -342,16 +344,28 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('GEEK_COMMENT:', '')
     elseif a:filetype == "gentoo-conf-d" 
         call s:MapDelimiters('#', '')
+    elseif a:filetype == "gentoo-env-d"
+        call s:MapDelimiters('#', '')
+    elseif a:filetype == "gentoo-init-d"
+        call s:MapDelimiters('#', '')
+    elseif a:filetype == "gentoo-make-conf"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == 'gentoo-package-keywords'
         call s:MapDelimiters('#', '')
     elseif a:filetype == 'gentoo-package-mask' 
         call s:MapDelimiters('#', '')
     elseif a:filetype == 'gentoo-package-use' 
         call s:MapDelimiters('#', '')
+    elseif a:filetype == 'gitAnnotate'
+        call s:MapDelimiters('', '')
+    elseif a:filetype == 'gitdiff'
+        call s:MapDelimiters('', '')
     elseif a:filetype == "gnuplot" 
         call s:MapDelimiters('#','')
     elseif a:filetype == "groovy"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
+    elseif a:filetype == "grub"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "gtkrc" 
         call s:MapDelimiters('#', '')
     elseif a:filetype == "haskell" 
@@ -430,6 +444,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "lilypond" 
         call s:MapDelimiters('%', '')
+    elseif a:filetype == "liquid"
+        call s:MapDelimiters('{%', '%}')
     elseif a:filetype == "lisp" 
         call s:MapDelimitersWithAlternative(';','', '#|', '|#') 
     elseif a:filetype == "lite" 
@@ -474,8 +490,12 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('%', '')
     elseif a:filetype == "mib" 
         call s:MapDelimiters('--', '')
+    elseif a:filetype == "mkd" 
+        call s:MapDelimiters('>', '')
     elseif a:filetype == "mma" 
         call s:MapDelimiters('(*','*)') 
+    elseif a:filetype == "modconf"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "model"
         call s:MapDelimiters('$','$') 
     elseif a:filetype =~ "moduala." 
@@ -486,6 +506,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('(*','*)') 
     elseif a:filetype == "monk" 
         call s:MapDelimiters(';', '')
+    elseif a:filetype == "mplayerconf" 
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "mrxvtrc" 
         call s:MapDelimiters('#', '')
     elseif a:filetype == "mush" 
@@ -538,6 +560,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimitersWithAlternative('{','}', '(*', '*)')
     elseif a:filetype == "passwd" 
         call s:MapDelimiters('','')
+    elseif a:filetype == "patran" 
+        call s:MapDelimitersWithAlternative('$','','/*', '*/')
     elseif a:filetype == "pcap" 
         call s:MapDelimiters('#', '')
     elseif a:filetype == "pccts" 
@@ -586,6 +610,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "ptcap" 
         call s:MapDelimiters('#', '')
+    elseif a:filetype == "pyrex"
+        call s:MapDelimiters('#','')
     elseif a:filetype == "python" 
         call s:MapDelimiters('#','') 
     elseif a:filetype == "qf" 
@@ -610,6 +636,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "rexx" 
         call s:MapDelimiters('/*','*/')
+    elseif a:filetype == "rib"
+        call s:MapDelimiters('#','')
     elseif a:filetype == "robots" 
         call s:MapDelimiters('#', '')
     elseif a:filetype == "rpl" 
@@ -708,6 +736,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('--', '')
     elseif a:filetype == "strace" 
         call s:MapDelimiters('/*','*/')
+    elseif a:filetype == "sudoers"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "SVKAnnotate" 
         call s:MapDelimiters('','')
     elseif a:filetype == "svn" 
@@ -715,6 +745,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype == "SVNAnnotate" 
         call s:MapDelimiters('','')
     elseif a:filetype == "SVNcommitlog" 
+        call s:MapDelimiters('','')
+    elseif a:filetype == "SVNdiff"
         call s:MapDelimiters('','')
     elseif a:filetype == "systemverilog" 
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
@@ -790,6 +822,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('##', '')
     elseif a:filetype == "wget" 
         call s:MapDelimiters('#', '')
+    elseif a:filetype ==? "Wikipedia" 
+        call s:MapDelimiters('<!--','-->') 
     elseif a:filetype == "winbatch" 
         call s:MapDelimiters(';', '')
     elseif a:filetype == "wml" 
@@ -1041,7 +1075,7 @@ function s:CommentBlock(top, bottom, lSide, rSide, forceNested )
 
                     if s:Multipart()
                         "stick the right delimiter down 
-                        let theLine = strpart(theLine, 0, rSide+strlen(leftSpaced)) . rightSpaced . strpart(theLine, rSide+strlen(rightSpaced))
+                        let theLine = strpart(theLine, 0, rSide+strlen(leftSpaced)) . rightSpaced . strpart(theLine, rSide+strlen(leftSpaced))
 
                         let firstLeftDelim = s:FindDelimiterIndex(b:left, theLine)
                         let lastRightDelim = s:LastIndexOfDelim(b:right, theLine)
@@ -1440,14 +1474,14 @@ endfunction
 "    'nested', 'toEOL', 'prepend', 'append', 'insert', 'uncomment', 'yank'
 function! NERDComment(isVisual, type) range
     " we want case sensitivity when commenting 
-    let prevIgnoreCase = &ignorecase
+    let oldIgnoreCase = &ignorecase
     set noignorecase
 
     if a:isVisual
         let firstLine = line("'<")
         let lastLine = line("'>")
         let firstCol = col("'<")
-        let lastCol = col("'>")
+        let lastCol = col("'>") - (&selection == 'exclusive' ? 1 : 0)
     else
         let firstLine = a:firstline
         let lastLine = a:lastline
@@ -1529,7 +1563,7 @@ function! NERDComment(isVisual, type) range
         execute firstLine .','. lastLine .'call NERDComment('. a:isVisual .', "norm")'
     endif
 
-    let &ignorecase = prevIgnoreCase
+    let &ignorecase = oldIgnoreCase
 endfunction
 
 " Function: s:PlaceDelimitersAndInsBetween() function {{{2
