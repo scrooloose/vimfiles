@@ -696,6 +696,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('%', '')
     elseif a:filetype == "sl" 
         call s:MapDelimiters('/*','*/')
+    elseif a:filetype == "slice" 
+        call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "slrnrc" 
         call s:MapDelimiters('%', '')
     elseif a:filetype == "sm" 
@@ -814,6 +816,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('"','') 
     elseif a:filetype == "viminfo" 
         call s:MapDelimiters('','') 
+    elseif a:filetype == "vimperator"
+        call s:MapDelimiters('"','')
     elseif a:filetype == "virata" 
         call s:MapDelimiters('%', '')
     elseif a:filetype == "vo_base" 
@@ -1283,10 +1287,8 @@ function s:CommentLinesSexy(topline, bottomline)
         endif
         call setline(a:topline, theLine)
 
-        echoerr theLine
-
         "comment the bottom line 
-        if a:bottomLine != a:topline
+        if a:bottomline != a:topline
             let theLine = getline(a:bottomline)
             let lineHasTabs = s:HasLeadingTabs(theLine)
             if lineHasTabs
@@ -1294,15 +1296,10 @@ function s:CommentLinesSexy(topline, bottomline)
             endif
             let theLine = s:SwapOutterMultiPartDelimsForPlaceHolders(theLine)
         endif
-
-        echoer theLine
-
         let theLine = s:AddRightDelim(spaceString . right, theLine)
         if lineHasTabs
             let theLine = s:ConvertLeadingSpacesToTabs(theLine)
         endif
-
-        echoerr theLine
         call setline(a:bottomline, theLine)
     else
 
