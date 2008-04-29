@@ -15,7 +15,7 @@ function! s:SetupHTMLMaps(ft)
     call IMAP('<div`', "<div<++>>\<CR><++>\<CR></div>", a:ft)
     call IMAP('id`', "id=\"<++>\"", a:ft)
     call IMAP('<pcf`', "<p>\<CR>  <label for=\"<+id+>\"><++></label>\<CR><++>\<CR></p>", a:ft)
-    call IMAP('<img`', "<img src=\"<++>\"<++>/>", a:ft)
+    call IMAP('<img`', "<img src=\"<++>\"<++> />", a:ft)
     call IMAP('<h1`', "<h1<++>><++></h1>", a:ft)
     call IMAP('<h2`', "<h2<++>><++></h2>", a:ft)
     call IMAP('<h3`', "<h3<++>><++></h3>", a:ft)
@@ -26,6 +26,9 @@ function! s:SetupHTMLMaps(ft)
     call IMAP('<title`', "<title><++></title>", a:ft)
     call IMAP('<select`', "<select name=\"<++>\"<++>><++></select>", a:ft)
     call IMAP('<script`', "<script type=\"text/javascript\">\<CR>//<![CDATA[<++>\<CR>//]]>\<CR></script>", a:ft)
+
+    call IMAP('href`', '<a href="<++>"><++></a>', a:ft)
+    call IMAP('<link`', '<link rel="stylesheet" type="text/css" href="<++>" />', a:ft)
 
 endfunction
 
