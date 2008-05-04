@@ -110,7 +110,7 @@ call s:InitVariable("g:NERDTreeMapUpdir", "u")
 call s:InitVariable("g:NERDTreeMapUpdirKeepOpen", "U")
 
 "SECTION: Script level variable declaration{{{2
-let s:escape_chars =  " `|\"~'#"
+let s:escape_chars =  " \\`\|\"#%&,?()\*^<>"
 let s:NERDTreeWinName = '_NERD_tree_'
 
 "init all the nerd tree markup 
@@ -553,7 +553,7 @@ function! s:oTreeDirNode.InitChildren(silent) dict
 
     "get an array of all the files in the nodes dir 
     let dir = self.path
-    let filesStr = globpath(dir.StrForOS(0), '*') . "\n" . globpath(dir.StrForOS(0), '.*')
+    let filesStr = globpath(dir.StrForGlob(), '*') . "\n" . globpath(dir.StrForGlob(), '.*')
     let files = split(filesStr, "\n")
 
     if !a:silent && len(files) > g:NERDTreeNotificationThreshold
@@ -563,8 +563,10 @@ function! s:oTreeDirNode.InitChildren(silent) dict
     let invalidFilesFound = 0
     for i in files
 
-        "filter out the .. and . directories 
-        if i !~ '\.\.$' && i !~ '\.$'
+        "filter out the .. and . directories
+        "Note: we must match .. AND ../ cos sometimes the globpath returns
+        "../ for path with strange chars (eg $)
+        if i !~ '\.\..\?$' && i !~ '\..\?$'
 
             "put the next file in a new node and attach it 
             try
@@ -662,7 +664,7 @@ function! s:oTreeDirNode.Refresh() dict
 
     "go thru all the files/dirs under this node 
     let dir = self.path
-    let filesStr = globpath(dir.StrForOS(0), '*') . "\n" . globpath(dir.StrForOS(0), '.*')
+    let filesStr = globpath(dir.StrForGlob(), '*') . "\n" . globpath(dir.StrForGlob(), '.*')
     let files = split(filesStr, "\n")
     for i in files
         if i !~ '\.\.$' && i !~ '\.$'
@@ -933,7 +935,7 @@ function! s:oPath.Delete() dict
             "if we are runnnig windows then put quotes around the pathstring 
             let cmd = g:NERDTreeRemoveDirCmd . self.StrForOS(1)
         else
-            let cmd = g:NERDTreeRemoveDirCmd . self.StrForOS(0)
+            let cmd = g:NERDTreeRemoveDirCmd . self.StrForOS(1)
         endif
         let success = system(cmd)
 
@@ -1208,6 +1210,22 @@ function! s:oPath.StrForEditCmd() dict
     endif
 
 endfunction
+"FUNCTION: oPath.StrForGlob() {{{3
+function! s:oPath.StrForGlob() dict
+    let lead = s:os_slash
+
+    "if we are running windows then slap a drive letter on the front
+    if s:running_windows
+        let lead = strpart(getcwd(), 0, 2) . s:os_slash
+    endif
+
+    let toReturn = lead . join(self.pathSegments, s:os_slash)
+
+    if !s:running_windows
+        let toReturn = escape(toReturn, s:escape_chars)
+    endif
+    return toReturn
+endfunction
 "FUNCTION: oPath.StrForOS(esc) {{{3 
 "
 "Gets the string path for this path object that is appropriate for the OS.
@@ -1322,7 +1340,7 @@ function! s:InitNerdTree(dir)
     "if instructed to, then change the vim CWD to the dir the NERDTree is
     "inited in 
     if g:NERDTreeChDirMode != 0
-        exec "cd " . path.StrForOS(1)
+        exec 'cd ' . path.StrForOS(1)
     endif
 
     let t:treeShowHelp = 0
@@ -2812,7 +2830,7 @@ function! s:RenameCurrent()
         "if the node is open in a buffer, ask the user if they want to
         "close that buffer 
         if bufnum != -1
-            let prompt = "|\n|Node renamed.\n|\n|The old file is open in buffer ". bufnum . (bufwinnr(bufnum) == -1 ? " (hidden)" : "") .". Delete this buffer? (yN)"
+            let prompt = "\nNode renamed.\n\nThe old file is open in buffer ". bufnum . (bufwinnr(bufnum) == -1 ? " (hidden)" : "") .". Delete this buffer? (yN)"
             call s:PromptToDelBuffer(bufnum, prompt)
         endif
 
