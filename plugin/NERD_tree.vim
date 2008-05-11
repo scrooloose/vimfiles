@@ -1,7 +1,7 @@
 " vim global plugin that provides a nice tree explorer
 " Last Change:  31 March 2008
 " Maintainer:   Martin Grenfell <martin_grenfell at msn dot com>
-let s:NERD_tree_version = '2.8.0'
+let s:NERD_tree_version = '2.8.0.1'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -308,7 +308,8 @@ endfunction
 "FUNCTION: oTreeFileNode.Rename {{{3 
 "Calls the rename method for this nodes path obj 
 function! s:oTreeFileNode.Rename(newName) dict
-    call self.path.Rename(a:newName)
+    let newName = substitute(a:newName, '\(\\\|\/\)$', '', '')
+    call self.path.Rename(newName)
     call self.parent.RemoveChild(self)
 
     let parentPath = self.path.GetPathTrunk()
@@ -318,7 +319,6 @@ function! s:oTreeFileNode.Rename(newName) dict
         call newParent.CreateChild(self.path, 1)
     endif
 endfunction
-
 "FUNCTION: oTreeFileNode.StrDisplay() {{{3 
 "
 "Returns a string that specifies how the node should be represented as a
@@ -772,9 +772,9 @@ let s:oPath = {}
 let oPath = s:oPath
 "FUNCTION: oPath.ChangeToDir() {{{3 
 function! s:oPath.ChangeToDir() dict
-    let dir = self.Str(1)
+    let dir = self.StrForCd()
     if self.isDirectory == 0
-        let dir = self.GetPathTrunk().Str(1)
+        let dir = self.GetPathTrunk().StrForCd()
     endif
 
     try
@@ -850,27 +850,24 @@ function! s:oPath.Create(fullpath) dict
         throw "NERDTree.Path.Exists Exception: Directory Exists: '" . a:fullpath . "'"
     endif
 
-    "get the unix version of the input path 
-    let fullpath = s:oPath.WinToUnixPath(a:fullpath)
-
     try 
 
         "if it ends with a slash, assume its a dir create it 
-        if fullpath =~ '\/$'
+        if a:fullpath =~ '\(\\\|\/\)$'
             "whack the trailing slash off the end if it exists 
-            let fullpath = substitute(fullpath, '\/$', '', '')
+            let fullpath = substitute(a:fullpath, '\(\\\|\/\)$', '', '')
 
             call mkdir(fullpath, 'p')
 
         "assume its a file and create 
         else
-            call writefile([], fullpath)
+            call writefile([], a:fullpath)
         endif
     catch /.*/
         throw "NERDTree.Path Exception: Could not create path: '" . a:fullpath . "'"
     endtry
 
-    return s:oPath.New(fullpath)
+    return s:oPath.New(a:fullpath)
 endfunction
 
 "FUNCTION: oPath.Copy(dest) {{{3 
@@ -889,7 +886,7 @@ function! s:oPath.Copy(dest) dict
     let cmd = g:NERDTreeCopyCmd . " " . self.StrForOS(0) . " " . dest
     let success = system(cmd)
     if success != 0
-        throw "NERDTree.Path Exception: Could not copy ''". self.StrForOS() ."'' to: '" . a:dest . "'"
+        throw "NERDTree.Path Exception: Could not copy ''". self.StrForOS(0) ."'' to: '" . a:dest . "'"
     endif
 endfunction
 
@@ -943,13 +940,24 @@ function! s:oPath.Delete() dict
             throw "NERDTree.Path.Deletion Exception: Could not delete directory: '" . self.StrForOS(0) . "'"
         endif
     else
-        let success = delete(self.Str(0))
+        let success = delete(self.StrForOS(!s:running_windows))
         if success != 0
             throw "NERDTree.Path.Deletion Exception: Could not delete file: '" . self.Str(0) . "'"
         endif
     endif
 endfunction
 
+"FUNCTION: oPath.ExtractDriveLetter(fullpath) {{{3 
+"
+"If running windows, cache the drive letter for this path
+function! s:oPath.ExtractDriveLetter(fullpath) dict
+    if s:running_windows
+        let self.drive = substitute(a:fullpath, '\(^[a-zA-Z]:\).*', '\1', '')
+    else
+        let self.drive = ''
+    endif
+
+endfunction
 "FUNCTION: oPath.GetDir() {{{3 
 "
 "Returns this path if it is a directory, else this paths parent.
@@ -975,8 +983,6 @@ function! s:oPath.GetParent() dict
     let path = '/'. join(self.pathSegments[0:-2], '/')
     return s:oPath.New(path)
 endfunction
-
-
 "FUNCTION: oPath.GetLastPathComponent(dirSlash) {{{3 
 "
 "Gets the last part of this path.   
@@ -998,7 +1004,7 @@ endfunction
 "FUNCTION: oPath.GetPathTrunk() {{{3 
 "Gets the path without the last segment on the end.
 function! s:oPath.GetPathTrunk() dict
-    return s:oPath.New('/' . join(self.pathSegments[0:-2], '/'))
+    return s:oPath.New(self.StrTrunk())
 endfunction
 
 "FUNCTION: oPath.GetSortOrderIndex() {{{3 
@@ -1051,15 +1057,13 @@ endfunction
 
 "FUNCTION: oPath.Equals() {{{3 
 "
-"Determines whether 2 path objecs are "equal".
+"Determines whether 2 path objects are "equal".
 "They are equal if the paths they represent are the same
 "
 "Args:
 "path: the other path obj to compare this with
 function! s:oPath.Equals(path) dict
-    let this = self.ChopTrailingSlash(self.Str(1))
-    let that = self.ChopTrailingSlash(a:path.Str(1))
-    return this == that
+    return self.Str(0) == a:path.Str(0)
 endfunction
 
 "FUNCTION: oPath.New() {{{3 
@@ -1074,35 +1078,25 @@ function! s:oPath.New(fullpath) dict
     return newPath
 endfunction
 
-"FUNCTION: oPath.NewMinimal() {{{3 
-function! s:oPath.NewMinimal(fullpath) dict
-    let newPath = copy(self)
-    let fullpath = s:oPath.WinToUnixPath(a:fullpath)
-
-    let newPath.pathSegments = split(fullpath, '/')
-    
-    let newPath.isDirectory = isdirectory(fullpath)
-
-    return newPath
-endfunction
-
 "FUNCTION: oPath.ReadInfoFromDisk(fullpath) {{{3 
 "
 "
 "Throws NERDTree.Path.InvalidArguments exception.
 function! s:oPath.ReadInfoFromDisk(fullpath) dict
+    call self.ExtractDriveLetter(a:fullpath)
+
     let fullpath = s:oPath.WinToUnixPath(a:fullpath)
 
     let self.pathSegments = split(fullpath, '/')
 
     let self.isReadOnly = 0
-    if isdirectory(fullpath)
+    if isdirectory(a:fullpath)
         let self.isDirectory = 1
-    elseif filereadable(fullpath)
+    elseif filereadable(a:fullpath)
         let self.isDirectory = 0
-        let self.isReadOnly = filewritable(fullpath) == 0
+        let self.isReadOnly = filewritable(a:fullpath) == 0
     else
-        throw "NERDTree.Path.InvalidArguments Exception: Invalid path = " . fullpath
+        throw "NERDTree.Path.InvalidArguments Exception: Invalid path = " . a:fullpath
     endif
 
     "grab the last part of the path (minus the trailing slash) 
@@ -1131,7 +1125,7 @@ endfunction
 
 "FUNCTION: oPath.Refresh() {{{3 
 function! s:oPath.Refresh() dict
-    call self.ReadInfoFromDisk(self.Str(0))
+    call self.ReadInfoFromDisk(self.StrForGlob())
 endfunction
 
 "FUNCTION: oPath.Rename() {{{3 
@@ -1142,11 +1136,11 @@ function! s:oPath.Rename(newPath) dict
         throw "NERDTree.Path.InvalidArguments exception. Invalid newPath for renaming = ". a:newPath
     endif
 
-    let success =  rename(self.Str(0), a:newPath)
+    let success =  rename(self.StrForOS(!s:running_windows), a:newPath)
     if success != 0
-        throw "NERDTree.Path.Rename Exception: Could not rename: '" . self.Str(0) . "'" . 'to:' . a:newPath
+        throw "NERDTree.Path.Rename Exception: Could not rename: '" . self.StrForOS(0) . "'" . 'to:' . a:newPath
     endif
-    let self.pathSegments = split(a:newPath, '/')
+    call self.ReadInfoFromDisk(a:newPath)
 endfunction
 
 "FUNCTION: oPath.Str(esc) {{{3 
@@ -1177,6 +1171,19 @@ function! s:oPath.StrAbs() dict
     return resolve(self.Str(1))
 endfunction
 
+"FUNCTION: oPath.StrForCd() {{{3
+"
+" returns a string that can be used with :cd
+"
+"Return:
+"a string that can be used in the view to represent this path
+function! s:oPath.StrForCd() dict
+    if s:running_windows
+        return self.StrForOS(0)
+    else
+        return self.StrForOS(1)
+    endif
+endfunction
 "FUNCTION: oPath.StrDisplay() {{{3 
 "
 "Returns a string that specifies how the path should be represented as a
@@ -1216,7 +1223,7 @@ function! s:oPath.StrForGlob() dict
 
     "if we are running windows then slap a drive letter on the front
     if s:running_windows
-        let lead = strpart(getcwd(), 0, 2) . s:os_slash
+        let lead = self.drive . '\'
     endif
 
     let toReturn = lead . join(self.pathSegments, s:os_slash)
@@ -1240,7 +1247,7 @@ function! s:oPath.StrForOS(esc) dict
 
     "if we are running windows then slap a drive letter on the front 
     if s:running_windows
-        let lead = strpart(getcwd(), 0, 2) . s:os_slash
+        let lead = self.drive . '\'
     endif
 
     let toReturn = lead . join(self.pathSegments, s:os_slash)
@@ -1258,7 +1265,7 @@ endfunction
 "FUNCTION: oPath.StrTrunk() {{{3 
 "Gets the path without the last segment on the end.
 function! s:oPath.StrTrunk() dict
-    return '/' . join(self.pathSegments[0:-2], '/')
+    return self.drive . '/' . join(self.pathSegments[0:-2], '/')
 endfunction
 
 "FUNCTION: oPath.WinToUnixPath(pathstr){{{3
@@ -1340,7 +1347,7 @@ function! s:InitNerdTree(dir)
     "if instructed to, then change the vim CWD to the dir the NERDTree is
     "inited in 
     if g:NERDTreeChDirMode != 0
-        exec 'cd ' . path.StrForOS(1)
+        exec 'cd ' . path.StrForCd()
     endif
 
     let t:treeShowHelp = 0
@@ -1791,8 +1798,9 @@ function! s:GetPath(ln)
             endif
         endif
     endwhile
-    let curFile = dir . curFile
-    return s:oPath.NewMinimal(curFile)
+    let curFile = t:NERDTreeRoot.path.drive . dir . curFile
+    let toReturn = s:oPath.New(curFile)
+    return toReturn
 endfunction 
 
 "FUNCTION: s:GetSelectedDir() {{{2 
@@ -2604,7 +2612,7 @@ function! s:InsertNewNode()
     let newNodeName = input("Add a childnode\n".
                           \ "==========================================================\n". 
                           \ "Enter the dir/file name to be created. Dirs end with a '/'\n" . 
-                          \ "", curDirNode.path.Str(0))
+                          \ "", curDirNode.path.StrForGlob() . s:os_slash)
     
     if newNodeName == ''
         call s:Echo("Node Creation Aborted.")
@@ -2613,7 +2621,6 @@ function! s:InsertNewNode()
 
     try
         let newPath = s:oPath.Create(newNodeName)
-
         let parentNode = t:NERDTreeRoot.FindNode(newPath.GetPathTrunk())
 
         let newTreeNode = s:oTreeFileNode.New(newPath)
@@ -2812,14 +2819,12 @@ function! s:RenameCurrent()
     let newNodePath = input("Rename the current node\n" .
                           \ "==========================================================\n" . 
                           \ "Enter the new path for the node:                          \n" . 
-                          \ "", curNode.path.Str(0))
+                          \ "", curNode.path.StrForOS(0))
     
     if newNodePath == ''
         call s:Echo("Node Renaming Aborted.")
         return
     endif
-
-    let newNodePath = substitute(newNodePath, '\/$', '', '')
 
     try
         let bufnum = bufnr(curNode.path.Str(0))
