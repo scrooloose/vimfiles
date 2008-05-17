@@ -63,7 +63,8 @@ The following features and functionality are provided by the NERD tree:
         * optional displaying of hidden files (. files)
         * files can be "turned off" so that only directories are displayed
     * A textual filesystem menu is provided which allows you to
-      create/delete/rename file and directory nodes
+      create/delete/rename file and directory nodes as well as copy (for
+      supported OSs)
     * The position and size of the NERD tree window can be customised 
     * The order in which the nodes in the tree are listed can be customised.
     * A model of your filesystem is created/maintained as you explore it. This
@@ -94,6 +95,9 @@ The following features and functionality are provided by the NERD tree:
                 If a NERD tree already exists for this tab, it is reopened and
                 rendered again.  If no NERD tree exists for this tab then this
                 command acts the same as the |:NERDTree| command.
+
+:NERDTreeClose
+                Close the NERD tree in this tab.
 
 ------------------------------------------------------------------------------
 2.2. NERD tree Mappings                                     *NERDTreeMappings*
@@ -581,10 +585,6 @@ the CWD is changed whenever the tree root is changed. For example, if the CWD
 is /home/marty/foobar and you make the node for /home/marty/foobar/baz the new
 root then the CWD will become /home/marty/foobar/baz.
 
-Note to windows users: it is highly recommended that you have this option set
-to either 1 or 2 or else the script wont function properly if you attempt to
-open a NERD tree on a different drive to the one vim is currently in.
-
 Authors note: at work i have this option set to 1 because i have a giant ctags
 file in the root dir of my project. This way i can initialise the NERD tree
 with the root dir of my project and always have ctags available to me --- no
@@ -702,7 +702,7 @@ Other examples: >
     (3) ['\/$', '\.rb$', '\.php$', '*', '\.swp$',  '\.bak$', '\~$']
 <
 1. Directories will appear last, everything else will appear above.
-2. Every will simply appear in alphabetical order.
+2. Everything will simply appear in alphabetical order.
 3. Dirs will appear first, then ruby and php. Swap files, bak files and vim
    backup files will appear last with everything else preceding them.
 
@@ -783,6 +783,18 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog* 
+
+2.9.0
+
+    - path handling improvements, thanks to Zhang Shuhan for heaps of
+      testing/bug reports
+        * improved how paths are stored, now the script will no longer get
+          confused about drives on MF Windows
+        * made the script way better at handling paths with strange characters
+          in them (eg '$@; etc)
+    - applied a patch from Cory Echols
+        * add the command :NERDTreeClose to close the tree for the current tab
+        * set the filetype for the NERD tree buffer to "nerdtree"
 
 2.8.0
     - added an option to enable/disable line numbers in the NERD tree window,
@@ -1000,5 +1012,5 @@ the &hidden option is set.
 Thanks to Olivier Yiptong for prompting me to make line numbers in the
 NERD tree window optional.
 
-Thanks to Zhang Shuhan for a bug report when initializing the tree in a dir
-containing spaces.
+Thanks to Zhang Shuhan for all of his emails and testing to help improve the
+NERD tree path handling.

@@ -1,7 +1,7 @@
 " vim global plugin that provides easy code commenting for various file types
-" Last Change:  4 May 2008
+" Last Change:  17 May 2008
 " Maintainer:   Martin Grenfell <martin_grenfell at msn.com>
-let s:NERD_commenter_version = 2.1.13
+let s:NERD_commenter_version = 2.1.14
 
 " For help documentation type :help NERDCommenter. If this fails, Restart vim
 " and try again. If it sill doesnt work... the help page is at the bottom 
@@ -290,6 +290,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('<!--','-->') 
     elseif a:filetype == "dtml" 
         call s:MapDelimiters('<dtml-comment>','</dtml-comment>') 
+    elseif a:filetype == "dtrace"
+        call s:MapDelimiters('/*','*/')
     elseif a:filetype == "dylan" 
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == 'ebuild'
@@ -360,6 +362,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('', '')
     elseif a:filetype == 'gitcommit'
         call s:MapDelimiters('', '')
+    elseif a:filetype == 'gitconfig'
+        call s:MapDelimiters(';', '')
     elseif a:filetype == 'gitdiff'
         call s:MapDelimiters('', '')
     elseif a:filetype == "gnuplot" 
@@ -526,6 +530,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('/*', '')
     elseif a:filetype == "ncf" 
         call s:MapDelimiters(';', '')
+    elseif a:filetype == "nerdtree"
+        call s:MapDelimiters('', '')
     elseif a:filetype == "netdict" 
         call s:MapDelimiters('', '')
     elseif a:filetype == "netrw" 
@@ -764,6 +770,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters(';', '')
     elseif a:filetype == "tak" 
         call s:MapDelimiters('$', '')
+    elseif a:filetype == "tar"
+        call s:MapDelimiters('', '')
     elseif a:filetype == "tasm" 
         call s:MapDelimiters(';', '')
     elseif a:filetype == "tcl" 
