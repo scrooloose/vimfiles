@@ -860,6 +860,9 @@ to get illegal syntax when uncommenting them.
 ==============================================================================
 8. Changelog                                                *NERDComChangelog*
 
+2.1.15
+    - added support for pamconf, thanks to Martin Kustermann
+
 2.1.14
     - added support for gitconfig, tar, nerdtree
     - added support for dtrace, thanks to nicothakis for the post
@@ -1058,9 +1061,9 @@ to get illegal syntax when uncommenting them.
       filetypes.
     - Added '#' comments as an alternative for the asm filetype
 
-Thanks to Markus Klinik and Anders for bug reports, and again to Anders
-for his patch. Thanks to John O'Shea and fREW for the filetype
-information.
+    Thanks to Markus Klinik and Anders for bug reports, and again to Anders
+    for his patch. Thanks to John O'Shea and fREW for the filetype
+    information.
 
 ==============================================================================
 8. Credits                                                    *NERDComCredits*
@@ -1248,3 +1251,4 @@ Greg Jandl                          pyrex/cython
 Christophe Benz                     services, gitcommit
 A Pontus                            vimperator
 Stromnov                            slice
+Martin Kustermann                   pamconf

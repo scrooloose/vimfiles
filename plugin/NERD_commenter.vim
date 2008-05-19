@@ -1,11 +1,7 @@
 " vim global plugin that provides easy code commenting for various file types
-" Last Change:  17 May 2008
+" Last Change:  19 May 2008
 " Maintainer:   Martin Grenfell <martin_grenfell at msn.com>
 let s:NERD_commenter_version = 2.1.14
-
-" For help documentation type :help NERDCommenter. If this fails, Restart vim
-" and try again. If it sill doesnt work... the help page is at the bottom 
-" of this file.
 
 " Section: script init stuff {{{1
 if exists("loaded_nerd_comments")
@@ -564,6 +560,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('', '')
     elseif a:filetype == "ox" 
         call s:MapDelimiters('//', '')
+    elseif a:filetype == "pamconf"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "pascal" 
         call s:MapDelimitersWithAlternative('{','}', '(*', '*)')
     elseif a:filetype == "passwd" 
