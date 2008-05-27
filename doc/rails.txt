@@ -112,6 +112,7 @@ Installing and Using the Plugin ~
 						*rails-install-plugin*
 If you have the zip file, extract it to vimfiles (Windows) or ~/.vim
 (everything else).  You should have the following files: >
+	autoload/rails.vim
 	plugin/rails.vim
 	doc/rails.txt
 See |add-local-help| for instructions on enabling the documentation.  In a
@@ -217,7 +218,7 @@ actually edit a file from a Rails application.
 <			On Debian compatible distributions, the following is
 			the preferred method: >
 		:command -bar -nargs=1 OpenURL :!sensible-browser <args>
-<			If has("mac_gui"), has("win32_gui"), or
+<			If exists("$SECURITYSESSIONID"), has("gui_win32"), or
 			executable("sensible-browser") is true, the
 			corresponding command above will be automatically
 			defined.  Otherwise, you must provide your own (which
@@ -1075,7 +1076,8 @@ default.
 	let g:rails_subversion=1
 Automatically add/remove files to the subversion repository for commands like
 |:Rgenerate| and |:Rdestroy| (but not |:Rscript|).  Ignored when the
-application is not part of a subversion repository.  Disabled by default.
+application is not part of a subversion repository.  Deprecated and disabled
+by default.
 
 						*g:rails_syntax*  >
 	let g:rails_syntax=1
@@ -1084,19 +1086,11 @@ Enabled by default.  See |rails-syntax|.
 
 					*rails-tabs* *g:rails_tabstop*  >
 	let g:rails_tabstop=4
-This option is for people who dislike the default 'shiftwidth' of 2.  When
-non-zero, all files will have a |:retab|! done with 'tabstop' set to 2 on
-load, to convert the initial indent from spaces to tabs.  Then, 'tabstop' and
-'shiftwidth' will be set to the option's value.  The process is reversed on
-write.  Thus, one can use a custom indent when editing files, yet conform to
-Rails conventions when saving them.  There is also a local buffer version
-of this option, to allow for things like: >
-	autocmd User Rails if &ft == 'ruby' | let b:rails_tabstop = 4 | endif
-This option defaults to 0, which is the recommended value.
+This option now requires the plugin railstab.vim from vim.org:
+	http://www.vim.org/scripts/script.php?script_id=2253
 
-If instead of all this magic, you would prefer to just override this plugin's
-settings and use your own custom 'shiftwidth', adjust things manually in an
-autocommand: >
+If your goal is simply just override this plugin's settings and use your own
+custom 'shiftwidth', adjust things manually in an autocommand: >
 	autocmd User Rails set sw=4 sts=4 noet
 This is highly discouraged: don't fight Rails.
 
@@ -1113,12 +1107,9 @@ The latest stable version can be found at
     http://www.vim.org/scripts/script.php?script_id=1567
 In Vim 7, you can keep up to date with |GetLatestVimScripts|.
 
-Development versions can be found at the following URLs:
-    http://tpope.us/rails.vba
-    http://tpope.us/rails.zip
-    http://svn.tpope.net/rails/vim/railsvim
-The first is a |vimball| for Vim 7.  The third is a subversion repository
-and contains the very latest features and bugs.
+The very latest development versions can be retrieved from Git:
+    http://git.tpope.net/?p=vim-rails.git
+    git clone git://git.tpope.net/git/vim-rails.git
 
 Feedback is highly desired on this plugin.  Please send all comments,
 complaints, and compliments to the author.  No bug is too small to report.
