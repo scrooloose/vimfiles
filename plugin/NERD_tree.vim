@@ -180,6 +180,16 @@ function! s:CompareNodes(n1, n2)
     return a:n1.path.CompareTo(a:n2.path)
 endfunction
 
+"FUNCTION: oTreeFileNode.ClearMarks() {{{3
+function! s:oTreeFileNode.ClearMarks() dict
+    let marks = s:GetMarks()
+    for i in keys(marks)
+        if marks[i].Equals(self.path)
+            call remove(marks, i)
+        end
+    endfor
+    call self.path.CacheMarkNames()
+endfunction
 "FUNCTION: oTreeFileNode.Copy(dest) {{{3
 function! s:oTreeFileNode.Copy(dest) dict
     call self.path.Copy(a:dest)
@@ -339,6 +349,10 @@ function! s:oTreeFileNode.New(path) dict
     endif
 endfunction
 
+"FUNCTION: oTreeFileNode.Refresh {{{3
+function! s:oTreeFileNode.Refresh() dict
+    call self.path.Refresh()
+endfunction
 "FUNCTION: oTreeFileNode.Rename {{{3
 "Calls the rename method for this nodes path obj
 function! s:oTreeFileNode.Rename(newName) dict
@@ -692,55 +706,50 @@ function! s:oTreeDirNode.OpenRecursively2(forceOpen) dict
 endfunction
 
 "FUNCTION: oTreeDirNode.Refresh {{{3
+unlet s:oTreeDirNode.Refresh
 function! s:oTreeDirNode.Refresh() dict
-    let newChildNodes = []
-    let invalidFilesFound = 0
+    call self.path.Refresh()
 
-    "go thru all the files/dirs under this node
-    let dir = self.path
-    let filesStr = globpath(dir.StrForGlob(), '*') . "\n" . globpath(dir.StrForGlob(), '.*')
-    let files = split(filesStr, "\n")
-    for i in files
-        if i !~ '\.\.$' && i !~ '\.$'
+    "if this node was ever opened, refresh its children
+    if self.isOpen || !empty(self.children)
+        "go thru all the files/dirs under this node
+        let newChildNodes = []
+        let invalidFilesFound = 0
+        let dir = self.path
+        let filesStr = globpath(dir.StrForGlob(), '*') . "\n" . globpath(dir.StrForGlob(), '.*')
+        let files = split(filesStr, "\n")
+        for i in files
+            if i !~ '\.\.$' && i !~ '\.$'
 
-            try
-                "create a new path and see if it exists in this nodes children
-                let path = s:oPath.New(i)
-                let newNode = self.GetChild(path)
-                if newNode != {}
-
-                    "if the existing node is a dir can be refreshed then
-                    "refresh it
-                    if newNode.path.isDirectory && (!empty(newNode.children) || newNode.isOpen == 1)
+                try
+                    "create a new path and see if it exists in this nodes children
+                    let path = s:oPath.New(i)
+                    let newNode = self.GetChild(path)
+                    if newNode != {}
                         call newNode.Refresh()
+                        call add(newChildNodes, newNode)
 
-                    "if we have a filenode then refresh the path
-                    elseif newNode.path.isDirectory == 0
-                        call newNode.path.Refresh()
+                    "the node doesnt exist so create it
+                    else
+                        let newNode = s:oTreeFileNode.New(path)
+                        let newNode.parent = self
+                        call add(newChildNodes, newNode)
                     endif
 
-                    call add(newChildNodes, newNode)
 
-                "the node doesnt exist so create it
-                else
-                    let newNode = s:oTreeFileNode.New(path)
-                    let newNode.parent = self
-                    call add(newChildNodes, newNode)
-                endif
+                catch /^NERDTree.InvalidArguments/
+                    let invalidFilesFound = 1
+                endtry
+            endif
+        endfor
 
+        "swap this nodes children out for the children we just read/refreshed
+        let self.children = newChildNodes
+        call self.SortChildren()
 
-            catch /^NERDTree.InvalidArguments/
-                let invalidFilesFound = 1
-            endtry
+        if invalidFilesFound
+            call s:EchoWarning("some files could not be loaded into the NERD tree")
         endif
-    endfor
-
-    "swap this nodes children out for the children we just read/refreshed
-    let self.children = newChildNodes
-    call self.SortChildren()
-
-    if invalidFilesFound
-        call s:EchoWarning("some files could not be loaded into the NERD tree")
     endif
 endfunction
 
@@ -804,6 +813,17 @@ endfunction
 "============================================================
 let s:oPath = {}
 let oPath = s:oPath
+"FUNCTION: oPath.CacheMarkNames() {{{3
+function! s:oPath.CacheMarkNames() dict
+    let self.markNames = []
+    let marks = s:GetMarks()
+    for k in keys(marks)
+        if marks[k].Equals(self)
+            call add(self.markNames, k)
+        endif
+    endfor
+    return self.markNames
+endfunction
 "FUNCTION: oPath.ChangeToDir() {{{3
 function! s:oPath.ChangeToDir() dict
     let dir = self.StrForCd()
@@ -1102,14 +1122,10 @@ endfunction
 
 "FUNCTION: oPath.MarkNames() {{{3
 function! s:oPath.MarkNames() dict
-    let toReturn = []
-    let marks = s:GetMarks()
-    for k in keys(marks)
-        if marks[k].Equals(self)
-            call add(toReturn, k)
-        endif
-    endfor
-    return toReturn
+    if !exists("self.markNames")
+        call self.CacheMarkNames()
+    endif
+    return self.markNames
 endfunction
 "FUNCTION: oPath.New() {{{3
 "
@@ -1171,6 +1187,7 @@ endfunction
 "FUNCTION: oPath.Refresh() {{{3
 function! s:oPath.Refresh() dict
     call self.ReadInfoFromDisk(self.StrForOS(0))
+    call self.CacheMarkNames()
 endfunction
 
 "FUNCTION: oPath.Rename() {{{3
@@ -1388,7 +1405,18 @@ endfunction " >>>
 "FUNCTION: s:ClearAllMarks() {{{2
 "delete all marks
 function! s:ClearAllMarks()
-    let g:NERDTreeMarks = {}
+    for name in keys(g:NERDTreeMarks)
+        let node = {}
+        try
+            let node = s:GetNodeForMark(name, 1)
+        catch /NERDTree/
+        endtry
+        call remove(g:NERDTreeMarks, name)
+        if !empty(node)
+            call node.path.CacheMarkNames()
+        endif
+    endfor
+    call s:WriteMarks()
 endfunction
 "FUNCTION: s:GetNodeForMark(name, searchFromAbsoluteRoot) {{{2
 "get the treenode for the mark with the given name
@@ -1411,21 +1439,28 @@ function! s:GetNodeForMark(name, searchFromAbsoluteRoot)
     endif
     return targetNode
 endfunction
-"FUNCTION: s:InitNerdTree(dir) {{{2
-"Initialized the NERD tree, where the root will be initialized with the given
-"directory
+"FUNCTION: s:InitNerdTree(name) {{{2
+"Initialise the nerd tree for this tab. The tree will start in either the
+"given directory, or the directory associated with the given mark
 "
-"Arg:
-"dir: the dir to init the root with
-function! s:InitNerdTree(dir)
-    let dir = a:dir == '' ? expand('%:p:h') : a:dir
-    let dir = resolve(dir)
-
-    let path = s:oPath.New(dir)
-
-    if !path.isDirectory
-        call s:EchoWarning("Error reading: " . dir)
-        return
+"Args:
+"name: the name of a mark or a directory
+function! s:InitNerdTree(name)
+    let path = {}
+    if count(keys(s:GetMarks()), a:name)
+        let path = s:GetMarks()[a:name]
+    else
+        let dir = a:name == '' ? expand('%:p:h') : a:name
+        let dir = resolve(dir)
+        try
+            let path = s:oPath.New(dir)
+        catch /NERDTree.Path.InvalidArguments/
+            call s:Echo("No mark or directory found for: " . a:name)
+            return
+        endtry
+        if !path.isDirectory
+            let path = path.GetParent()
+        endif
     endif
 
     "if instructed to, then change the vim CWD to the dir the NERDTree is
@@ -1450,16 +1485,6 @@ function! s:InitNerdTree(dir)
     call s:CreateTreeWin()
     call s:RenderView()
     call s:PutCursorOnNode(t:NERDTreeRoot, 0, 0)
-endfunction
-
-"FUNCTION: s:InitNerdTreeFromMark(name) {{{2
-"initialise a new NERD tree from the path associated with the given mark name
-function! s:InitNerdTreeFromMark(name)
-    let target = s:GetMarks()[a:name]
-    if !target.isDirectory
-        let target = target.GetParent()
-    endif
-    call s:InitNerdTree(target.StrForOS(0))
 endfunction
 " Function: s:ReadMarks()   {{{2
 function! s:ReadMarks()
@@ -1899,10 +1924,7 @@ function! s:GetPath(ln)
     let wasdir = 0
     if curFile =~ '/$'
         let wasdir = 1
-    endif
-    let curFile = substitute (curFile,' -> .*',"","") " remove link to
-    if wasdir == 1
-        let curFile = substitute (curFile, '/\?$', '/', "")
+        let curFile = substitute(curFile, '/\?$', '/', "")
     endif
 
 
@@ -1911,24 +1933,19 @@ function! s:GetPath(ln)
     while lnum > 0
         let lnum = lnum - 1
         let curLine = getline(lnum)
+        let curLineStripped = s:StripMarkupFromLine(curLine, 1)
 
         "have we reached the top of the tree?
         if curLine =~ '^/'
-            let sd = substitute (curLine, '[ ]*$', "", "")
-            let dir = sd . dir
+            let dir = substitute (curLine, ' *$', "", "") . dir
             break
         endif
-        if curLine =~ '/$'
+        if curLineStripped =~ '/$'
             let lpindent = match(curLine,s:tree_markup_reg_neg) / s:tree_wid
             if lpindent < indent
                 let indent = indent - 1
-                let sd = substitute (curLine, '^' . s:tree_markup_reg . '*',"","")
-                let sd = substitute (sd, ' -> .*', '',"")
 
-                " remove leading escape
-                let sd = substitute (sd,'^\\', "", "")
-
-                let dir = sd . dir
+                let dir = substitute (curLineStripped,'^\\', "", "") . dir
                 continue
             endif
         endif
@@ -2395,7 +2412,7 @@ function! s:ShouldSplitToOpen(winnumber)
     return winnr("$") == 1 || (modified && s:BufInWindows(winbufnr(a:winnumber)) < 2)
 endfunction
 
-"FUNCTION: s:StripMarkupFromLine(line){{{2
+"FUNCTION: s:StripMarkupFromLine(line, removeLeadingSpaces){{{2
 "returns the given line with all the tree parts stripped off
 "
 "Args:
@@ -2528,7 +2545,7 @@ function! s:BindMappings()
     command! -buffer -nargs=1 Mark :call <SID>MarkNode('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=1 RecallMark :call <SID>RecallMark('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=1 OpenMark :call <SID>OpenMark('<args>')
-    command! -buffer -complete=customlist,s:FindMarks -nargs=+ ClearMarks call <SID>ClearMarks('<args>')
+    command! -buffer -complete=customlist,s:FindMarks -nargs=* ClearMarks call <SID>ClearMarks('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=+ MarkToRoot call <SID>MarkToRoot('<args>')
     command! -buffer -nargs=0 ClearAllMarks call <SID>ClearAllMarks() <bar> call <SID>RenderView()
     command! -buffer -nargs=0 ReadMarks call <SID>ReadMarks() <bar> call <SID>RenderView()
@@ -2596,11 +2613,27 @@ endfunction
 " FUNCTION: s:ClearMarks(marks) {{{2
 function! s:ClearMarks(marks)
     let marks = s:GetMarks()
-    for name in split(a:marks, ' ')
-        if count(keys(marks), name)
-            call remove(marks, name)
+    if a:marks == ''
+        let currentNode = s:GetSelectedNode()
+        if currentNode != {}
+            call currentNode.ClearMarks()
         endif
-    endfor
+    else
+        for name in split(a:marks, ' ')
+            if count(keys(marks), name)
+                let node = {}
+                try
+                    let node = s:GetNodeForMark(name, 1)
+                catch /NERDTree/
+                endtry
+                call remove(marks, name)
+                if !empty(node)
+                    call node.path.CacheMarkNames()
+                endif
+            endif
+        endfor
+    endif
+    call s:WriteMarks()
     call s:RenderView()
 endfunction
 " FUNCTION: s:CloseChildren() {{{2
@@ -2881,6 +2914,7 @@ function! s:MarkNode(name)
     if currentNode != {}
         let marks = s:GetMarks()
         let marks[a:name] = currentNode.path
+        call currentNode.path.CacheMarkNames()
         call s:WriteMarks()
         call s:RenderView()
     else
