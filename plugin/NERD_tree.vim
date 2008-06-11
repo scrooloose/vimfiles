@@ -141,7 +141,7 @@ endif
 command! -n=? -complete=dir NERDTree :call s:InitNerdTree('<args>')
 command! -n=? -complete=dir NERDTreeToggle :call s:Toggle('<args>')
 command! -n=0 NERDTreeClose :call s:CloseTreeIfOpen()
-command! -n=1 -complete=customlist,s:FindMarks NERDTreeFromMark call s:InitNerdTreeFromMark('<args>')
+command! -n=1 -complete=customlist,s:FindMarks NERDTreeFromMark call s:InitNerdTree('<args>')
 " SECTION: Auto commands {{{1
 "============================================================
 "Save the cursor position whenever we close the nerd tree
@@ -1775,6 +1775,14 @@ function! s:DumpHelp()
         let @h=@h."\" Other mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapQuit .": Close the NERDTree window\n"
         let @h=@h."\" ". g:NERDTreeMapHelp .": toggle help\n"
+        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\" Mark commands~\n"
+        let @h=@h."\" :Mark <name>\n"
+        let @h=@h."\" :MarkToRoot <mark>\n"
+        let @h=@h."\" :RevealMark <mark>\n"
+        let @h=@h."\" :OpenMark <mark>\n"
+        let @h=@h."\" :ClearMarks [<marks>]\n"
+        let @h=@h."\" :ClearAllMarks\n"
     else
         let @h="\" Press ". g:NERDTreeMapHelp ." for help\n"
     endif
@@ -1811,7 +1819,7 @@ function! s:EchoError(msg)
     echohl normal
 endfunction
 " FUNCTION: s:FindMarks(A,L,P) {{{2
-" completion function for the RecallMark command
+" completion function for the mark commands
 function! s:FindMarks(A,L,P)
     let keys = keys(s:GetMarks())
     return filter(keys, 'v:val =~ "^' . a:A . '"')
@@ -2344,7 +2352,8 @@ function! s:SetupSyntaxHighlighting()
     syn match treeHelpTitle #" .*\~#hs=s+2,he=e-1 contains=treeFlag
     syn match treeToggleOn #".*(on)#hs=e-2,he=e-1 contains=treeHelpKey
     syn match treeToggleOff #".*(off)#hs=e-3,he=e-1 contains=treeHelpKey
-    syn match treeHelp  #^" .*# contains=treeHelpKey,treeHelpTitle,treeFlag,treeToggleOff,treeToggleOn
+    syn match treeHelpCommand #" :.\{-}\>#hs=s+3
+    syn match treeHelp  #^" .*# contains=treeHelpKey,treeHelpTitle,treeFlag,treeToggleOff,treeToggleOn,treeHelpCommand
 
     "highlighting for sym links
     syn match treeLink #[^-| `].* -> # contains=treeMark
@@ -2377,6 +2386,7 @@ function! s:SetupSyntaxHighlighting()
 
     hi def link treeHelp String
     hi def link treeHelpKey Identifier
+    hi def link treeHelpCommand Identifier
     hi def link treeHelpTitle Macro
     hi def link treeToggleOn Question
     hi def link treeToggleOff WarningMsg
@@ -2543,7 +2553,7 @@ function! s:BindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenExpl ." :call <SID>OpenExplorer()<cr>"
 
     command! -buffer -nargs=1 Mark :call <SID>MarkNode('<args>')
-    command! -buffer -complete=customlist,s:FindMarks -nargs=1 RecallMark :call <SID>RecallMark('<args>')
+    command! -buffer -complete=customlist,s:FindMarks -nargs=1 RevealMark :call <SID>RevealMark('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=1 OpenMark :call <SID>OpenMark('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=* ClearMarks call <SID>ClearMarks('<args>')
     command! -buffer -complete=customlist,s:FindMarks -nargs=+ MarkToRoot call <SID>MarkToRoot('<args>')
@@ -3031,9 +3041,9 @@ function! s:PreviewNode(openNewWin)
     call s:PutCursorInTreeWin()
 endfunction
 
-" FUNCTION: s:RecallMark(name) {{{2
+" FUNCTION: s:RevealMark(name) {{{2
 " put the cursor on the node associate with the given name
-function! s:RecallMark(name)
+function! s:RevealMark(name)
     try
         let targetNode = s:GetNodeForMark(a:name, 0)
         call s:PutCursorOnNode(targetNode, 0, 1)
