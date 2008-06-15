@@ -1,7 +1,7 @@
 " vim global plugin that provides a nice tree explorer
 " Last Change:  17 May 2008
 " Maintainer:   Martin Grenfell <martin_grenfell at msn dot com>
-let s:NERD_tree_version = '2.9.0'
+let s:NERD_tree_version = '2.10.0rc1'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -1467,9 +1467,9 @@ function! s:InitNerdTree(name)
             call s:Echo("No bookmark or directory found for: " . a:name)
             return
         endtry
-        if !path.isDirectory
-            let path = path.GetParent()
-        endif
+    endif
+    if !path.isDirectory
+        let path = path.GetParent()
     endif
 
     "if instructed to, then change the vim CWD to the dir the NERDTree is
@@ -2064,6 +2064,18 @@ function! s:OpenDirNodeSplit(treenode)
     endif
 endfunction
 
+" FUNCTION: s:OpenExplorerFor(treenode) {{{2
+" opens a netrw window for the given dir treenode
+function! s:OpenExplorerFor(treenode)
+    let oldwin = winnr()
+    wincmd p
+    if oldwin == winnr() || (&modified && s:BufInWindows(winbufnr(winnr())) < 2)
+        wincmd p
+        call s:OpenDirNodeSplit(a:treenode)
+    else
+        exec ("silent edit " . a:treenode.path.StrForEditCmd())
+    endif
+endfunction
 "FUNCTION: s:OpenFileNode(treenode) {{{2
 "Open the file represented by the given node in the current window, splitting
 "the window if needed
@@ -2972,7 +2984,9 @@ function! s:OpenBookmark(name)
         let bookmarks = s:GetBookmarks()
         let targetNode = s:oTreeFileNode.New(bookmarks[a:name])
     endtry
-    if !targetNode.path.isDirectory
+    if targetNode.path.isDirectory
+        call s:OpenExplorerFor(targetNode)
+    else
         call s:OpenFileNode(targetNode)
     endif
 endfunction
@@ -2992,14 +3006,7 @@ endfunction
 function! s:OpenExplorer()
     let treenode = s:GetSelectedDir()
     if treenode != {}
-        let oldwin = winnr()
-        wincmd p
-        if oldwin == winnr() || (&modified && s:BufInWindows(winbufnr(winnr())) < 2)
-            wincmd p
-            call s:OpenDirNodeSplit(treenode)
-        else
-            exec ("silent edit " . treenode.path.StrForEditCmd())
-        endif
+        call s:OpenExplorerFor(treenode)
     else
         call s:Echo("select a node first")
     endif
