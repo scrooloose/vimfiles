@@ -1,7 +1,16 @@
-" vim global plugin that provides a nice tree explorer
-" Last Change:  17 May 2008
-" Maintainer:   Martin Grenfell <martin_grenfell at msn dot com>
-let s:NERD_tree_version = '2.10.0rc1'
+" ============================================================================
+" File:        NERD_tree.vim
+" Description: vim global plugin that provides a nice tree explorer
+" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+" Last Change: 17 June, 2008
+" License:     This program is free software. It comes without any warranty,
+"              to the extent permitted by applicable law. You can redistribute
+"              it and/or modify it under the terms of the Do What The Fuck You
+"              Want To Public License, Version 2, as published by Sam Hocevar.
+"              See http://sam.zoy.org/wtfpl/COPYING for more details.
+"
+" ============================================================================
+let s:NERD_tree_version = '2.10.0'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -1508,11 +1517,11 @@ function! s:ReadBookmarks()
             try
                 let bookmarks[key] = s:oPath.New(path)
             catch /NERDTree.Path.InvalidArguments/
-                let invalidBookmarksFound = 1
+                let invalidBookmarksFound += 1
             endtry
         endfor
         if invalidBookmarksFound
-            call s:Echo("Invalid bookmarks were read and discarded")
+            call s:Echo(invalidBookmarksFound . " invalid bookmarks were read and discarded")
             call s:WriteBookmarks()
         endif
     endif
@@ -1817,7 +1826,7 @@ endfunction
 "msg: the message to echo
 function! s:Echo(msg)
     redraw
-    echo "NERDTree: " . a:msg
+    echomsg "NERDTree: " . a:msg
 endfunction
 "FUNCTION: s:EchoWarning {{{2
 "Wrapper for s:Echo, sets the message type to warningmsg for this message
@@ -2095,7 +2104,12 @@ endfunction
 function! s:OpenFileNode(treenode)
     call s:PutCursorInTreeWin()
 
-    if s:ShouldSplitToOpen(winnr("#"))
+    "if the file is already open in this tab then just stick the cursor in it
+    let winnr = bufwinnr(a:treenode.path.StrForOS(0))
+    if winnr != -1
+        exec winnr . "wincmd w"
+
+    elseif s:ShouldSplitToOpen(winnr("#"))
         call s:OpenFileNodeSplit(a:treenode)
     else
         try
@@ -2441,16 +2455,28 @@ endfunction
 "Args:
 "winnumber: the number of the window in question
 function! s:ShouldSplitToOpen(winnumber)
-    if &hidden
-        return 0
+    "gotta split if theres only one window (i.e. the NERD tree)
+    if winnr("$") == 1
+        return 1
     endif
-    let oldwinnr = winnr()
 
+    let oldwinnr = winnr()
     exec a:winnumber . "wincmd p"
+    let specialWindow = getbufvar("%", '&buftype') != '' || getwinvar('%', '&previewwindow')
     let modified = &modified
     exec oldwinnr . "wincmd p"
 
-    return winnr("$") == 1 || (modified && s:BufInWindows(winbufnr(a:winnumber)) < 2)
+    "if its a special window e.g. quickfix or another explorer plugin then we
+    "have to split
+    if specialWindow
+        return 1
+    endif
+
+    if &hidden
+        return 0
+    endif
+
+    return modified && s:BufInWindows(winbufnr(a:winnumber)) < 2
 endfunction
 
 "FUNCTION: s:StripMarkupFromLine(line, removeLeadingSpaces){{{2
