@@ -2,7 +2,7 @@
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 17 June, 2008
+" Last Change: 23 June, 2008
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '2.10.0'
+let s:NERD_tree_version = '2.11.0'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -123,20 +123,10 @@ call s:InitVariable("g:NERDTreeMapUpdirKeepOpen", "U")
 let s:escape_chars =  " \\`\|\"#%&,?()\*^<>"
 let s:NERDTreeWinName = '_NERD_tree_'
 
-"init all the nerd tree markup
-let s:tree_vert = '|'
-let s:tree_vert_last = '`'
 let s:tree_wid = 2
-let s:tree_wid_str = '  '
-let s:tree_wid_strM1 = ' '
-let s:tree_dir_open = '~'
-let s:tree_dir_closed = '+'
-let s:tree_file = '-'
 let s:tree_markup_reg = '[ \-+~`|]'
 let s:tree_markup_reg_neg = '[^ \-+~`|]'
 let s:tree_up_dir_line = '.. (up a dir)'
-let s:tree_RO_str = ' [RO]'
-let s:tree_RO_str_reg = ' \[RO\]'
 
 let s:os_slash = '/'
 if s:running_windows
@@ -1010,7 +1000,7 @@ function! s:oPath.Delete() dict
             throw "NERDTree.Path.Deletion Exception: Could not delete directory: '" . self.StrForOS(0) . "'"
         endif
     else
-        let success = delete(self.StrForOS(!s:running_windows))
+        let success = delete(self.StrForOS(0))
         if success != 0
             throw "NERDTree.Path.Deletion Exception: Could not delete file: '" . self.Str(0) . "'"
         endif
@@ -1169,6 +1159,11 @@ function! s:oPath.ReadInfoFromDisk(fullpath) dict
         throw "NERDTree.Path.InvalidArguments Exception: Invalid path = " . a:fullpath
     endif
 
+    let self.isExecutable = 0
+    if !self.isDirectory
+        let self.isExecutable = getfperm(a:fullpath) =~ 'x'
+    endif
+
     "grab the last part of the path (minus the trailing slash)
     let lastPathComponent = self.GetLastPathComponent(0)
 
@@ -1207,7 +1202,7 @@ function! s:oPath.Rename(newPath) dict
         throw "NERDTree.Path.InvalidArguments exception. Invalid newPath for renaming = ". a:newPath
     endif
 
-    let success =  rename(self.StrForOS(!s:running_windows), a:newPath)
+    let success =  rename(self.StrForOS(0), a:newPath)
     if success != 0
         throw "NERDTree.Path.Rename Exception: Could not rename: '" . self.StrForOS(0) . "'" . 'to:' . a:newPath
     endif
@@ -1265,6 +1260,10 @@ endfunction
 function! s:oPath.StrDisplay() dict
     let toReturn = self.GetLastPathComponent(1)
 
+    if self.isExecutable
+        let toReturn = toReturn . '*'
+    endif
+
     let bookmarks = self.BookmarkNames()
     if !empty(bookmarks)
         let toReturn .= ' {' . join(bookmarks, ',') . '}'
@@ -1275,7 +1274,7 @@ function! s:oPath.StrDisplay() dict
     endif
 
     if self.isReadOnly
-        let toReturn .=  s:tree_RO_str
+        let toReturn .=  ' [RO]'
     endif
 
     return toReturn
@@ -1687,9 +1686,9 @@ function! s:DrawTree(curNode, depth, drawText, vertMap, isLastChild)
         if a:depth > 1
             for j in a:vertMap[0:-2]
                 if j == 1
-                    let treeParts = treeParts . s:tree_vert . s:tree_wid_strM1
+                    let treeParts = treeParts . '| '
                 else
-                    let treeParts = treeParts . s:tree_wid_str
+                    let treeParts = treeParts . '  '
                 endif
             endfor
         endif
@@ -1697,9 +1696,9 @@ function! s:DrawTree(curNode, depth, drawText, vertMap, isLastChild)
         "get the last vertical tree part for this line which will be different
         "if this node is the last child of its parent
         if a:isLastChild
-            let treeParts = treeParts . s:tree_vert_last
+            let treeParts = treeParts . '`'
         else
-            let treeParts = treeParts . s:tree_vert
+            let treeParts = treeParts . '|'
         endif
 
 
@@ -1707,12 +1706,12 @@ function! s:DrawTree(curNode, depth, drawText, vertMap, isLastChild)
         "name itself
         if a:curNode.path.isDirectory
             if a:curNode.isOpen
-                let treeParts = treeParts . s:tree_dir_open
+                let treeParts = treeParts . '~'
             else
-                let treeParts = treeParts . s:tree_dir_closed
+                let treeParts = treeParts . '+'
             endif
         else
-            let treeParts = treeParts . s:tree_file
+            let treeParts = treeParts . '-'
         endif
         let line = treeParts . a:curNode.StrDisplay()
 
@@ -1751,7 +1750,7 @@ function! s:DumpHelp()
         let @h=@h."\" File node mappings~\n"
         let @h=@h."\" ". (g:NERDTreeMouseMode == 3 ? "single" : "double") ."-click,\n"
         let @h=@h."\" ". g:NERDTreeMapActivateNode .": open in prev window\n"
-        let @h=@h."\" ". g:NERDTreeMapPreview .": preview \n"
+        let @h=@h."\" ". g:NERDTreeMapPreview .": preview\n"
         let @h=@h."\" ". g:NERDTreeMapOpenInTab.": open in new tab\n"
         let @h=@h."\" ". g:NERDTreeMapOpenInTabSilent .": open in new tab silently\n"
         let @h=@h."\" middle-click,\n"
@@ -1759,7 +1758,7 @@ function! s:DumpHelp()
         let @h=@h."\" ". g:NERDTreeMapPreviewSplit .": preview split\n"
         let @h=@h."\" ". g:NERDTreeMapExecute.": Execute file\n"
 
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Directory node mappings~\n"
         let @h=@h."\" ". (g:NERDTreeMouseMode == 1 ? "double" : "single") ."-click,\n"
         let @h=@h."\" ". g:NERDTreeMapActivateNode .": open & close node\n"
@@ -1769,9 +1768,9 @@ function! s:DumpHelp()
         let @h=@h."\"    current node recursively\n"
         let @h=@h."\" middle-click,\n"
         let @h=@h."\" ". g:NERDTreeMapOpenExpl.": Open netrw for selected\n"
-        let @h=@h."\"    node \n"
+        let @h=@h."\"    node\n"
 
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Tree navigation mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapJumpRoot .": go to root\n"
         let @h=@h."\" ". g:NERDTreeMapJumpParent .": go to parent\n"
@@ -1780,7 +1779,7 @@ function! s:DumpHelp()
         let @h=@h."\" ". g:NERDTreeMapJumpNextSibling .": go to next sibling\n"
         let @h=@h."\" ". g:NERDTreeMapJumpPrevSibling .": go to prev sibling\n"
 
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Filesystem mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapChangeRoot .": change tree root to the\n"
         let @h=@h."\"    selected dir\n"
@@ -1793,17 +1792,17 @@ function! s:DumpHelp()
         let @h=@h."\" ". g:NERDTreeMapChdir .":change the CWD to the\n"
         let @h=@h."\"    selected dir\n"
 
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Tree filtering mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapToggleHidden .": hidden files (" . (g:NERDTreeShowHidden ? "on" : "off") . ")\n"
         let @h=@h."\" ". g:NERDTreeMapToggleFilters .": file filters (" . (t:NERDTreeIgnoreEnabled ? "on" : "off") . ")\n"
         let @h=@h."\" ". g:NERDTreeMapToggleFiles .": files (" . (g:NERDTreeShowFiles ? "on" : "off") . ")\n"
 
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Other mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapQuit .": Close the NERDTree window\n"
         let @h=@h."\" ". g:NERDTreeMapHelp .": toggle help\n"
-        let @h=@h."\" \n\" ----------------------------\n"
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Bookmark commands~\n"
         let @h=@h."\" :Bookmark <name>\n"
         let @h=@h."\" :BookmarkToRoot <name>\n"
@@ -1950,7 +1949,6 @@ function! s:GetPath(ln)
     endif
 
     "get the indent level for the file (i.e. how deep in the tree it is)
-    "let indent = match(line,'[^-| `]') / s:tree_wid
     let indent = match(line, s:tree_markup_reg_neg) / s:tree_wid
 
 
@@ -2114,7 +2112,7 @@ function! s:OpenFileNode(treenode)
     else
         try
             wincmd p
-            silent exec ("edit " . a:treenode.path.StrForEditCmd())
+            exec ("edit " . a:treenode.path.StrForEditCmd())
         catch /^Vim\%((\a\+)\)\=:E37/
             call s:PutCursorInTreeWin()
             call s:Echo("Cannot open file, it is already open and modified")
@@ -2206,17 +2204,8 @@ function! s:OpenNodeSplit(treenode)
         call s:PutCursorInTreeWin()
         throw "NERDTree.view.FileOpen exception: ". a:treenode.path.Str(0) ." is already open and modified."
     catch /^Vim\%((\a\+)\)\=:/
-        do nothing
+        "do nothing
     endtry
-
-    " resize the explorer window if it is larger than the requested size
-    exec(there)
-
-    if g:NERDTreeWinSize =~ '[0-9]\+' && winheight("") > g:NERDTreeWinSize
-        exec("silent vertical resize ".g:NERDTreeWinSize)
-    endif
-
-    wincmd p
 
     " Restore splitmode settings
     let &splitbelow=savesplitbelow
@@ -2298,7 +2287,7 @@ function! s:RenderView()
     call s:DumpHelp()
 
     "delete the blank line before the help and add one after it
-    call setline(line(".")+1, " ")
+    call setline(line(".")+1, "")
     call cursor(line(".")+1, col("."))
 
     "add the 'up a dir' line
@@ -2351,13 +2340,17 @@ endfunction
 "
 "Assumes the cursor is in the NERDTree window
 function! s:RestoreScreenState()
-    if !exists("t:NERDTreeOldTopLine") || !exists("t:NERDTreeOldPos")
+    if !exists("t:NERDTreeOldTopLine") || !exists("t:NERDTreeOldPos") || !exists("t:NERDTreeOldWindowSize")
         return
     endif
+    exec("silent ". (g:NERDTreeSplitVertical ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
 
+    let old_scrolloff=&scrolloff
+    let &scrolloff=0
     call cursor(t:NERDTreeOldTopLine, 0)
     normal! zt
     call setpos(".", t:NERDTreeOldPos)
+    let &scrolloff=old_scrolloff
 endfunction
 
 "FUNCTION: s:SaveScreenState() {{{2
@@ -2368,6 +2361,7 @@ endfunction
 function! s:SaveScreenState()
     let t:NERDTreeOldPos = getpos(".")
     let t:NERDTreeOldTopLine = line("w0")
+    let t:NERDTreeOldWindowSize = g:NERDTreeSplitVertical ? winwidth("") : winheight("")
 endfunction
 
 "FUNCTION: s:SetupSyntaxHighlighting() {{{2
@@ -2398,28 +2392,31 @@ function! s:SetupSyntaxHighlighting()
     syn match treeToggleOn #".*(on)#hs=e-2,he=e-1 contains=treeHelpKey
     syn match treeToggleOff #".*(off)#hs=e-3,he=e-1 contains=treeHelpKey
     syn match treeHelpCommand #" :.\{-}\>#hs=s+3
-    syn match treeHelp  #^" .*# contains=treeHelpKey,treeHelpTitle,treeFlag,treeToggleOff,treeToggleOn,treeHelpCommand
+    syn match treeHelp  #^".*# contains=treeHelpKey,treeHelpTitle,treeFlag,treeToggleOff,treeToggleOn,treeHelpCommand
 
-    "highlighting for sym links
-    syn match treeLink #[^-| `].* -> # contains=treeBookmark
 
     "highlighting for readonly files
-    syn match treeRO #[0-9a-zA-Z]\+.*\[RO\]# contains=treeFlag,treeBookmark
+    syn match treeRO #[\/0-9a-zA-Z]\+.*\[RO\]# contains=treeFlag,treeBookmark
 
     "highlighting for bookmarks
     syn match treeBookmark # {.*}#hs=s+1
 
+    "highlighting for sym links
+    syn match treeLink #[^-| `].* -> # contains=treeBookmark,treeOpenable,treeClosable,treeDirSlash
+
     "highlighing for directory nodes and file nodes
     syn match treeDirSlash #/#
     syn match treeDir #[^-| `].*/# contains=treeLink,treeDirSlash,treeOpenable,treeClosable
-    syn match treeFile  #|-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark
-    syn match treeFile  #`-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark
+    syn match treeExecFile  #[|`]-.*\*\($\| \)# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark
+    syn match treeFile  #|-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark,treeExecFile
+    syn match treeFile  #`-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark,treeExecFile
     syn match treeCWD #^/.*$#
 
     if g:NERDChristmasTree
         hi def link treePart Special
         hi def link treePartFile Type
-        hi def link treeFile Macro
+        hi def link treeFile Normal
+        hi def link treeExecFile Title
         hi def link treeDirSlash Identifier
         hi def link treeClosable Type
     else
@@ -2439,7 +2436,7 @@ function! s:SetupSyntaxHighlighting()
     hi def link treeDir Directory
     hi def link treeUp Directory
     hi def link treeCWD Statement
-    hi def link treeLink Title
+    hi def link treeLink Macro
     hi def link treeOpenable Title
     hi def link treeFlag ignore
     hi def link treeRO WarningMsg
@@ -2492,10 +2489,13 @@ function! s:StripMarkupFromLine(line, removeLeadingSpaces)
     let line = substitute (line,"^" . s:tree_markup_reg . "*","","")
 
     "strip off any read only flag
-    let line = substitute (line, s:tree_RO_str_reg, "","")
+    let line = substitute (line, ' \[RO\]', "","")
 
     "strip off any bookmark flags
     let line = substitute (line, ' {[^}]*}', "","")
+
+    "strip off any executable flags
+    let line = substitute (line, '*\ze\($\| \)', "","")
 
     let wasdir = 0
     if line =~ '/$'
@@ -2671,7 +2671,7 @@ function! s:CheckForActivate()
         "if they clicked a dir, check if they clicked on the + or ~ sign
         "beside it
         if currentNode.path.isDirectory
-            let reg = '^' . s:tree_markup_reg .'*[' . s:tree_dir_open . s:tree_dir_closed . ']$'
+            let reg = '^' . s:tree_markup_reg .'*[~+]$'
             if startToCur =~ reg
                 call s:ActivateNode()
                 return
@@ -2986,18 +2986,7 @@ endfunction
 function! s:JumpToSibling(forward)
     let currentNode = s:GetSelectedNode()
     if !empty(currentNode)
-
-        if !currentNode.path.isDirectory
-
-            if a:forward
-                let sibling = currentNode.parent.FindSibling(1)
-            else
-                let sibling = currentNode.parent
-            endif
-
-        else
-            let sibling = currentNode.FindSibling(a:forward)
-        endif
+        let sibling = currentNode.FindSibling(a:forward)
 
         if !empty(sibling)
             call s:PutCursorOnNode(sibling, 1, 0)

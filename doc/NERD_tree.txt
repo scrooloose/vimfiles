@@ -43,7 +43,7 @@ What is this "NERD tree"??
 The NERD tree allows you to explore your filesystem and to open files and
 directories. It presents the filesystem to you in the form of a tree which you
 manipulate with the keyboard and/or mouse. It also allows you to perform
-simple filesystem operations so you can alter the tree dynamically.
+simple filesystem operations.
 
 The following features and functionality are provided by the NERD tree:
     * Files and directories are displayed in a hierarchical tree structure
@@ -53,6 +53,7 @@ The following features and functionality are provided by the NERD tree:
         * sym-links
         * windows .lnk files
         * read-only files
+        * executable files
     * Many (customisable) mappings are provided to manipulate the tree:
         * Mappings to open/close/explore directory nodes
         * Mappings to open files in new/existing windows/tabs
@@ -66,7 +67,7 @@ The following features and functionality are provided by the NERD tree:
         * optional displaying of hidden files (. files)
         * files can be "turned off" so that only directories are displayed
     * A textual filesystem menu is provided which allows you to
-      create/delete/rename file and directory nodes as well as copy (for
+      create/delete/move file and directory nodes as well as copy (for
       supported OSs)
     * The position and size of the NERD tree window can be customised
     * The order in which the nodes in the tree are listed can be customised.
@@ -266,9 +267,8 @@ Recursively opens the selelected directory.
 
 All files and directories are cached, but if a directory would not be
 displayed due to file filters (see |NERDTreeIgnore| |NERDTree-f|) or the
-hidden file filter (see |NERDTreeShowHidden|) then it is not opened. This is
-handy, especially if you have .svn directories.
-
+hidden file filter (see |NERDTreeShowHidden|) then its contents are not
+cached. This is handy, especially if you have .svn directories.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-x*
@@ -344,8 +344,7 @@ Default key: <C-j>
 Map option: NERDTreeMapJumpNextSibling
 Applies to: files and directories.
 
-If a dir node is selected, jump to the next sibling of that node.
-If a file node is selected, jump to the next sibling of that nodes parent.
+Jump to the next sibling of the selected node.
 
 ------------------------------------------------------------------------------
                                                                 *NERDTree-c-k*
@@ -353,8 +352,7 @@ Default key: <C-k>
 Map option: NERDTreeMapJumpPrevSibling
 Applies to: files and directories.
 
-If a dir node is selected, jump to the previous sibling of that node.
-If a file node is selected, jump to the previous sibling of that nodes parent.
+Jump to the previous sibling of the selected node.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-C*
@@ -828,10 +826,7 @@ Window manager integration?
 6. The Author                                                 *NERDTreeAuthor*
 
 The author of the NERD tree is a terrible terrible monster called Martyzilla
-who gobbles up small children with milk and sugar for breakfast. He has an odd
-love/hate relationship with computers (but monsters hate everything by nature
-you know...) which can be awkward for him since he is a pro computer nerd for
-a living.
+who gobbles up small children with milk and sugar for breakfast.
 
 He can be reached at martin_grenfell at msn.com. He would love to hear from
 you, so feel free to send him suggestions and/or comments about this plugin.
@@ -840,6 +835,22 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog*
+
+2.11.0
+    - changes to the 'o' mapping when opening files:
+      - dont clobber "special" windows (eg taglist/quickfix/etc). This should
+        make the NERD tree play nicer with other explorer plugins. Thanks to
+        Yuan Jiang for the suggestion.
+      - if the file is already open in the current tab, just move the cursor
+        to that window
+    - highlight executable files, made some slight changes to other
+      highlighting
+    - if the user resizes the tree window, keep that new size. Dont reset to
+      the default during the <tab> mapping, or :NERDTreeToggle command. Only
+      reset the size if a fresh tree is started with :NERDTree.
+    - remove the "magic" functionality from the <c-j>/<c-k> mappings (it was
+      more confusing than helpful)
+    - other minor fixes
 
 2.10.0
     - added bookmarks, see :help NERDTreeBookmarkCommands for details. Thanks
@@ -1085,6 +1096,9 @@ set the NERD tree buffers filetype to 'nerdtree'
 
 Thanks to Piotr Czachur for all his suggestions and testing for the bookmarks
 feature.
+
+Thanks to Yuan Jiang for suggesting the "o" mapping shouldnt clobber "special"
+windows, like taglist.
 
 ==============================================================================
 9. License                                                   *NERDTreeLicense*
