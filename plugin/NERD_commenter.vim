@@ -1,7 +1,16 @@
-" vim global plugin that provides easy code commenting for various file types
-" Last Change:  24 May 2008
-" Maintainer:   Martin Grenfell <martin_grenfell at msn.com>
-let s:NERD_commenter_version = 2.1.14
+" ============================================================================
+" File:        NERD_commenter.vim
+" Description: vim global plugin that provides easy code commenting
+" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+" Last Change: 22 June, 2008
+" License:     This program is free software. It comes without any warranty,
+"              to the extent permitted by applicable law. You can redistribute
+"              it and/or modify it under the terms of the Do What The Fuck You
+"              Want To Public License, Version 2, as published by Sam Hocevar.
+"              See http://sam.zoy.org/wtfpl/COPYING for more details.
+"
+" ============================================================================
+let s:NERD_commenter_version = 2.1.15
 
 " Section: script init stuff {{{1
 if exists("loaded_nerd_comments")
@@ -368,6 +377,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#','')
     elseif a:filetype == "groovy"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
+    elseif a:filetype == "group"
+        call s:MapDelimiters('','')
     elseif a:filetype == "grub"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "gtkrc"
