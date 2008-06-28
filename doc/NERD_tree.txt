@@ -523,6 +523,8 @@ NERD tree. These options should be set in your vimrc.
 |NERDTreeMouseMode|             Tells the NERD tree how to handle mouse
                                 clicks.
 
+|NERDTreeQuitOnOpen|            Closes the tree window after opening a file.
+
 |NERDTreeShowFiles|             Tells the NERD tree whether to display files
                                 in the tree on startup.
 
@@ -694,6 +696,15 @@ then (to single click activate it) you must click somewhere in
 'application.rb'.
 
 ------------------------------------------------------------------------------
+                                                          *NERDTreeQuitOnOpen*
+
+Values: 0 or 1.
+Default: 0
+
+If set to 1, the NERD tree window will close after opening a file with the
+|NERDTree-o| or |NERDTree-tab| mappings.
+
+------------------------------------------------------------------------------
                                                            *NERDTreeShowFiles*
 Values: 0 or 1.
 Default: 1.
@@ -835,6 +846,12 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog*
+
+2.12.0
+    - applied a patch from Matan Nassau to add the NERDTreeQuitOnOpen option
+      which closes the tree window after opening a file.
+    - fix to window resizing when opening a file when NERD tree is the only
+      window open
 
 2.11.0
     - changes to the 'o' mapping when opening files:
@@ -1100,6 +1117,7 @@ feature.
 Thanks to Yuan Jiang for suggesting the "o" mapping shouldnt clobber "special"
 windows, like taglist.
 
+Thanks to Matan Nassau for the patch to add the NERDTreeQuitOnOpen option.
 ==============================================================================
 9. License                                                   *NERDTreeLicense*
 
