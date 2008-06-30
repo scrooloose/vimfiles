@@ -73,8 +73,7 @@ endif
 "once here
 let s:NERDTreeSortStarIndex = index(g:NERDTreeSortOrder, '*')
 
-call s:InitVariable("g:NERDTreeSplitVertical", 1)
-call s:InitVariable("g:NERDTreeWinPos", 1)
+call s:InitVariable("g:NERDTreeWinPos", "left")
 call s:InitVariable("g:NERDTreeWinSize", 31)
 
 let s:running_windows = has("win16") || has("win32") || has("win64")
@@ -167,6 +166,7 @@ function! s:oBookmark.AddBookmark(name, path) dict
         endif
     endfor
     call add(s:oBookmark.Bookmarks(), s:oBookmark.New(a:name, a:path))
+    call s:oBookmark.Sort()
 endfunction
 " Function: oBookmark.Bookmarks()   {{{3
 " Class method to get all bookmarks. Lazily initializes the bookmarks global
@@ -223,6 +223,11 @@ function! s:oBookmark.CacheBookmarks() dict
         endif
     endif
 endfunction
+" FUNCTION: oBookmark.CompareTo(otherbookmark) {{{3
+" Compare these two bookmarks for sorting purposes
+function! s:oBookmark.CompareTo(otherbookmark) dict
+    return a:otherbookmark.name < self.name
+endfunction
 " FUNCTION: oBookmark.ClearAll() {{{3
 " Class method to delete all bookmarks.
 function! s:oBookmark.ClearAll() dict
@@ -238,7 +243,7 @@ function! s:oBookmark.Delete() dict
     let node = {}
     try
         let node = self.GetNode(1)
-    catch /NERDTree.BookmarkNodeNotFound/
+    catch /NERDTree.BookmarkNotFound/
     endtry
     call remove(s:oBookmark.Bookmarks(), index(s:oBookmark.Bookmarks(), self))
     if !empty(node)
@@ -255,7 +260,7 @@ function! s:oBookmark.GetNode(searchFromAbsoluteRoot) dict
     let searchRoot = a:searchFromAbsoluteRoot ? s:AbsoluteTreeRoot() : t:NERDTreeRoot
     let targetNode = searchRoot.FindNode(self.path)
     if empty(targetNode)
-        throw "NERDTree.BookmarkNodeNotFound no node was found for bookmark: " . self.name
+        throw "NERDTree.BookmarkNotFound no node was found for bookmark: " . self.name
     endif
     return targetNode
 endfunction
@@ -281,10 +286,20 @@ function! s:oBookmark.New(name, path) dict
     let newBookmark.path = a:path
     return newBookmark
 endfunction
+" Function: oBookmark.Sort()   {{{3
+" Class method that sorts all bookmarks
+function! s:oBookmark.Sort() dict
+    let CompareFunc = function("s:CompareBookmarks")
+    call sort(s:oBookmark.Bookmarks(), CompareFunc)
+endfunction
 " Function: oBookmark.Str()   {{{3
 " Get the string that should be rendered in the view for this bookmark
 function! s:oBookmark.Str() dict
-    let pathStrMaxLen = 26 - len(self.name)
+    let pathStrMaxLen = winwidth(s:GetTreeWinNum()) - 5 - len(self.name)
+    if &nu
+        let pathStrMaxLen = pathStrMaxLen - &numberwidth
+    endif
+
     let pathStr = self.path.StrForOS(0)
     if len(pathStr) > pathStrMaxLen
         let pathStr = '<' . strpart(pathStr, len(pathStr) - pathStrMaxLen)
@@ -1578,6 +1593,12 @@ function! s:BufInWindows(bnum)
     return cnt
 endfunction " >>>
 
+"FUNCTION: CompareBookmarks(first, second) {{{2
+"Compares two bookmarks
+function! s:CompareBookmarks(first, second)
+    return a:first.CompareTo(a:second)
+endfunction
+
 " FUNCTION: s:CompleteBookmarks(A,L,P) {{{2
 " completion function for the bookmark commands
 function! s:CompleteBookmarks(A,L,P)
@@ -1719,8 +1740,8 @@ endfunction
 "options etc
 function! s:CreateTreeWin()
     "create the nerd tree window
-    let splitLocation = g:NERDTreeWinPos ? "topleft " : "botright "
-    let splitMode = g:NERDTreeSplitVertical ? "vertical " : ""
+    let splitLocation = (g:NERDTreeWinPos == "top" || g:NERDTreeWinPos == "left") ? "topleft " : "botright "
+    let splitMode = s:ShouldSplitVertically() ? "vertical " : ""
     let splitSize = g:NERDTreeWinSize
     let t:NERDTreeWinName = localtime() . s:NERDTreeWinName
     let cmd = splitLocation . splitMode . splitSize . ' new ' . t:NERDTreeWinName
@@ -1864,6 +1885,13 @@ function! s:DumpHelp()
         let @h=@h."\" middle-click,\n"
         let @h=@h."\" ". g:NERDTreeMapOpenExpl.": Open netrw for selected\n"
         let @h=@h."\"    node\n"
+
+        let @h=@h."\"\n\" ----------------------------\n"
+        let @h=@h."\" Bookmark table mappings~\n"
+        let @h=@h."\" double-click,\n"
+        let @h=@h."\" ". g:NERDTreeMapActivateNode .": open bookmark\n"
+        let @h=@h."\" ". g:NERDTreeMapOpenInTab.": open in new tab\n"
+        let @h=@h."\" ". g:NERDTreeMapOpenInTabSilent .": open in new tab silently\n"
 
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Tree navigation mappings~\n"
@@ -2257,16 +2285,16 @@ function! s:OpenNodeSplit(treenode)
     " 'right' and 'below' will be set to the settings needed for
     " splitbelow and splitright IF the explorer is the only window.
     "
-    if g:NERDTreeSplitVertical == 1
-        let there= g:NERDTreeWinPos ? "wincmd h" : "wincmd l"
-        let back= g:NERDTreeWinPos ? "wincmd l" : "wincmd h"
-        let right=g:NERDTreeWinPos ? 1 : 0
+    if s:ShouldSplitVertically()
+        let there= g:NERDTreeWinPos == "left" ? "wincmd h" : "wincmd l"
+        let back = g:NERDTreeWinPos == "left" ? "wincmd l" : "wincmd h"
+        let right= g:NERDTreeWinPos == "left"
         let below=0
     else
-        let there= g:NERDTreeWinPos ? "wincmd k" : "wincmd j"
-        let back= g:NERDTreeWinPos ? "wincmd j" : "wincmd k"
+        let there= g:NERDTreeWinPos == "top" ? "wincmd k" : "wincmd j"
+        let back = g:NERDTreeWinPos == "top" ? "wincmd j" : "wincmd k"
+        let below= g:NERDTreeWinPos == "top"
         let right=0
-        let below=g:NERDTreeWinPos ? 1 : 0
     endif
 
     " Attempt to go to adjacent window
@@ -2286,9 +2314,11 @@ function! s:OpenNodeSplit(treenode)
 
     " Create a variable to use if splitting vertically
     let splitMode = ""
-    if (onlyOneWin && g:NERDTreeSplitVertical) || (!onlyOneWin && !g:NERDTreeSplitVertical)
+    if (onlyOneWin && s:ShouldSplitVertically()) || (!onlyOneWin && !s:ShouldSplitVertically())
         let splitMode = "vertical"
     endif
+
+    echomsg splitMode
 
     " Open the new window
     try
@@ -2462,7 +2492,7 @@ function! s:RestoreScreenState()
     if !exists("t:NERDTreeOldTopLine") || !exists("t:NERDTreeOldPos") || !exists("t:NERDTreeOldWindowSize")
         return
     endif
-    exec("silent ". (g:NERDTreeSplitVertical ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
+    exec("silent ". (s:ShouldSplitVertically() ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
 
     let old_scrolloff=&scrolloff
     let &scrolloff=0
@@ -2480,7 +2510,7 @@ endfunction
 function! s:SaveScreenState()
     let t:NERDTreeOldPos = getpos(".")
     let t:NERDTreeOldTopLine = line("w0")
-    let t:NERDTreeOldWindowSize = g:NERDTreeSplitVertical ? winwidth("") : winheight("")
+    let t:NERDTreeOldWindowSize = s:ShouldSplitVertically() ? winwidth("") : winheight("")
 endfunction
 
 "FUNCTION: s:SetupSyntaxHighlighting() {{{2
@@ -2533,7 +2563,7 @@ function! s:SetupSyntaxHighlighting()
     "highlighting for the bookmarks display
     syn match treeBookmarksLeader #^>#
     syn match treeBookmarksHeader #^>-\+Bookmarks-\+# contains=treeBookmarksLeader
-    syn match treeBookmarkName #^>[a-zA-Z_]\{-} #he=e-1 contains=treeBookmarksLeader
+    syn match treeBookmarkName #^>[a-zA-Z1-9_]\{-} #he=e-1 contains=treeBookmarksLeader
     syn match treeBookmark #^>.*$# contains=treeBookmarksLeader,treeBookmarkName
 
     if g:NERDChristmasTree
@@ -2605,6 +2635,11 @@ function! s:ShouldSplitToOpen(winnumber)
     return modified && s:BufInWindows(winbufnr(a:winnumber)) < 2
 endfunction
 
+" Function: s:ShouldSplitVertically()   {{{2
+" Returns 1 if g:NERDTreeWinPos is 'left' or 'right'
+function! s:ShouldSplitVertically()
+    return g:NERDTreeWinPos == 'left' || g:NERDTreeWinPos == 'right'
+endfunction
 "FUNCTION: s:StripMarkupFromLine(line, removeLeadingSpaces){{{2
 "returns the given line with all the tree parts stripped off
 "
@@ -2744,8 +2779,8 @@ function! s:BindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpLastChild ." :call <SID>JumpToLastChild()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpRoot ." :call <SID>JumpToRoot()<cr>"
 
-    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTab ." :call <SID>OpenNodeNewTab(0)<cr>"
-    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTabSilent ." :call <SID>OpenNodeNewTab(1)<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTab ." :call <SID>OpenInNewTab(0)<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTabSilent ." :call <SID>OpenInNewTab(1)<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenExpl ." :call <SID>OpenExplorer()<cr>"
 
@@ -2775,7 +2810,7 @@ endfunction
 function! s:BookmarkToRoot(name)
     try
         let targetNode = s:oBookmark.GetNodeForName(a:name, 1)
-    catch /NERDTree.BookmarkNodeNotFound/
+    catch /NERDTree.BookmarkNotFound/
         let targetNode = s:oTreeFileNode.New(s:oBookmark.BookmarkFor(a:name).path)
     endtry
     call targetNode.MakeRoot()
@@ -3154,26 +3189,34 @@ function! s:OpenExplorer()
     endif
 endfunction
 
-" FUNCTION: s:OpenNodeNewTab(stayCurrentTab) {{{2
-" Opens the currently selected file from the explorer in a
-" new tab
-"
+" FUNCTION: s:OpenInNewTab(stayCurrentTab) {{{2
+" Opens the selected node or bookmark in a new tab
 " Args:
 " stayCurrentTab: if 1 then vim will stay in the current tab, if 0 then vim
 " will go to the tab where the new file is opened
-function! s:OpenNodeNewTab(stayCurrentTab)
+function! s:OpenInNewTab(stayCurrentTab)
+    let currentTab = tabpagenr()
+
     let treenode = s:GetSelectedNode()
     if treenode != {}
-        let curTabNr = tabpagenr()
         exec "tabedit " . treenode.path.StrForEditCmd()
         if a:stayCurrentTab
-            exec "tabnext " . curTabNr
+            exec "tabnext " . currentTab
         endif
     else
-        call s:Echo("select a node first")
+        let bookmark = s:GetSelectedBookmark()
+        if bookmark != {}
+            if bookmark.path.isDirectory
+                exec "tabnew +NERDTreeFromBookmark\\ " . bookmark.name
+            else
+                exec "tabedit " . bookmark.path.StrForEditCmd()
+            endif
+            if a:stayCurrentTab
+                exec "tabnext " . currentTab
+            endif
+        endif
     endif
 endfunction
-
 
 " FUNCTION: s:OpenNodeRecursively() {{{2
 function! s:OpenNodeRecursively()
