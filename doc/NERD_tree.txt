@@ -22,7 +22,9 @@ CONTENTS                                                   *NERDTree-contents*
     1.Intro...................................|NERDTree|
     2.Functionality provided..................|NERDTreeFunctionality|
         2.1 Global commands...................|NERDTreeGlobalCommands|
-        2.2 Bookmark commands.................|NERDTreeBookmarkCommands|
+        2.2 Bookmarks.........................|NERDTreeBookmarks|
+            2.2.1 The bookmark table..........|NERDTreeBookmarkTable|
+            2.2.2 Bookmark commands...........|NERDTreeBookmarkCommands|
         2.3 NERD tree mappings................|NERDTreeMappings|
         2.4 The filesystem menu...............|NERDTreeFilesysMenu|
     3.Options.................................|NERDTreeOptions|
@@ -110,11 +112,21 @@ The following features and functionality are provided by the NERD tree:
     Close the NERD tree in this tab.
 
 ------------------------------------------------------------------------------
-2.2. Bookmark Commands                              *NERDTreeBookmarkCommands*
+2.2. Bookmarks                                             *NERDTreeBookmarks*
 
 Bookmarks in the NERD tree are a way to tag files or directories of interest.
 For example, you could use bookmarks to tag all of your project directories.
-See also |:NERDTree| and |:NERDTreeFromBookmark|.
+
+------------------------------------------------------------------------------
+2.2.1. The Bookmark Table                              *NERDTreeBookmarkTable*
+
+If the bookmark table is active (see |NERDTree-B| and
+|NERDTreeShowBookmarks|), it will be rendered above the tree. You can double
+click bookmarks or use the |NERDTree-o| mapping to activate them. See also,
+|NERDTree-t| and |NERDTree-T|
+
+------------------------------------------------------------------------------
+2.2.2. Bookmark commands                            *NERDTreeBookmarkCommands*
 
 Note that the following commands are only available in the NERD tree buffer.
 
@@ -147,15 +159,17 @@ Note that the following commands are only available in the NERD tree buffer.
 :ClearAllBookmarks
     Remove all bookmarks.
 
+See also |:NERDTree| and |:NERDTreeFromBookmark|.
+
 ------------------------------------------------------------------------------
 2.3. NERD tree Mappings                                     *NERDTreeMappings*
 
 Default  Description~                                             help-tag~
 Key~
 
-o.......Open selected file, or expand selected dir...............|NERDTree-o|
+o.......Open files, directories and bookmarks....................|NERDTree-o|
 go......Open selected file, but leave cursor in the NERDTree.....|NERDTree-go|
-t.......Open selected node in a new tab..........................|NERDTree-t|
+t.......Open selected node/bookmark in a new tab.................|NERDTree-t|
 T.......Same as 't' but keep the focus on the current tab........|NERDTree-T|
 <tab>...Open selected file in a split window.....................|NERDTree-tab|
 g<tab>..Same as <tab>, but leave the cursor on the NERDTree......|NERDTree-gtab|
@@ -187,6 +201,7 @@ cd......Change the CWD to the dir of the selected node...........|NERDTree-cd|
 H.......Toggle whether hidden files displayed....................|NERDTree-H|
 f.......Toggle whether the file filters are used.................|NERDTree-f|
 F.......Toggle whether files are displayed.......................|NERDTree-F|
+B.......Toggle whether the bookmark table is displayed...........|NERDTree-B|
 
 q.......Close the NERDTree window................................|NERDTree-q|
 ?.......Toggle the display of the quick help.....................|NERDTree-?|
@@ -197,8 +212,16 @@ Default key: o
 Map option: NERDTreeMapActivateNode
 Applies to: files and directories.
 
-If a file node is selected, it is opened in the previous window. If a
-directory is selected it is opened or closed depending on its current state.
+If a file node is selected, it is opened in the previous window.
+
+If a directory is selected it is opened or closed depending on its current
+state.
+
+If a bookmark that links to a directory is selected then that directory
+becomes the new root.
+
+If a bookmark that links to a file is selected then that file is opened in the
+previous window.
 
 ------------------------------------------------------------------------------
                                                                  *NERDTree-go*
@@ -220,6 +243,10 @@ Applies to: files and directories.
 
 Opens the selected file in a new tab. If a directory is selected, a netrw is
 opened in a new tab.
+
+If a bookmark which points to a directory is selected, open a NERD tree for
+that directory in a new tab. If the bookmark points to a file, open that file
+in a new tab.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-T*
@@ -432,6 +459,14 @@ Applies to: no restrictions.
 Toggles whether file nodes are displayed.
 
 ------------------------------------------------------------------------------
+                                                                  *NERDTree-B*
+Default key: B
+Map option: NERDTreeMapToggleBookmarks
+Applies to: no restrictions.
+
+Toggles whether the bookmarks table is displayed.
+
+------------------------------------------------------------------------------
                                                                   *NERDTree-q*
 Default key: q
 Map option: NERDTreeMapQuit
@@ -523,6 +558,11 @@ NERD tree. These options should be set in your vimrc.
 |NERDTreeMouseMode|             Tells the NERD tree how to handle mouse
                                 clicks.
 
+|NERDTreeQuitOnOpen|            Closes the tree window after opening a file.
+
+|NERDTreeShowBookmarks|         Tells the NERD tree whether to display the
+                                bookmarks table on startup.
+
 |NERDTreeShowFiles|             Tells the NERD tree whether to display files
                                 in the tree on startup.
 
@@ -535,13 +575,8 @@ NERD tree. These options should be set in your vimrc.
 |NERDTreeSortOrder|             Tell the NERD tree how to sort the nodes in
                                 the tree.
 
-|NERDTreeSplitVertical|         Tells the script whether the NERD tree should
-                                be created by splitting the window vertically
-                                or horizontally.
-
 |NERDTreeWinPos|                Tells the script where to put the NERD tree
                                 window.
-
 
 |NERDTreeWinSize|               Sets the window size when the NERD tree is
                                 opened.
@@ -694,6 +729,24 @@ then (to single click activate it) you must click somewhere in
 'application.rb'.
 
 ------------------------------------------------------------------------------
+                                                          *NERDTreeQuitOnOpen*
+
+Values: 0 or 1.
+Default: 0
+
+If set to 1, the NERD tree window will close after opening a file with the
+|NERDTree-o| or |NERDTree-tab| mappings.
+
+------------------------------------------------------------------------------
+                                                       *NERDTreeShowBookmarks*
+Values: 0 or 1.
+Default: 0.
+
+If this option is set to 1 then the bookmarks table will be displayed.
+
+This option can be toggled dynamically with the |NERDTree-B| mapping.
+
+------------------------------------------------------------------------------
                                                            *NERDTreeShowFiles*
 Values: 0 or 1.
 Default: 1.
@@ -762,29 +815,15 @@ Other examples: >
    backup files will appear last with everything else preceding them.
 
 ------------------------------------------------------------------------------
-                                                       *NERDTreeSplitVertical*
-Values: 0 or 1.
-Default: 1.
-
-This option, along with |NERDTreeWinPos|, is used to determine where the NERD
-tree window appears.
-
-If it is set to 1 then the NERD tree window will appear on either the left or
-right side of the screen (depending on the |NERDTreeWinPos| option).
-
-If it set to 0 then the NERD tree window will appear at the top of the screen.
-
-------------------------------------------------------------------------------
                                                               *NERDTreeWinPos*
-Values: 0 or 1.
-Default: 1.
+Values: "left", "right", "top" or "bottom"
+Default: "left".
 
-This option works in conjunction with the |NERDTreeSplitVertical| option to
-determine where NERD tree window is placed on the screen.
+This option is used to determine where NERD tree window is placed on the
+screen.
 
-If the option is set to 1 then the NERD tree will appear on the left or top of
-the screen (depending on the value of |NERDTreeSplitVertical|). If set to 0,
-the window will appear on the right or bottom of the screen.
+"top" or "bottom", will cause a horizontal split to be created for the tree,
+while "left" and "right" will cause a vertical split.
 
 This option is makes it possible to use two different explorer type
 plugins simultaneously. For example, you could have the taglist plugin on the
@@ -835,6 +874,16 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog*
+
+2.12.0
+    - added a UI for bookmarks. See :help NERDTreeBookmarkTable for details.
+    - combined the NERDTreeWinPos and NERDTreeSplitVertical. See :help
+      NERDTreeWinPos.
+    - applied a patch from Matan Nassau to add the NERDTreeQuitOnOpen option
+      which closes the tree window after opening a file. See :help
+      NERDTreeQuitOnOpen.
+    - fix to window resizing when opening a file when NERD tree is the only
+      window open
 
 2.11.0
     - changes to the 'o' mapping when opening files:
@@ -1100,6 +1149,7 @@ feature.
 Thanks to Yuan Jiang for suggesting the "o" mapping shouldnt clobber "special"
 windows, like taglist.
 
+Thanks to Matan Nassau for the patch to add the NERDTreeQuitOnOpen option.
 ==============================================================================
 9. License                                                   *NERDTreeLicense*
 

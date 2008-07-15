@@ -53,6 +53,8 @@ call s:InitVariable("g:NERDTreeHighlightCursorline", 1)
 call s:InitVariable("g:NERDTreeBookmarksFile", expand('$HOME') . '/.NERDTreeBookmarks')
 call s:InitVariable("g:NERDTreeMouseMode", 1)
 call s:InitVariable("g:NERDTreeNotificationThreshold", 100)
+call s:InitVariable("g:NERDTreeQuitOnOpen", 0)
+call s:InitVariable("g:NERDTreeShowBookmarks", 0)
 call s:InitVariable("g:NERDTreeShowFiles", 1)
 call s:InitVariable("g:NERDTreeShowHidden", 0)
 call s:InitVariable("g:NERDTreeShowLineNumbers", 0)
@@ -71,8 +73,7 @@ endif
 "once here
 let s:NERDTreeSortStarIndex = index(g:NERDTreeSortOrder, '*')
 
-call s:InitVariable("g:NERDTreeSplitVertical", 1)
-call s:InitVariable("g:NERDTreeWinPos", 1)
+call s:InitVariable("g:NERDTreeWinPos", "left")
 call s:InitVariable("g:NERDTreeWinSize", 31)
 
 let s:running_windows = has("win16") || has("win32") || has("win64")
@@ -113,6 +114,7 @@ call s:InitVariable("g:NERDTreeMapPreviewSplit", "g" . NERDTreeMapOpenSplit)
 call s:InitVariable("g:NERDTreeMapQuit", "q")
 call s:InitVariable("g:NERDTreeMapRefresh", "r")
 call s:InitVariable("g:NERDTreeMapRefreshRoot", "R")
+call s:InitVariable("g:NERDTreeMapToggleBookmarks", "B")
 call s:InitVariable("g:NERDTreeMapToggleFiles", "F")
 call s:InitVariable("g:NERDTreeMapToggleFilters", "f")
 call s:InitVariable("g:NERDTreeMapToggleHidden", "H")
@@ -140,22 +142,198 @@ endif
 command! -n=? -complete=dir NERDTree :call s:InitNerdTree('<args>')
 command! -n=? -complete=dir NERDTreeToggle :call s:Toggle('<args>')
 command! -n=0 NERDTreeClose :call s:CloseTreeIfOpen()
-command! -n=1 -complete=customlist,s:FindBookmarks NERDTreeFromBookmark call s:InitNerdTree('<args>')
+command! -n=1 -complete=customlist,s:CompleteBookmarks NERDTreeFromBookmark call s:InitNerdTree('<args>')
 " SECTION: Auto commands {{{1
 "============================================================
 "Save the cursor position whenever we close the nerd tree
 exec "autocmd BufWinLeave *". s:NERDTreeWinName ."* :call <SID>SaveScreenState()"
 "cache bookmarks when vim loads
-autocmd VimEnter * call <SID>ReadBookmarks()
+autocmd VimEnter * call s:oBookmark.CacheBookmarks()
 
 "SECTION: Classes {{{1
 "============================================================
+"CLASS: oBookmark {{{2
+"============================================================
+let s:oBookmark = {}
+" FUNCTION: oBookmark.AddBookmark(name, path) {{{3
+" Class method to add a new bookmark to the list, if a previous bookmark exists
+" with the same name, just update the path for that bookmark
+function! s:oBookmark.AddBookmark(name, path) dict
+    for i in s:oBookmark.Bookmarks()
+        if i.name == a:name
+            let i.path = a:path
+            return
+        endif
+    endfor
+    call add(s:oBookmark.Bookmarks(), s:oBookmark.New(a:name, a:path))
+    call s:oBookmark.Sort()
+endfunction
+" Function: oBookmark.Bookmarks()   {{{3
+" Class method to get all bookmarks. Lazily initializes the bookmarks global
+" variable
+function! s:oBookmark.Bookmarks() dict
+    if !exists("g:NERDTreeBookmarks")
+        let g:NERDTreeBookmarks = []
+    endif
+    return g:NERDTreeBookmarks
+endfunction
+" Function: oBookmark.BookmarkFor(name)   {{{3
+" Class method to get the bookmark that has the given name. {} is return if no
+" bookmark is found
+function! s:oBookmark.BookmarkFor(name) dict
+    for i in s:oBookmark.Bookmarks()
+        if i.name == a:name
+            return i
+        endif
+    endfor
+    return {}
+endfunction
+" Function: oBookmark.BookmarkNames()   {{{3
+" Class method to return an array of all bookmark names
+function! s:oBookmark.BookmarkNames() dict
+    let names = []
+    for i in s:oBookmark.Bookmarks()
+        call add(names, i.name)
+    endfor
+    return names
+endfunction
+" FUNCTION: oBookmark.CacheBookmarks() {{{3
+" Class method to read all bookmarks from the bookmarks file intialize
+" bookmark objects for each one.
+function! s:oBookmark.CacheBookmarks() dict
+    if filereadable(g:NERDTreeBookmarksFile)
+        let bookmarks = []
+        let bookmarkStrings = readfile(g:NERDTreeBookmarksFile)
+        let invalidBookmarksFound = 0
+        for i in bookmarkStrings
+            let name = substitute(i, '^\(\w\{-}\) .*$', '\1', '')
+            let path = substitute(i, '^\w\{-} \(.*\)$', '\1', '')
+
+            try
+                let bookmark = s:oBookmark.New(name, s:oPath.New(path))
+            catch /NERDTree.Path.InvalidArguments/
+                let invalidBookmarksFound += 1
+            endtry
+            call add(bookmarks, bookmark)
+        endfor
+        let g:NERDTreeBookmarks = bookmarks
+        if invalidBookmarksFound
+            call s:Echo(invalidBookmarksFound . " invalid bookmarks were read and discarded")
+            call s:WriteBookmarks()
+        endif
+    endif
+endfunction
+" FUNCTION: oBookmark.CompareTo(otherbookmark) {{{3
+" Compare these two bookmarks for sorting purposes
+function! s:oBookmark.CompareTo(otherbookmark) dict
+    return a:otherbookmark.name < self.name
+endfunction
+" FUNCTION: oBookmark.ClearAll() {{{3
+" Class method to delete all bookmarks.
+function! s:oBookmark.ClearAll() dict
+    for i in s:oBookmark.Bookmarks()
+        call i.Delete()
+    endfor
+    call s:oBookmark.Write()
+endfunction
+" FUNCTION: oBookmark.Delete() {{{3
+" Delete this bookmark. If the node for this bookmark is under the current
+" root, then recache bookmarks for its Path object
+function! s:oBookmark.Delete() dict
+    let node = {}
+    try
+        let node = self.GetNode(1)
+    catch /NERDTree.BookmarkNotFound/
+    endtry
+    call remove(s:oBookmark.Bookmarks(), index(s:oBookmark.Bookmarks(), self))
+    if !empty(node)
+        call node.path.CacheBookmarks()
+    endif
+endfunction
+" FUNCTION: oBookmark.GetNode(searchFromAbsoluteRoot) {{{3
+" Gets the treenode for this bookmark
+"
+" Args:
+" searchFromAbsoluteRoot: specifies whether we should search from the current
+" tree root, or the highest cached node
+function! s:oBookmark.GetNode(searchFromAbsoluteRoot) dict
+    let searchRoot = a:searchFromAbsoluteRoot ? s:AbsoluteTreeRoot() : t:NERDTreeRoot
+    let targetNode = searchRoot.FindNode(self.path)
+    if empty(targetNode)
+        throw "NERDTree.BookmarkNotFound no node was found for bookmark: " . self.name
+    endif
+    return targetNode
+endfunction
+" FUNCTION: oBookmark.GetNodeForName(name, searchFromAbsoluteRoot) {{{3
+" Class method that finds the bookmark with the given name and returns the
+" treenode for it.
+function! s:oBookmark.GetNodeForName(name, searchFromAbsoluteRoot) dict
+    let bookmark = s:oBookmark.BookmarkFor(a:name)
+    if bookmark == {}
+        throw "NERDTree.BookmarkNotFound no node was found for bookmark: " . a:name
+    endif
+    return bookmark.GetNode(a:searchFromAbsoluteRoot)
+endfunction
+" FUNCTION: oBookmark.New(name, path) {{{3
+" Create a new bookmark object with the given name and path object
+function! s:oBookmark.New(name, path) dict
+    if a:name !~ '^[0-9a-zA-Z_]*$'
+        throw "NERDTree.IllegalBookmarkName illegal name:" a:name
+    endif
+
+    let newBookmark = copy(self)
+    let newBookmark.name = a:name
+    let newBookmark.path = a:path
+    return newBookmark
+endfunction
+" Function: oBookmark.Sort()   {{{3
+" Class method that sorts all bookmarks
+function! s:oBookmark.Sort() dict
+    let CompareFunc = function("s:CompareBookmarks")
+    call sort(s:oBookmark.Bookmarks(), CompareFunc)
+endfunction
+" Function: oBookmark.Str()   {{{3
+" Get the string that should be rendered in the view for this bookmark
+function! s:oBookmark.Str() dict
+    let pathStrMaxLen = winwidth(s:GetTreeWinNum()) - 5 - len(self.name)
+    if &nu
+        let pathStrMaxLen = pathStrMaxLen - &numberwidth
+    endif
+
+    let pathStr = self.path.StrForOS(0)
+    if len(pathStr) > pathStrMaxLen
+        let pathStr = '<' . strpart(pathStr, len(pathStr) - pathStrMaxLen)
+    endif
+    return '>' . self.name . ' [' . pathStr . ']'
+endfunction
+" Function: oBookmark.Write()   {{{3
+" Class method to write all bookmarks to the bookmarks file
+function! s:oBookmark.Write() dict
+    let bookmarkStrings = []
+    for i in s:oBookmark.Bookmarks()
+        call add(bookmarkStrings, i.name . ' ' . i.path.StrForOS(0))
+    endfor
+    call writefile(bookmarkStrings, g:NERDTreeBookmarksFile)
+endfunction
 "CLASS: oTreeFileNode {{{2
 "This class is the parent of the oTreeDirNode class and constitures the
 "'Component' part of the composite design pattern between the treenode
 "classes.
 "============================================================
 let s:oTreeFileNode = {}
+"FUNCTION: oTreeFileNode.Bookmark(name) {{{3
+"bookmark this node with a:name
+function! s:oTreeFileNode.Bookmark(name) dict
+    try
+        let oldMarkedNode = s:oBookmark.GetNodeForName(a:name, 1)
+        call oldMarkedNode.path.UncacheBookmark(a:name)
+    catch /NERDTree.Bookmark\(DoesntExist\|NotFound\)/
+    endtry
+
+    call s:oBookmark.AddBookmark(a:name, self.path)
+    call self.path.CacheBookmarks()
+    call s:oBookmark.Write()
+endfunction
 "FUNCTION: oTreeFileNode.CacheParent {{{3
 "initializes self.parent if it isnt already
 function! s:oTreeFileNode.CacheParent() dict
@@ -181,13 +359,12 @@ endfunction
 
 "FUNCTION: oTreeFileNode.ClearBookmarks() {{{3
 function! s:oTreeFileNode.ClearBookmarks() dict
-    let bookmarks = s:GetBookmarks()
-    for i in keys(bookmarks)
-        if bookmarks[i].Equals(self.path)
-            call remove(bookmarks, i)
+    for i in s:oBookmark.Bookmarks()
+        if i.path.Equals(self.path)
+            call i.Delete()
         end
     endfor
-    call self.path.CacheBookmarkNames()
+    call self.path.CacheBookmarks()
 endfunction
 "FUNCTION: oTreeFileNode.Copy(dest) {{{3
 function! s:oTreeFileNode.Copy(dest) dict
@@ -811,21 +988,19 @@ endfunction
 "CLASS: oPath {{{2
 "============================================================
 let s:oPath = {}
-let oPath = s:oPath
 "FUNCTION: oPath.BookmarkNames() {{{3
 function! s:oPath.BookmarkNames() dict
-    if !exists("self.bookmarkNames")
-        call self.CacheBookmarkNames()
+    if !exists("self.bookmark")
+        call self.CacheBookmarks()
     endif
     return self.bookmarkNames
 endfunction
-"FUNCTION: oPath.CacheBookmarkNames() {{{3
-function! s:oPath.CacheBookmarkNames() dict
+"FUNCTION: oPath.CacheBookmarks() {{{3
+function! s:oPath.CacheBookmarks() dict
     let self.bookmarkNames = []
-    let bookmarks = s:GetBookmarks()
-    for k in keys(bookmarks)
-        if bookmarks[k].Equals(self)
-            call add(self.bookmarkNames, k)
+    for i in s:oBookmark.Bookmarks()
+        if i.path.Equals(self)
+            call add(self.bookmarkNames, i.name)
         endif
     endfor
     return self.bookmarkNames
@@ -1191,7 +1366,7 @@ endfunction
 "FUNCTION: oPath.Refresh() {{{3
 function! s:oPath.Refresh() dict
     call self.ReadInfoFromDisk(self.StrForOS(0))
-    call self.CacheBookmarkNames()
+    call self.CacheBookmarks()
 endfunction
 
 "FUNCTION: oPath.Rename() {{{3
@@ -1264,9 +1439,8 @@ function! s:oPath.StrDisplay() dict
         let toReturn = toReturn . '*'
     endif
 
-    let bookmarks = self.BookmarkNames()
-    if !empty(bookmarks)
-        let toReturn .= ' {' . join(bookmarks, ',') . '}'
+    if !empty(self.BookmarkNames())
+        let toReturn .= ' {' . join(self.BookmarkNames(), ',') . '}'
     endif
 
     if self.isSymLink
@@ -1419,42 +1593,16 @@ function! s:BufInWindows(bnum)
     return cnt
 endfunction " >>>
 
-"FUNCTION: s:ClearAllBookmarks() {{{2
-"delete all bookmarks
-function! s:ClearAllBookmarks()
-    for name in keys(g:NERDTreeBookmarks)
-        let node = {}
-        try
-            let node = s:GetNodeForBookmark(name, 1)
-        catch /NERDTree/
-        endtry
-        call remove(g:NERDTreeBookmarks, name)
-        if !empty(node)
-            call node.path.CacheBookmarkNames()
-        endif
-    endfor
-    call s:WriteBookmarks()
+"FUNCTION: CompareBookmarks(first, second) {{{2
+"Compares two bookmarks
+function! s:CompareBookmarks(first, second)
+    return a:first.CompareTo(a:second)
 endfunction
-"FUNCTION: s:GetNodeForBookmark(name, searchFromAbsoluteRoot) {{{2
-"get the treenode for the bookmark with the given name
-"
-"Args:
-"name: name of bookmark
-"searchFromAbsoluteRoot: specifies wheather we should search from the current
-"tree root, or the highest cached node
-function! s:GetNodeForBookmark(name, searchFromAbsoluteRoot)
-    try
-        let bookmark = s:GetBookmarks()[a:name]
-    catch /E716/ "key not in dictionary error
-        throw "NERDTree.BookmarkDoesntExist no bookmark found with name: " . a:name
-    endtry
 
-    let searchRoot = a:searchFromAbsoluteRoot ? s:AbsoluteTreeRoot() : t:NERDTreeRoot
-    let targetNode = searchRoot.FindNode(bookmark)
-    if empty(targetNode)
-        throw "NERDTree.BookmarkNotFound no node was found for bookmark: " . a:name
-    endif
-    return targetNode
+" FUNCTION: s:CompleteBookmarks(A,L,P) {{{2
+" completion function for the bookmark commands
+function! s:CompleteBookmarks(A,L,P)
+    return filter(s:oBookmark.BookmarkNames(), 'v:val =~ "^' . a:A . '"')
 endfunction
 "FUNCTION: s:InitNerdTree(name) {{{2
 "Initialise the nerd tree for this tab. The tree will start in either the
@@ -1464,8 +1612,8 @@ endfunction
 "name: the name of a bookmark or a directory
 function! s:InitNerdTree(name)
     let path = {}
-    if count(keys(s:GetBookmarks()), a:name)
-        let path = s:GetBookmarks()[a:name]
+    if s:oBookmark.BookmarkFor(a:name) != {}
+        let path = s:oBookmark.BookmarkFor(a:name).path
     else
         let dir = a:name == '' ? expand('%:p:h') : a:name
         let dir = resolve(dir)
@@ -1503,43 +1651,11 @@ function! s:InitNerdTree(name)
     call s:RenderView()
     call s:PutCursorOnNode(t:NERDTreeRoot, 0, 0)
 endfunction
-" Function: s:ReadBookmarks()   {{{2
-function! s:ReadBookmarks()
-    if filereadable(g:NERDTreeBookmarksFile)
-        let bookmarks = s:GetBookmarks()
-        let bookmarkStrings = readfile(g:NERDTreeBookmarksFile)
-        let invalidBookmarksFound = 0
-        for i in bookmarkStrings
-            let key = substitute(i, '^\(\w\{-}\) .*$', '\1', '')
-            let path = substitute(i, '^\w\{-} \(.*\)$', '\1', '')
-
-            try
-                let bookmarks[key] = s:oPath.New(path)
-            catch /NERDTree.Path.InvalidArguments/
-                let invalidBookmarksFound += 1
-            endtry
-        endfor
-        if invalidBookmarksFound
-            call s:Echo(invalidBookmarksFound . " invalid bookmarks were read and discarded")
-            call s:WriteBookmarks()
-        endif
-    endif
-endfunction
 " Function: s:TreeExistsForTab()   {{{2
 " Returns 1 if a nerd tree root exists in the current tab
 function! s:TreeExistsForTab()
     return exists("t:NERDTreeRoot")
 endfunction
-" Function: s:WriteBookmarks()   {{{2
-function! s:WriteBookmarks()
-    let bookmarks = s:GetBookmarks()
-    let bookmarkStrings = []
-    for k in keys(bookmarks)
-        call add(bookmarkStrings, k . ' ' . bookmarks[k].StrForOS(0))
-    endfor
-    call writefile(bookmarkStrings, g:NERDTreeBookmarksFile)
-endfunction
-
 " SECTION: Public Functions {{{1
 "============================================================
 "Returns the node that the cursor is currently on.
@@ -1624,8 +1740,8 @@ endfunction
 "options etc
 function! s:CreateTreeWin()
     "create the nerd tree window
-    let splitLocation = g:NERDTreeWinPos ? "topleft " : "botright "
-    let splitMode = g:NERDTreeSplitVertical ? "vertical " : ""
+    let splitLocation = (g:NERDTreeWinPos == "top" || g:NERDTreeWinPos == "left") ? "topleft " : "botright "
+    let splitMode = s:ShouldSplitVertically() ? "vertical " : ""
     let splitSize = g:NERDTreeWinSize
     let t:NERDTreeWinName = localtime() . s:NERDTreeWinName
     let cmd = splitLocation . splitMode . splitSize . ' new ' . t:NERDTreeWinName
@@ -1771,6 +1887,13 @@ function! s:DumpHelp()
         let @h=@h."\"    node\n"
 
         let @h=@h."\"\n\" ----------------------------\n"
+        let @h=@h."\" Bookmark table mappings~\n"
+        let @h=@h."\" double-click,\n"
+        let @h=@h."\" ". g:NERDTreeMapActivateNode .": open bookmark\n"
+        let @h=@h."\" ". g:NERDTreeMapOpenInTab.": open in new tab\n"
+        let @h=@h."\" ". g:NERDTreeMapOpenInTabSilent .": open in new tab silently\n"
+
+        let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Tree navigation mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapJumpRoot .": go to root\n"
         let @h=@h."\" ". g:NERDTreeMapJumpParent .": go to parent\n"
@@ -1797,6 +1920,7 @@ function! s:DumpHelp()
         let @h=@h."\" ". g:NERDTreeMapToggleHidden .": hidden files (" . (g:NERDTreeShowHidden ? "on" : "off") . ")\n"
         let @h=@h."\" ". g:NERDTreeMapToggleFilters .": file filters (" . (t:NERDTreeIgnoreEnabled ? "on" : "off") . ")\n"
         let @h=@h."\" ". g:NERDTreeMapToggleFiles .": files (" . (g:NERDTreeShowFiles ? "on" : "off") . ")\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleBookmarks .": bookmarks (" . (g:NERDTreeShowBookmarks ? "on" : "off") . ")\n"
 
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Other mappings~\n"
@@ -1844,12 +1968,6 @@ function! s:EchoError(msg)
     echohl errormsg
     call s:Echo(a:msg)
     echohl normal
-endfunction
-" FUNCTION: s:FindBookmarks(A,L,P) {{{2
-" completion function for the bookmark commands
-function! s:FindBookmarks(A,L,P)
-    let keys = keys(s:GetBookmarks())
-    return filter(keys, 'v:val =~ "^' . a:A . '"')
 endfunction
 "FUNCTION: s:FindNodeLineNumber(treenode){{{2
 "Finds the line number for the given tree node
@@ -1913,14 +2031,6 @@ function! s:FindRootNodeLineNumber()
     return rootLine
 endfunction
 
-" FUNCTION: s:GetBookmarks(name) {{{2
-" getter/lazy initializer for the g:NERDTreeBookmarks hash
-function! s:GetBookmarks()
-    if !exists("g:NERDTreeBookmarks")
-        let g:NERDTreeBookmarks = {}
-    endif
-    return g:NERDTreeBookmarks
-endfunction
 "FUNCTION: s:GetPath(ln) {{{2
 "Gets the full path to the node that is rendered on the given line number
 "
@@ -1987,6 +2097,17 @@ function! s:GetPath(ln)
     let curFile = t:NERDTreeRoot.path.drive . dir . curFile
     let toReturn = s:oPath.New(curFile)
     return toReturn
+endfunction
+
+"FUNCTION: s:GetSelectedBookmark() {{{2
+"Returns the current node if it is a dir node, or else returns the current
+"nodes parent
+function! s:GetSelectedBookmark()
+    let line = getline(".")
+    let name = substitute(line, '^>\(.\{-}\) \[.*\]$', '\1', '')
+    if name != line
+        return s:oBookmark.BookmarkFor(name)
+    endif
 endfunction
 
 "FUNCTION: s:GetSelectedDir() {{{2
@@ -2164,16 +2285,16 @@ function! s:OpenNodeSplit(treenode)
     " 'right' and 'below' will be set to the settings needed for
     " splitbelow and splitright IF the explorer is the only window.
     "
-    if g:NERDTreeSplitVertical == 1
-        let there= g:NERDTreeWinPos ? "wincmd h" : "wincmd l"
-        let back= g:NERDTreeWinPos ? "wincmd l" : "wincmd h"
-        let right=g:NERDTreeWinPos ? 1 : 0
+    if s:ShouldSplitVertically()
+        let there= g:NERDTreeWinPos == "left" ? "wincmd h" : "wincmd l"
+        let back = g:NERDTreeWinPos == "left" ? "wincmd l" : "wincmd h"
+        let right= g:NERDTreeWinPos == "left"
         let below=0
     else
-        let there= g:NERDTreeWinPos ? "wincmd k" : "wincmd j"
-        let back= g:NERDTreeWinPos ? "wincmd j" : "wincmd k"
+        let there= g:NERDTreeWinPos == "top" ? "wincmd k" : "wincmd j"
+        let back = g:NERDTreeWinPos == "top" ? "wincmd j" : "wincmd k"
+        let below= g:NERDTreeWinPos == "top"
         let right=0
-        let below=g:NERDTreeWinPos ? 1 : 0
     endif
 
     " Attempt to go to adjacent window
@@ -2193,9 +2314,11 @@ function! s:OpenNodeSplit(treenode)
 
     " Create a variable to use if splitting vertically
     let splitMode = ""
-    if (onlyOneWin && g:NERDTreeSplitVertical) || (!onlyOneWin && !g:NERDTreeSplitVertical)
+    if (onlyOneWin && s:ShouldSplitVertically()) || (!onlyOneWin && !s:ShouldSplitVertically())
         let splitMode = "vertical"
     endif
+
+    echomsg splitMode
 
     " Open the new window
     try
@@ -2273,6 +2396,20 @@ function! s:PutCursorInTreeWin()
     exec s:GetTreeWinNum() . "wincmd w"
 endfunction
 
+"FUNCTION: s:RenderBookmarks {{{2
+function! s:RenderBookmarks()
+
+    call setline(line(".")+1, ">----------Bookmarks----------")
+    call cursor(line(".")+1, col("."))
+
+    for i in s:oBookmark.Bookmarks()
+        call setline(line(".")+1, i.Str())
+        call cursor(line(".")+1, col("."))
+    endfor
+
+    call setline(line(".")+1, '')
+    call cursor(line(".")+1, col("."))
+endfunction
 "FUNCTION: s:RenderView {{{2
 "The entry function for rendering the tree. Renders the root then calls
 "s:DrawTree to draw the children of the root
@@ -2290,13 +2427,17 @@ function! s:RenderView()
     let topLine = line("w0")
 
     "delete all lines in the buffer (being careful not to clobber a register)
-    :silent 1,$delete _
+    silent 1,$delete _
 
     call s:DumpHelp()
 
     "delete the blank line before the help and add one after it
     call setline(line(".")+1, "")
     call cursor(line(".")+1, col("."))
+
+    if g:NERDTreeShowBookmarks
+        call s:RenderBookmarks()
+    endif
 
     "add the 'up a dir' line
     call setline(line(".")+1, s:tree_up_dir_line)
@@ -2310,7 +2451,7 @@ function! s:RenderView()
     call s:DrawTree(t:NERDTreeRoot, 0, 0, [], t:NERDTreeRoot.GetChildCount() == 1)
 
     "delete the blank line at the top of the buffer
-    :silent 1,1delete _
+    silent 1,1delete _
 
     "restore the view
     let old_scrolloff=&scrolloff
@@ -2351,7 +2492,7 @@ function! s:RestoreScreenState()
     if !exists("t:NERDTreeOldTopLine") || !exists("t:NERDTreeOldPos") || !exists("t:NERDTreeOldWindowSize")
         return
     endif
-    exec("silent ". (g:NERDTreeSplitVertical ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
+    exec("silent ". (s:ShouldSplitVertically() ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
 
     let old_scrolloff=&scrolloff
     let &scrolloff=0
@@ -2369,7 +2510,7 @@ endfunction
 function! s:SaveScreenState()
     let t:NERDTreeOldPos = getpos(".")
     let t:NERDTreeOldTopLine = line("w0")
-    let t:NERDTreeOldWindowSize = g:NERDTreeSplitVertical ? winwidth("") : winheight("")
+    let t:NERDTreeOldWindowSize = s:ShouldSplitVertically() ? winwidth("") : winheight("")
 endfunction
 
 "FUNCTION: s:SetupSyntaxHighlighting() {{{2
@@ -2402,12 +2543,8 @@ function! s:SetupSyntaxHighlighting()
     syn match treeHelpCommand #" :.\{-}\>#hs=s+3
     syn match treeHelp  #^".*# contains=treeHelpKey,treeHelpTitle,treeFlag,treeToggleOff,treeToggleOn,treeHelpCommand
 
-
     "highlighting for readonly files
     syn match treeRO #[\/0-9a-zA-Z]\+.*\[RO\]# contains=treeFlag,treeBookmark
-
-    "highlighting for bookmarks
-    syn match treeBookmark # {.*}#hs=s+1
 
     "highlighting for sym links
     syn match treeLink #[^-| `].* -> # contains=treeBookmark,treeOpenable,treeClosable,treeDirSlash
@@ -2419,6 +2556,15 @@ function! s:SetupSyntaxHighlighting()
     syn match treeFile  #|-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark,treeExecFile
     syn match treeFile  #`-.*# contains=treeLink,treePart,treeRO,treePartFile,treeBookmark,treeExecFile
     syn match treeCWD #^/.*$#
+
+    "highlighting for bookmarks
+    syn match treeBookmark # {.*}#hs=s+1
+
+    "highlighting for the bookmarks display
+    syn match treeBookmarksLeader #^>#
+    syn match treeBookmarksHeader #^>-\+Bookmarks-\+# contains=treeBookmarksLeader
+    syn match treeBookmarkName #^>[a-zA-Z1-9_]\{-} #he=e-1 contains=treeBookmarksLeader
+    syn match treeBookmark #^>.*$# contains=treeBookmarksLeader,treeBookmarkName
 
     if g:NERDChristmasTree
         hi def link treePart Special
@@ -2433,6 +2579,11 @@ function! s:SetupSyntaxHighlighting()
         hi def link treeFile Normal
         hi def link treeClosable Title
     endif
+
+    hi def link treeBookmarksHeader macro
+    hi def link treeBookmarksLeader ignore
+    hi def link treeBookmarkName Identifier
+    hi def link treeBookmark Statement
 
     hi def link treeHelp String
     hi def link treeHelpKey Identifier
@@ -2484,6 +2635,11 @@ function! s:ShouldSplitToOpen(winnumber)
     return modified && s:BufInWindows(winbufnr(a:winnumber)) < 2
 endfunction
 
+" Function: s:ShouldSplitVertically()   {{{2
+" Returns 1 if g:NERDTreeWinPos is 'left' or 'right'
+function! s:ShouldSplitVertically()
+    return g:NERDTreeWinPos == 'left' || g:NERDTreeWinPos == 'right'
+endfunction
 "FUNCTION: s:StripMarkupFromLine(line, removeLeadingSpaces){{{2
 "returns the given line with all the tree parts stripped off
 "
@@ -2551,18 +2707,28 @@ function! s:ActivateNode()
     if getline(".") == s:tree_up_dir_line
         return s:UpDir(0)
     endif
-    let treenode = s:GetSelectedNode()
-    if treenode == {}
-        call s:EchoWarning("cannot open selected entry")
-        return
-    endif
 
-    if treenode.path.isDirectory
-        call treenode.ToggleOpen()
-        call s:RenderView()
-        call s:PutCursorOnNode(treenode, 0, 0)
+    let treenode = s:GetSelectedNode()
+    if treenode != {}
+        if treenode.path.isDirectory
+            call treenode.ToggleOpen()
+            call s:RenderView()
+            call s:PutCursorOnNode(treenode, 0, 0)
+        else
+            call s:OpenFileNode(treenode)
+            if g:NERDTreeQuitOnOpen
+                call s:CloseTree()
+            endif
+        endif
     else
-        call s:OpenFileNode(treenode)
+        let bookmark = s:GetSelectedBookmark()
+        if !empty(bookmark)
+            if bookmark.path.isDirectory
+                call s:BookmarkToRoot(bookmark.name)
+            else
+                call s:OpenFileNode(s:oTreeFileNode.New(bookmark.path))
+            endif
+        endif
     endif
 endfunction
 
@@ -2599,6 +2765,7 @@ function! s:BindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleHidden ." :call <SID>ToggleShowHidden()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleFilters ." :call <SID>ToggleIgnoreFilter()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleFiles ." :call <SID>ToggleShowFiles()<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleBookmarks ." :call <SID>ToggleShowBookmarks()<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapCloseDir ." :call <SID>CloseCurrentDir()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapCloseChildren ." :call <SID>CloseChildren()<cr>"
@@ -2612,42 +2779,27 @@ function! s:BindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpLastChild ." :call <SID>JumpToLastChild()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpRoot ." :call <SID>JumpToRoot()<cr>"
 
-    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTab ." :call <SID>OpenNodeNewTab(0)<cr>"
-    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTabSilent ." :call <SID>OpenNodeNewTab(1)<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTab ." :call <SID>OpenInNewTab(0)<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenInTabSilent ." :call <SID>OpenInNewTab(1)<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenExpl ." :call <SID>OpenExplorer()<cr>"
 
     command! -buffer -nargs=1 Bookmark :call <SID>BookmarkNode('<args>')
-    command! -buffer -complete=customlist,s:FindBookmarks -nargs=1 RevealBookmark :call <SID>RevealBookmark('<args>')
-    command! -buffer -complete=customlist,s:FindBookmarks -nargs=1 OpenBookmark :call <SID>OpenBookmark('<args>')
-    command! -buffer -complete=customlist,s:FindBookmarks -nargs=* ClearBookmarks call <SID>ClearBookmarks('<args>')
-    command! -buffer -complete=customlist,s:FindBookmarks -nargs=+ BookmarkToRoot call <SID>BookmarkToRoot('<args>')
-    command! -buffer -nargs=0 ClearAllBookmarks call <SID>ClearAllBookmarks() <bar> call <SID>RenderView()
-    command! -buffer -nargs=0 ReadBookmarks call <SID>ReadBookmarks() <bar> call <SID>RenderView()
-    command! -buffer -nargs=0 WriteBookmarks call <SID>WriteBookmarks()
+    command! -buffer -complete=customlist,s:CompleteBookmarks -nargs=1 RevealBookmark :call <SID>RevealBookmark('<args>')
+    command! -buffer -complete=customlist,s:CompleteBookmarks -nargs=1 OpenBookmark :call <SID>OpenBookmark('<args>')
+    command! -buffer -complete=customlist,s:CompleteBookmarks -nargs=* ClearBookmarks call <SID>ClearBookmarks('<args>')
+    command! -buffer -complete=customlist,s:CompleteBookmarks -nargs=+ BookmarkToRoot call <SID>BookmarkToRoot('<args>')
+    command! -buffer -nargs=0 ClearAllBookmarks call s:oBookmark.ClearAll() <bar> call <SID>RenderView()
+    command! -buffer -nargs=0 ReadBookmarks call s:oBookmark.CacheBookmarks() <bar> call <SID>RenderView()
+    command! -buffer -nargs=0 WriteBookmarks call s:oBookmark.Write()
 endfunction
 
 " FUNCTION: s:BookmarkNode(name) {{{2
 " Associate the current node with the given name
 function! s:BookmarkNode(name)
-    if a:name !~ '^[0-9a-zA-Z_]*$'
-        call s:Echo("Bookmarks must be named using numbers, letters and underscores only")
-        return
-    endif
-
     let currentNode = s:GetSelectedNode()
     if currentNode != {}
-
-        try
-            let oldMarkedNode = s:GetNodeForBookmark(a:name, 1)
-            call oldMarkedNode.path.UncacheBookmark(a:name)
-        catch /NERDTree.Bookmark\(DoesntExist\|NotFound\)/
-        endtry
-
-        let bookmarks = s:GetBookmarks()
-        let bookmarks[a:name] = currentNode.path
-        call currentNode.path.CacheBookmarkNames()
-        call s:WriteBookmarks()
+        call currentNode.Bookmark(a:name)
         call s:RenderView()
     else
         call s:Echo("select a node first")
@@ -2657,10 +2809,9 @@ endfunction
 " Make the node for the given bookmark the new tree root
 function! s:BookmarkToRoot(name)
     try
-        let targetNode = s:GetNodeForBookmark(a:name, 1)
+        let targetNode = s:oBookmark.GetNodeForName(a:name, 1)
     catch /NERDTree.BookmarkNotFound/
-        let bookmarks = s:GetBookmarks()
-        let targetNode = s:oTreeFileNode.New(bookmarks[a:name])
+        let targetNode = s:oTreeFileNode.New(s:oBookmark.BookmarkFor(a:name).path)
     endtry
     call targetNode.MakeRoot()
     call s:RenderView()
@@ -2726,7 +2877,6 @@ endfunction
 
 " FUNCTION: s:ClearBookmarks(bookmarks) {{{2
 function! s:ClearBookmarks(bookmarks)
-    let bookmarks = s:GetBookmarks()
     if a:bookmarks == ''
         let currentNode = s:GetSelectedNode()
         if currentNode != {}
@@ -2734,20 +2884,11 @@ function! s:ClearBookmarks(bookmarks)
         endif
     else
         for name in split(a:bookmarks, ' ')
-            if count(keys(bookmarks), name)
-                let node = {}
-                try
-                    let node = s:GetNodeForBookmark(name, 1)
-                catch /NERDTree/
-                endtry
-                call remove(bookmarks, name)
-                if !empty(node)
-                    call node.path.CacheBookmarkNames()
-                endif
-            endif
+            let bookmark = s:oBookmark.BookmarkFor(name)
+            call bookmark.Delete()
         endfor
     endif
-    call s:WriteBookmarks()
+    call s:oBookmark.Write()
     call s:RenderView()
 endfunction
 " FUNCTION: s:CloseChildren() {{{2
@@ -3009,13 +3150,13 @@ endfunction
 " put the cursor on the given bookmark and, if its a file, open it
 function! s:OpenBookmark(name)
     try
-        let targetNode = s:GetNodeForBookmark(a:name, 0)
+        let targetNode = s:oBookmark.GetNodeForName(a:name, 0)
         call s:PutCursorOnNode(targetNode, 0, 1)
         redraw!
     catch /NERDTree.BookmarkNotFound/
         call s:Echo("note - target node is not cached")
-        let bookmarks = s:GetBookmarks()
-        let targetNode = s:oTreeFileNode.New(bookmarks[a:name])
+        let bookmark = s:oBookmark.BookmarkFor(a:name)
+        let targetNode = s:oTreeFileNode.New(bookmark.path)
     endtry
     if targetNode.path.isDirectory
         call s:OpenExplorerFor(targetNode)
@@ -3030,6 +3171,9 @@ function! s:OpenEntrySplit()
     let treenode = s:GetSelectedNode()
     if treenode != {}
         call s:OpenFileNodeSplit(treenode)
+        if g:NERDTreeQuitOnOpen
+            call s:CloseTree()
+        endif
     else
         call s:Echo("select a node first")
     endif
@@ -3045,26 +3189,34 @@ function! s:OpenExplorer()
     endif
 endfunction
 
-" FUNCTION: s:OpenNodeNewTab(stayCurrentTab) {{{2
-" Opens the currently selected file from the explorer in a
-" new tab
-"
+" FUNCTION: s:OpenInNewTab(stayCurrentTab) {{{2
+" Opens the selected node or bookmark in a new tab
 " Args:
 " stayCurrentTab: if 1 then vim will stay in the current tab, if 0 then vim
 " will go to the tab where the new file is opened
-function! s:OpenNodeNewTab(stayCurrentTab)
+function! s:OpenInNewTab(stayCurrentTab)
+    let currentTab = tabpagenr()
+
     let treenode = s:GetSelectedNode()
     if treenode != {}
-        let curTabNr = tabpagenr()
         exec "tabedit " . treenode.path.StrForEditCmd()
         if a:stayCurrentTab
-            exec "tabnext " . curTabNr
+            exec "tabnext " . currentTab
         endif
     else
-        call s:Echo("select a node first")
+        let bookmark = s:GetSelectedBookmark()
+        if bookmark != {}
+            if bookmark.path.isDirectory
+                exec "tabnew +NERDTreeFromBookmark\\ " . bookmark.name
+            else
+                exec "tabedit " . bookmark.path.StrForEditCmd()
+            endif
+            if a:stayCurrentTab
+                exec "tabnext " . currentTab
+            endif
+        endif
     endif
 endfunction
-
 
 " FUNCTION: s:OpenNodeRecursively() {{{2
 function! s:OpenNodeRecursively()
@@ -3101,7 +3253,7 @@ endfunction
 " put the cursor on the node associate with the given name
 function! s:RevealBookmark(name)
     try
-        let targetNode = s:GetNodeForBookmark(a:name, 0)
+        let targetNode = s:oBookmark.GetNodeForName(a:name, 0)
         call s:PutCursorOnNode(targetNode, 0, 1)
     catch /NERDTree.BookmarkDoesntExist/
         call s:Echo("Bookmark isnt cached under the current root")
@@ -3217,6 +3369,13 @@ function! s:ToggleIgnoreFilter()
     call s:CenterView()
 endfunction
 
+" FUNCTION: s:ToggleShowBookmarks() {{{2
+" toggles the display of bookmarks
+function! s:ToggleShowBookmarks()
+    let g:NERDTreeShowBookmarks = !g:NERDTreeShowBookmarks
+    call s:RenderViewSavingPosition()
+    call s:CenterView()
+endfunction
 " FUNCTION: s:ToggleShowFiles() {{{2
 " toggles the display of hidden files
 function! s:ToggleShowFiles()
