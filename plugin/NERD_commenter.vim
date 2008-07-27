@@ -2,7 +2,8 @@
 " File:        NERD_commenter.vim
 " Description: vim global plugin that provides easy code commenting
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 22 June, 2008
+" Version:     2.1.17
+" Last Change: 27 June, 2008
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +11,6 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_commenter_version = 2.1.15
 
 " Section: script init stuff {{{1
 if exists("loaded_nerd_comments")
@@ -77,7 +77,7 @@ call s:InitVariable("g:NERDAppendComMap", g:NERDMapleader . 'A')
 call s:InitVariable("g:NERDComAlignBothMap", g:NERDMapleader . 'b')
 call s:InitVariable("g:NERDComAlignLeftMap", g:NERDMapleader . 'l')
 call s:InitVariable("g:NERDComAlignRightMap", g:NERDMapleader . 'r')
-call s:InitVariable("g:NERDComInInsertMap", '<C-c>')
+call s:InitVariable("g:NERDComInInsertMap", '')
 call s:InitVariable("g:NERDComLineInvertMap", g:NERDMapleader . 'i')
 call s:InitVariable("g:NERDComLineMap", g:NERDMapleader . 'c')
 call s:InitVariable("g:NERDComLineNestMap", g:NERDMapleader . 'n')
@@ -384,7 +384,7 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype == "gtkrc"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "haskell"
-        call s:MapDelimitersWithAlternative('--','', '{-', '-}')
+        call s:MapDelimitersWithAlternative('{-','-}', '--', '--')
     elseif a:filetype == "hb"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "h"
@@ -465,6 +465,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimitersWithAlternative(';','', '#|', '|#')
     elseif a:filetype == "lite"
         call s:MapDelimiters('/*','*/')
+    elseif a:filetype == "llvm"
+        call s:MapDelimiters(';','')
     elseif a:filetype == "lookupfile"
         call s:MapDelimiters('', '')
     elseif a:filetype == "lotos"
@@ -487,6 +489,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('dnl ', '')
     elseif a:filetype == "mail"
         call s:MapDelimiters('> ','')
+    elseif a:filetype == "mailcap"
+        call s:MapDelimiters('#','')
     elseif a:filetype == "make"
         call s:MapDelimiters('#','')
     elseif a:filetype == "map"
@@ -759,6 +763,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "st"
         call s:MapDelimiters('"','')
+    elseif a:filetype == "stata"
+        call s:MapDelimiters('/*','*/')
     elseif a:filetype == "stp"
         call s:MapDelimiters('--', '')
     elseif a:filetype == "strace"
@@ -889,6 +895,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('/*','*/')
     elseif a:filetype == "yaml"
         call s:MapDelimiters('#','')
+    elseif a:filetype == "xquery"
+        call s:MapDelimiters('(:',':)')
     elseif a:filetype == "z8a"
         call s:MapDelimiters(';', '')
 
@@ -3290,7 +3298,9 @@ execute 'nmap <silent>' . g:NERDAppendComMap . ' :call NERDComment(0, "append")<
 execute 'nmap <silent>' . g:NERDPrependComMap . ' :call NERDComment(0, "prepend")<cr>'
 
 " set up the mapping to insert comment delims at the cursor position in insert mode
-execute 'inoremap <silent>' . g:NERDComInInsertMap . ' ' . '<SPACE><BS><ESC>:call NERDComment(0, "insert")<CR>'
+if g:NERDComInInsertMap != ''
+    execute 'inoremap <silent>' . g:NERDComInInsertMap . ' ' . '<SPACE><BS><ESC>:call NERDComment(0, "insert")<CR>'
+endif
 
 " Section: Menu item setup {{{1
 " ===========================================================================

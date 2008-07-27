@@ -25,6 +25,7 @@ CONTENTS                                                   *NERDTree-contents*
         2.2 Bookmarks.........................|NERDTreeBookmarks|
             2.2.1 The bookmark table..........|NERDTreeBookmarkTable|
             2.2.2 Bookmark commands...........|NERDTreeBookmarkCommands|
+            2.2.3 Invalid bookmarks...........|NERDTreeInvalidBookmarks|
         2.3 NERD tree mappings................|NERDTreeMappings|
         2.4 The filesystem menu...............|NERDTreeFilesysMenu|
     3.Options.................................|NERDTreeOptions|
@@ -132,8 +133,7 @@ Note that the following commands are only available in the NERD tree buffer.
 
 :Bookmark <name>
     Bookmark the current node as <name>. If there is already a <name>
-    bookmark, it is overwritten. <name> must consist of alphanumeric
-    characters and underscores.
+    bookmark, it is overwritten. <name> must not contain spaces.
 
 :BookmarkToRoot <bookmark>
     Make the directory corresponding to <bookmark> the new root. If a treenode
@@ -159,7 +159,26 @@ Note that the following commands are only available in the NERD tree buffer.
 :ClearAllBookmarks
     Remove all bookmarks.
 
+:ReadBookmarks
+    Re-read the bookmarks in the |NERDTreeBookmarksFile|.
+
 See also |:NERDTree| and |:NERDTreeFromBookmark|.
+
+------------------------------------------------------------------------------
+2.2.3. Invalid Bookmarks                            *NERDTreeInvalidBookmarks*
+
+If invalid bookmarks are detected, the script will issue an error message and
+the invalid bookmarks will become unavailable for use.
+
+These bookmarks will still be stored in the bookmarks file (see
+|NERDTreeBookmarksFile|), down the bottom. There will always be a blank line
+after the valid bookmarks but before the invalid ones.
+
+Each line in the bookmarks file represents one bookmark. The proper format is:
+<bookmark name><space><full path to the bookmark location>
+
+After you have corrected any invalid bookmarks, either restart vim, or go
+:ReadBookmarks from the NERD tree window.
 
 ------------------------------------------------------------------------------
 2.3. NERD tree Mappings                                     *NERDTreeMappings*
@@ -241,8 +260,8 @@ Default key: t
 Map option: NERDTreeMapOpenInTab
 Applies to: files and directories.
 
-Opens the selected file in a new tab. If a directory is selected, a netrw is
-opened in a new tab.
+Opens the selected file in a new tab. If a directory is selected, a fresh
+NERD Tree for that directory is opened in a new tab.
 
 If a bookmark which points to a directory is selected, open a NERD tree for
 that directory in a new tab. If the bookmark points to a file, open that file
@@ -649,7 +668,7 @@ account. The above nodes would then be sorted like this: >
                                                            *NERDTreeChDirMode*
 
 Values: 0, 1 or 2.
-Default: 1.
+Default: 0.
 
 Use this option to tell the script when (if at all) to change the current
 working directory (CWD) for vim.
@@ -667,11 +686,6 @@ If the option is set to 2 then it behaves the same as if set to 1 except that
 the CWD is changed whenever the tree root is changed. For example, if the CWD
 is /home/marty/foobar and you make the node for /home/marty/foobar/baz the new
 root then the CWD will become /home/marty/foobar/baz.
-
-Authors note: at work i have this option set to 1 because i have a giant ctags
-file in the root dir of my project. This way i can initialise the NERD tree
-with the root dir of my project and always have ctags available to me --- no
-matter where i go with the NERD tree.
 
 ------------------------------------------------------------------------------
                                                  *NERDTreeHighlightCursorline*
@@ -744,7 +758,7 @@ Default: 0.
 
 If this option is set to 1 then the bookmarks table will be displayed.
 
-This option can be toggled dynamically with the |NERDTree-B| mapping.
+This option can be toggled dynamically, per tree, with the |NERDTree-B| mapping.
 
 ------------------------------------------------------------------------------
                                                            *NERDTreeShowFiles*
@@ -754,9 +768,9 @@ Default: 1.
 If this option is set to 1 then files are displayed in the NERD tree. If it is
 set to 0 then only directories are displayed.
 
-This option can be toggled dynamically with the |NERDTree-F| mapping and is
-useful for drastically shrinking the tree when you are navigating to a
-different part of the tree.
+This option can be toggled dynamically, per tree, with the |NERDTree-F|
+mapping and is useful for drastically shrinking the tree when you are
+navigating to a different part of the tree.
 
 ------------------------------------------------------------------------------
                                                           *NERDTreeShowHidden*
@@ -764,8 +778,8 @@ Values: 0 or 1.
 Default: 0.
 
 This option tells vim whether to display hidden files by default. This option
-can be dynamically toggled with the |NERDTree-H| mapping.
-Use one of the follow lines to set this option: >
+can be dynamically toggled, per tree, with the |NERDTree-H| mapping.  Use one
+of the follow lines to set this option: >
     let NERDTreeShowHidden=0
     let NERDTreeShowHidden=1
 <
@@ -875,15 +889,47 @@ fridge for later ;)
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog*
 
+2.13.0
+    - make NERDTreeChDir option default to 0 (i.e. never change vims current
+      working dir by default)
+    - when moving/deleting nodes with the filesystem menu, move/delete any
+      associated bookmarks
+    - make the t/T on directory nodes open a fresh NERD tree for the selected
+      dir in a new tab, rather than a netrw.
+    - place the cursor at the top of the bookmarks table when opening it with B
+    - make NERDTreeQuitOnOpen option work with the g<tab> and go mappings,
+      thanks to Maxim Kim for the bug report
+    - change how invalid bookmarks are handled. Now they are not deleted. If a
+      bookmark is malformed (in the bookmarks file) or points to an
+      invalid/nonexisting location then print an error and place the offending
+      bookmarks at the bottom of the bookmarks file. See :help
+      |NERDTreeInvalidBookmarks| for info. Thanks to Zhang Shuhan for the
+      suggestion and the testing.
+    - fix a bug with the 'o' mapping that occurred when opening a new buffer
+      for a file whose name was a substring of an already open file. Thanks to
+      Charlton Wang for the report.
+    - stop the script from going into an infinite loop when it tries to cache
+      a named pipe. Thanks to Charlton Wang for the report.
+
 2.12.0
     - added a UI for bookmarks. See :help NERDTreeBookmarkTable for details.
-    - combined the NERDTreeWinPos and NERDTreeSplitVertical. See :help
+      Thanks to Zhang Shuhan for testing and bug reports.
+    - relaxed the restrictions on bookmark names, now the only restriction is
+      that they cant contain spaces. This allows for e.g. Chinese bookmark
+      names. Thanks to Zhang Shuhan for the suggestion.
+    - combined the NERDTreeWinPos and NERDTreeSplitVertical options. See :help
       NERDTreeWinPos.
     - applied a patch from Matan Nassau to add the NERDTreeQuitOnOpen option
       which closes the tree window after opening a file. See :help
       NERDTreeQuitOnOpen.
+    - optimised the nerd tree rendering. Now it takes just over 1/3 of the time
+      it previously took to render.
+    - now the tree filter mappings toggle the filters "per tree" rather than
+      globally. The global filter variables are used to set the initial filter
+      settings for each new NERD tree.
     - fix to window resizing when opening a file when NERD tree is the only
       window open
+    - other fixes
 
 2.11.0
     - changes to the 'o' mapping when opening files:
@@ -1138,7 +1184,8 @@ Thanks to Olivier Yiptong for prompting me to make line numbers in the
 NERD tree window optional.
 
 Thanks to Zhang Shuhan for all of his emails and testing to help improve the
-NERD tree path handling.
+NERD tree path handling. Thanks also for suggesting the bookmarks gui, and for
+testing and his many suggestions and bugreports about bookmarks.
 
 Thanks to Cory Echols for sending a patch to add the :NERDTreeClose command and
 set the NERD tree buffers filetype to 'nerdtree'
@@ -1150,6 +1197,13 @@ Thanks to Yuan Jiang for suggesting the "o" mapping shouldnt clobber "special"
 windows, like taglist.
 
 Thanks to Matan Nassau for the patch to add the NERDTreeQuitOnOpen option.
+
+Thanks to Maxim Kim for reporting a bug with g<tab> and go mappings when
+NERDTreeQuitOnOpen was set.
+
+Thanks to Charlton Wang for reporting bugs with the 'o' mapping and with
+handling named pipes.
+
 ==============================================================================
 9. License                                                   *NERDTreeLicense*
 
