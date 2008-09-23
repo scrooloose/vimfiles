@@ -94,8 +94,8 @@ vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
 vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
 
 
-" jump to last cursor position when opening a file
-" dont do it when writing a commit log entry
+"jump to last cursor position when opening a file
+"dont do it when writing a commit log entry
 autocmd BufReadPost * call SetCursorPosition()
 function! SetCursorPosition()
     if &filetype !~ 'commit\c'
@@ -105,6 +105,28 @@ function! SetCursorPosition()
     end
 endfunction
 
+"define :Lorem command to dump in a paragraph of lorem ipsum
+command! -nargs=0 Lorem :normal iLorem ipsum dolor sit amet, consectetur
+      \ adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+      \ magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+      \ ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+      \ irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+      \ fugiat nulla pariatur.  Excepteur sint occaecat cupidatat non
+      \ proident, sunt in culpa qui officia deserunt mollit anim id est
+      \ laborum
+
+"define :HighlightExcessColumns command to highlight the offending parts of
+"lines that are "too long". where "too long" is defined by &textwidth or an
+"arg passed to the command 
+command! -nargs=? HighlightExcessColumns call s:HighlightExcessColumns('<args>')
+function! s:HighlightExcessColumns(width)
+    let targetWidth = a:width != '' ? a:width : &textwidth
+    if targetWidth > 0
+        exec 'match Todo /\%>' . (targetWidth+1) . 'v/'
+    else
+        echomsg "HighlightExcessColumns: set a &textwidth, or pass one in"
+    endif
+endfunction
 
 "simple template system
 command! -complete=customlist,<SID>AvailableTemplates -n=1
