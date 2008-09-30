@@ -54,8 +54,8 @@ function! s:AddHTMLMapsFor(ft)
     let g:template[a:ft]['style'] ="<style type=\"text/css\">\<CR>".g:rs.g:re."\<CR></style>"
 
 
-    let g:template[a:ft]['href'] ='<a href="".g:rs.g:re."">".g:rs.g:re."</a>'
-    let g:template[a:ft]['link'] ='<link rel="stylesheet" type="text/css" href="".g:rs.g:re."" />'
+    let g:template[a:ft]['href'] ="<a href=\"".g:rs.g:re."\">".g:rs.g:re."</a>"
+    let g:template[a:ft]['link'] ="<link rel=\"stylesheet\" type=\"text/css\" href=\"".g:rs.g:re."\" />"
 
 endfunction
 
@@ -74,10 +74,10 @@ let g:template['eruby']['<%='] ="<%= ".g:rs.g:re." %>"
 let g:template['eruby']['<%=h'] ="<%=h ".g:rs.g:re." %>"
 let g:template['eruby']['cs'] ="<%= collection_select ".g:rs."object".g:re.", ".g:rs."method".g:re.", ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[options]".g:re.", ".g:rs."[html_options]".g:re." %>"
 let g:template['eruby']['ofcfs'] ="<%= options_from_collection_for_select ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[selected_value]".g:re." %>"
-let g:template['eruby']['sslt'] ='<%= stylesheet_link_tag "".g:rs.g:re."" %>'
-let g:template['eruby']['jsit'] ='<%= javascript_include_tag "".g:rs.g:re."" %>'
-let g:template['eruby']['it'] ='<%= image_tag "".g:rs.g:re."" %>'
-let g:template['eruby']['lt'] ='<%= link_to ".g:rs.g:re.", ".g:rs."dest".g:re." %>'
+let g:template['eruby']['sslt'] ="<%= stylesheet_link_tag \"".g:rs.g:re."\" %>"
+let g:template['eruby']['jsit'] ="<%= javascript_include_tag \"".g:rs.g:re."\" %>"
+let g:template['eruby']['it'] ="<%= image_tag \"".g:rs.g:re."\" %>"
+let g:template['eruby']['lt'] ="<%= link_to \"".g:rs.g:re."\", \"".g:rs."\"dest\"".g:re."\" %>"
 call s:AddHTMLMapsFor('eruby')
 
 "php mappings
