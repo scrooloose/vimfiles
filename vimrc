@@ -73,6 +73,11 @@ set t_Co=256
 "hide buffers when not displayed
 set hidden
 
+"use these place holders with code_complete.vim, the defaults screw up
+"indenting with ruby
+let g:rs = '<+'
+let g:re = '+>'
+
 "make <c-l> clear the highlight as well as redraw
 nnoremap <C-L> :nohls<CR><C-L>
 inoremap <C-L> <C-O>:nohls<CR>
