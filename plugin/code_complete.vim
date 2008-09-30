@@ -156,12 +156,20 @@ function! SwitchRegion()
     if match(getline('.'),g:rs.'.*'.g:re)!=-1 || search(g:rs.'.\{-}'.g:re)!=0
         normal 0
         call search(g:rs,'c',line('.'))
+        let start_col = col(".")
         normal v
         call search(g:re,'e',line('.'))
+        let end_col = col(".")
         if &selection == "exclusive"
             exec "norm " . "\<right>"
         endif
-        return "\<c-\>\<c-n>gvo\<c-g>"
+
+        "if the place holders are empty
+        if (end_col - start_col + 1) == strlen(g:rs) + strlen(g:re)
+            return "\<c-\>\<c-n>gvc"
+        else
+            return "\<c-\>\<c-n>gvo\<c-g>"
+        endif
     else
         if s:doappend == 1
             if g:completekey == "<tab>"
