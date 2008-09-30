@@ -77,7 +77,7 @@ let g:template['eruby']['ofcfs'] ="<%= options_from_collection_for_select ".g:rs
 let g:template['eruby']['sslt'] ="<%= stylesheet_link_tag \"".g:rs.g:re."\" %>"
 let g:template['eruby']['jsit'] ="<%= javascript_include_tag \"".g:rs.g:re."\" %>"
 let g:template['eruby']['it'] ="<%= image_tag \"".g:rs.g:re."\" %>"
-let g:template['eruby']['lt'] ="<%= link_to \"".g:rs.g:re."\", \"".g:rs."\"dest\"".g:re."\" %>"
+let g:template['eruby']['lt'] ="<%= link_to \"".g:rs.g:re."\", ".g:rs."dest".g:re." %>"
 call s:AddHTMLMapsFor('eruby')
 
 "php mappings
