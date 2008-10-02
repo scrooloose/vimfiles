@@ -16,7 +16,7 @@ call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor"
 call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
 
 call CodeCompleteAddTemplate("ruby", "def", "def ".g:rs."function_name".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "class", "class ".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "class", "class ".g:rs.g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
 call CodeCompleteAddTemplate("ruby", "map", "map {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "mapb", "map do |".g:rs."var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "select", "select {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
@@ -32,8 +32,9 @@ call CodeCompleteAddTemplate("ruby", "injectb", "inject do |".g:rs."total".g:re.
 call CodeCompleteAddTemplate("ruby", "detect", "detect {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "detectb", "detect do |".g:rs."var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "do", "do\<CR>".g:rs.g:re."\<CR>end\<CR>")
-
-
+call CodeCompleteAddTemplate("ruby", "if", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "ife", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "case", "case ".g:rs."subject".g:re."\<CR>when ".g:rs."value".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
 
 
 function! s:AddHTMLMapsFor(ft)
