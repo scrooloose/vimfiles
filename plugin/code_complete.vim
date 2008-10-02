@@ -39,9 +39,6 @@
 "                   region start and stop
 "               you can change them as you like.
 "
-"               g:user_defined_snippets
-"                   file name of user defined snippets.
-"
 "           key words:
 "               see "templates" section.
 "==================================================
@@ -64,15 +61,13 @@ if !exists("g:re")
     let g:re = '>`'    "region stop
 endif
 
-if !exists("g:user_defined_snippets")
-    let g:user_defined_snippets = "$VIMRUNTIME/plugin/my_snippets.vim"
-endif
 
 " ----------------------------
 let s:expanded = 0  "in case of inserting char after expand
 let s:signature_list = []
 let s:jumppos = -1
 let s:doappend = 1
+let s:templates = {}
 
 " Autocommands: {{{1
 autocmd BufReadPost,BufNewFile * call CodeCompleteStart()
@@ -131,15 +126,15 @@ endfunction
 
 function! ExpandTemplate(cword)
     "let cword = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
-    if has_key(g:template,&ft)
-        if has_key(g:template[&ft],a:cword)
+    if has_key(s:templates,&ft)
+        if has_key(s:templates[&ft],a:cword)
             let s:jumppos = line('.')
-            return "\<c-w>" . g:template[&ft][a:cword]
+            return "\<c-w>" . s:templates[&ft][a:cword]
         endif
     endif
-    if has_key(g:template['_'],a:cword)
+    if has_key(s:templates['_'],a:cword)
         let s:jumppos = line('.')
-        return "\<c-w>" . g:template['_'][a:cword]
+        return "\<c-w>" . s:templates['_'][a:cword]
     endif
     return ''
 endfunction
@@ -210,47 +205,19 @@ function! GetFileName()
 endfunction
 
 " Templates: {{{1
-" to add templates for new file type, see below
 "
-" "some new file type
-" let g:template['newft'] = {}
-" let g:template['newft']['keyword'] = "some abbrevation"
-" let g:template['newft']['anotherkeyword'] = "another abbrevation"
-" ...
+" To add new templates, use the CodeCompleteAddTemplate() function below.
 "
-" ---------------------------------------------
-" C templates
-let g:template = {}
-let g:template['c'] = {}
-let g:template['c']['co'] = "/*  */\<left>\<left>\<left>"
-let g:template['c']['cc'] = "/**<  */\<left>\<left>\<left>"
-let g:template['c']['df'] = "#define  "
-let g:template['c']['ic'] = "#include  \"\"\<left>"
-let g:template['c']['ii'] = "#include  <>\<left>"
-let g:template['c']['ff'] = "#ifndef  \<c-r>=GetFileName()\<cr>\<CR>#define  \<c-r>=GetFileName()\<cr>".
-            \repeat("\<cr>",5)."#endif  /*\<c-r>=GetFileName()\<cr>*/".repeat("\<up>",3)
-let g:template['c']['for'] = "for( ".g:rs."...".g:re." ; ".g:rs."...".g:re." ; ".g:rs."...".g:re." )\<cr>{\<cr>".
-            \g:rs."...".g:re."\<cr>}\<cr>"
-let g:template['c']['main'] = "int main(int argc, char \*argv\[\])\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['switch'] = "switch ( ".g:rs."...".g:re." )\<cr>{\<cr>case ".g:rs."...".g:re." :\<cr>break;\<cr>case ".
-            \g:rs."...".g:re." :\<cr>break;\<cr>default :\<cr>break;\<cr>}"
-let g:template['c']['if'] = "if( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['while'] = "while( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['ife'] = "if( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>} else\<cr>{\<cr>".g:rs."...".
-            \g:re."\<cr>}"
+" Example:
+"
+"  call CodeCompleteAddTemplate('java', 'println', 'System.out.println('.g:rs.g:re.')')
+"
+function! CodeCompleteAddTemplate(filetype, keyword, expansion)
+    if !exists("s:templates['".a:filetype."']")
+        let s:templates[a:filetype] = {}
+    endif
 
-" ---------------------------------------------
-" C++ templates
-let g:template['cpp'] = g:template['c']
-
-" ---------------------------------------------
-" common templates
-let g:template['_'] = {}
-let g:template['_']['xt'] = "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>"
-
-" ---------------------------------------------
-" load user defined snippets
-exec "silent! runtime ".g:user_defined_snippets
-
+    let s:templates[a:filetype][a:keyword] = a:expansion
+endfunction
 
 " vim: set ft=vim ff=unix fdm=marker :
