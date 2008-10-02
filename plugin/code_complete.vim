@@ -68,6 +68,7 @@ let s:signature_list = []
 let s:jumppos = -1
 let s:doappend = 1
 let s:templates = {}
+let s:templates['_'] = {}
 
 " Autocommands: {{{1
 autocmd BufReadPost,BufNewFile * call CodeCompleteStart()
