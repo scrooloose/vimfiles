@@ -99,14 +99,14 @@ call CodeCompleteAddTemplate("vim", "com", "command! -nargs=".g:rs."number_of_ar
 
 "global {{{1
 
-function! Modeline()
+function! ModelineSnippet()
     let start_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\1', '')
     let end_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\2', '')
     return start_comment . " vim: set " . g:rs."settings".g:re . ":" . end_comment
 endfunction
 
 
-call CodeCompleteAddTemplate("_", "modeline", "\<c-r>=Modeline()\<cr>")
+call CodeCompleteAddTemplate("_", "modeline", "\<c-r>=ModelineSnippet()\<cr>")
 
 
 " modeline {{{1
