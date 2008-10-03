@@ -133,13 +133,17 @@ function! ExpandTemplate(cword)
             if len(s:templates[&ft][a:cword]) == 1
                 return "\<c-w>" . s:templates[&ft][a:cword][0]
             else
-                return "\<c-w>" . s:ChooseSnippet(a:cword)
+                return "\<c-w>" . s:ChooseSnippet(&filetype, a:cword)
             endif
         endif
     endif
     if has_key(s:templates['_'],a:cword)
         let s:jumppos = line('.')
-        return "\<c-w>" . s:templates['_'][a:cword]
+        if len(s:templates['_'][a:cword]) == 1
+            return "\<c-w>" . s:templates['_'][a:cword][0]
+        else
+            return "\<c-w>" . s:ChooseSnippet('_', a:cword)
+        endif
     endif
     return ''
 endfunction
@@ -212,12 +216,12 @@ endfunction
 "asks the user to select a snippet for the given keyword
 "
 "returns the body of the chosen snippet
-function! s:ChooseSnippet(keyword)
+function! s:ChooseSnippet(filetype, keyword)
     "build the dialog/choice list
     let choices = ["Choose a snippet:"]
     let i = 0
-    while i < len(s:templates[&ft][a:keyword])
-        call add(choices, i+1 . "." . substitute(s:templates[&ft][a:keyword][i], "\r", '<CR>', 'g'))
+    while i < len(s:templates[a:filetype][a:keyword])
+        call add(choices, i+1 . "." . substitute(s:templates[a:filetype][a:keyword][i], "\r", '<CR>', 'g'))
         let i += 1
     endwhile
 
@@ -233,7 +237,7 @@ function! s:ChooseSnippet(keyword)
         return ""
     endif
 
-    return s:templates[&ft][a:keyword][choice-1]
+    return s:templates[a:filetype][a:keyword][choice-1]
 endfunction
 
 " Templates: {{{1
