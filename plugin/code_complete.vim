@@ -126,11 +126,15 @@ function! FunctionComplete(fun)
 endfunction
 
 function! ExpandTemplate(cword)
-    "let cword = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
     if has_key(s:templates,&ft)
         if has_key(s:templates[&ft],a:cword)
             let s:jumppos = line('.')
-            return "\<c-w>" . s:templates[&ft][a:cword]
+
+            if len(s:templates[&ft][a:cword]) == 1
+                return "\<c-w>" . s:templates[&ft][a:cword][0]
+            else
+                return "\<c-w>" . s:ChooseSnippet(a:cword)
+            endif
         endif
     endif
     if has_key(s:templates['_'],a:cword)
@@ -205,6 +209,33 @@ function! GetFileName()
     return _name
 endfunction
 
+"asks the user to select a snippet for the given keyword
+"
+"returns the body of the chosen snippet
+function! s:ChooseSnippet(keyword)
+    "build the dialog/choice list
+    let choices = ["Choose a snippet:"]
+    let i = 0
+    while i < len(s:templates[&ft][a:keyword])
+        call add(choices, i+1 . "." . substitute(s:templates[&ft][a:keyword][i], "\r", '<CR>', 'g'))
+        let i += 1
+    endwhile
+
+    "input(save|restore) needed because this function is called during a
+    "mapping
+    call inputsave()
+    let choice = inputlist(choices)
+    call inputrestore()
+    redraw!
+
+    if choice <= 0 || choice >= len(choices)
+        echoerr "Invalid choice"
+        return ""
+    endif
+
+    return s:templates[&ft][a:keyword][choice-1]
+endfunction
+
 " Templates: {{{1
 "
 " To add new templates, use the CodeCompleteAddTemplate() function below.
@@ -214,11 +245,15 @@ endfunction
 "  call CodeCompleteAddTemplate('java', 'println', 'System.out.println('.g:rs.g:re.')')
 "
 function! CodeCompleteAddTemplate(filetype, keyword, expansion)
-    if !exists("s:templates['".a:filetype."']")
+    if !has_key(s:templates, a:filetype)
         let s:templates[a:filetype] = {}
     endif
 
-    let s:templates[a:filetype][a:keyword] = a:expansion
+    if !has_key(s:templates[a:filetype], a:keyword)
+        let s:templates[a:filetype][a:keyword] = []
+    endif
+
+    call add(s:templates[a:filetype][a:keyword], a:expansion)
 endfunction
 
 " vim: set ft=vim ff=unix fdm=marker :
