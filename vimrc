@@ -76,6 +76,7 @@ set hidden
 "use these place holders with code_complete.vim, the defaults screw up
 "indenting with ruby
 let g:rs = '<+'
+let g:rsd = '<+='
 let g:re = '+>'
 
 "make <c-l> clear the highlight as well as redraw

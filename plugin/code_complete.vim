@@ -61,6 +61,9 @@ if !exists("g:re")
     let g:re = '>`'    "region stop
 endif
 
+if !exists("g:rsd")
+    let g:rsd = '`<+'    "region start with default value
+endif
 
 " ----------------------------
 let s:expanded = 0  "in case of inserting char after expand
@@ -81,11 +84,16 @@ menu <silent>       &Tools.Code\ Complete\ Stop           :call CodeCompleteStop
 
 function! CodeCompleteStart()
     exec "silent! iunmap  <buffer> ".g:completekey
-    exec "inoremap <buffer> ".g:completekey." <c-r>=CodeComplete()<cr><c-r>=SwitchRegion()<cr>"
+    exec "silent! nunmap  <buffer> ".g:completekey
+    exec "inoremap <buffer> ".g:completekey." <c-r>=CodeComplete()<cr><c-r>=SwitchRegion(0)<cr>"
+    exec "nnoremap <buffer> ".g:completekey." i<c-r>=SwitchRegion(0)<cr>"
+    exec "snoremap <buffer> ".g:completekey." <esc>i<c-r>=SwitchRegion(1)<cr>"
 endfunction
 
 function! CodeCompleteStop()
     exec "silent! iunmap <buffer> ".g:completekey
+    exec "silent! nunmap <buffer> ".g:completekey
+    exec "silent! sunmap <buffer> ".g:completekey
 endfunction
 
 function! FunctionComplete(fun)
@@ -126,39 +134,43 @@ function! FunctionComplete(fun)
 endfunction
 
 function! ExpandTemplate(cword)
+    let snippets = []
     if has_key(s:templates,&ft)
         if has_key(s:templates[&ft],a:cword)
-            let s:jumppos = line('.')
-
-            if len(s:templates[&ft][a:cword]) == 1
-                return "\<c-w>" . s:templates[&ft][a:cword][0]
-            else
-                return "\<c-w>" . s:ChooseSnippet(&filetype, a:cword)
-            endif
+            let snippets = extend(snippets, s:templates[&ft][a:cword])
         endif
     endif
     if has_key(s:templates['_'],a:cword)
+        let snippets = extend(snippets, s:templates['_'][a:cword])
+    endif
+
+    if len(snippets)
         let s:jumppos = line('.')
-        if len(s:templates['_'][a:cword]) == 1
-            return "\<c-w>" . s:templates['_'][a:cword][0]
+        if len(snippets) == 1
+            return "\<c-w>" . snippets[0]
         else
-            return "\<c-w>" . s:ChooseSnippet('_', a:cword)
+            return "\<c-w>" . s:ChooseSnippet(snippets)
         endif
     endif
+
     return ''
 endfunction
 
-function! SwitchRegion()
+function! SwitchRegion(removeDefaults)
     if len(s:signature_list)>1
         let s:signature_list=[]
         return ''
     endif
     if s:jumppos != -1
-        call cursor(s:jumppos,0)
+        call cursor(s:jumppos,1)
         let s:jumppos = -1
     endif
-    if match(getline('.'),g:rs.'.*'.g:re)!=-1 || search(g:rs.'.\{-}'.g:re)!=0
-        normal 0
+
+    if a:removeDefaults
+        call s:RemoveDefaultMarkers()
+    endif
+
+    if search(g:rs.'.\{-}'.g:re, 'c') != 0
         call search(g:rs,'c',line('.'))
         let start_col = col(".")
         normal v
@@ -213,15 +225,15 @@ function! GetFileName()
     return _name
 endfunction
 
-"asks the user to select a snippet for the given keyword
+"asks the user to select a snippet from the given list
 "
 "returns the body of the chosen snippet
-function! s:ChooseSnippet(filetype, keyword)
+function! s:ChooseSnippet(snippets)
     "build the dialog/choice list
     let choices = ["Choose a snippet:"]
     let i = 0
-    while i < len(s:templates[a:filetype][a:keyword])
-        call add(choices, i+1 . "." . substitute(s:templates[a:filetype][a:keyword][i], "\r", '<CR>', 'g'))
+    while i < len(a:snippets)
+        call add(choices, i+1 . "." . substitute(a:snippets[i], "\r", '<CR>', 'g'))
         let i += 1
     endwhile
 
@@ -237,7 +249,34 @@ function! s:ChooseSnippet(filetype, keyword)
         return ""
     endif
 
-    return s:templates[a:filetype][a:keyword][choice-1]
+    return a:snippets[choice-1]
+endfunction
+
+
+"removes a set of default markers for the current cursor postion
+"
+"i.e. turn this
+"   foo `<=foobar>` foo
+
+"into this
+"
+"  foo foobar foo
+function! s:RemoveDefaultMarkers()
+    let col = col(".")
+
+    "check for default markers at current position
+    if strpart(getline('.'), col-1, strlen(g:rsd)) == g:rsd
+
+        "remove them
+        let line = getline(".")
+        let start = col-1
+        let startOfBody = start + strlen(g:rsd)
+        let end = match(line, g:re, start)
+        let line = strpart(line, 0, start) .
+            \ strpart(line, startOfBody, end - startOfBody) .
+            \ strpart(line, end+strlen(g:re))
+        call setline(line("."), line)
+    endif
 endfunction
 
 " Templates: {{{1

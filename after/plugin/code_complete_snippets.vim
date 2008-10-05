@@ -26,7 +26,7 @@ call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re
 call CodeCompleteAddTemplate("ruby", "bvoc", "before_validation_on_create ".g:rs.g:re)
 call CodeCompleteAddTemplate("ruby", "bv", "before_validation ".g:rs.g:re)
 
-call CodeCompleteAddTemplate("ruby", "RDL", "RAILS_DEFAULT_LOGGER.debug ".g:rs.g:re)
+call CodeCompleteAddTemplate("ruby", "RDL", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
 
 call CodeCompleteAddTemplate("ruby", "rmc", "remove_column :".g:rs."table".g:re.", :".g:rs."column".g:re."")
 call CodeCompleteAddTemplate("ruby", "rnc", "rename_column :".g:rs."table".g:re.", :".g:rs."old".g:re.", :".g:rs."new".g:re."")
@@ -38,16 +38,14 @@ call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor"
 call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
 
 call CodeCompleteAddTemplate("ruby", "def", "def ".g:rs."function_name".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "def", "def omg".g:rs.g:re)
-call CodeCompleteAddTemplate("ruby", "def", "class ".g:rs.g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
-call CodeCompleteAddTemplate("ruby", "class", "class ".g:rs.g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
+call CodeCompleteAddTemplate("ruby", "class", "class ".g:rs."Name".g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
 call CodeCompleteAddTemplate("ruby", "map", "map {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "mapb", "map do |".g:rs."var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "select", "select {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "selectb", "select do |".g:rs."var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "sort", "sort {|".g:rs."var1".g:re.",".g:rs."var2".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "sortb", "sort do |".g:rs."var1".g:re.",".g:rs."var2".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "each", "each {|".g:rs."var".g:re."| ".g:rs."body".g:re."}")
+call CodeCompleteAddTemplate("ruby", "each", "each {|".g:rsd."x".g:re."| ".g:rs."".g:re."}")
 call CodeCompleteAddTemplate("ruby", "eachb", "each do |".g:rs."var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "each_with_index", "each_with_index {|".g:rs."var".g:re.",i| ".g:rs.g:re."}")
 call CodeCompleteAddTemplate("ruby", "each_with_indexb", "each_with_index do |".g:rs."var".g:re.",i|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
@@ -96,11 +94,14 @@ call CodeCompleteAddTemplate("vim", "func", "function! ".g:rs."name".g:re."(".g:
 call CodeCompleteAddTemplate("vim", "au", "autocmd ".g:rs."events".g:re." ".g:rs."pattern".g:re." ".g:rs."command".g:re)
 call CodeCompleteAddTemplate("vim", "com", "command! -nargs=".g:rs."number_of_args".g:re." ".g:rs."other_params".g:re." ".g:rs."name".g:re." ".g:rs."command".g:re)
 
+"java {{{
+call CodeCompleteAddTemplate("java", "for", "for(".g:rsd."int i".g:re."; ".g:rs."condition".g:re."; ".g:rsd."i++".g:re."){\<CR>".g:rs.g:re."\<CR>}")
+
 
 "global {{{1
 
 function! ModelineSnippet()
-    let start_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\1', '')
+    let start_comment = substitute(&commentstring, '^\([^ ]*\)\s*%s\(.*\)$', '\1', '')
     let end_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\2', '')
     return start_comment . " vim: set " . g:rs."settings".g:re . ":" . end_comment
 endfunction
