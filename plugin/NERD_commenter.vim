@@ -2,8 +2,8 @@
 " File:        NERD_commenter.vim
 " Description: vim global plugin that provides easy code commenting
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Version:     2.1.17
-" Last Change: 27 June, 2008
+" Version:     2.2.0
+" Last Change: 4th October, 2008
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -771,6 +771,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('','')
     elseif a:filetype == "SVNdiff"
         call s:MapDelimiters('','')
+    elseif a:filetype == "SVNinfo"
+        call s:MapDelimiters('','')
     elseif a:filetype == "systemverilog"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "tads"
@@ -811,6 +813,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "tssgm"
         call s:MapDelimiters("comment = '","'")
+    elseif a:filetype == "txt2tags"
+        call s:MapDelimiters('%','')
     elseif a:filetype == "uc"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "uil"
@@ -1000,13 +1004,13 @@ function s:AppendCommentToLine()
 
     "stick the delimiters down at the end of the line. We have to format the
     "comment with spaces as appropriate
-    execute ":normal " . insOrApp . (isLineEmpty ? '' : ' ') . left . right . " "
+    execute ":normal! " . insOrApp . (isLineEmpty ? '' : ' ') . left . right . " "
 
     " if there is a right delimiter then we gotta move the cursor left
     " by the len of the right delimiter so we insert between the delimiters
     if lenRight > 0
         let leftMoveAmount = lenRight
-        execute ":normal " . leftMoveAmount . "h"
+        execute ":normal! " . leftMoveAmount . "h"
     endif
     startinsert
 endfunction
@@ -1147,10 +1151,9 @@ endfunction
 " Args:
 "   -forceNested: a flag indicating whether the called is requesting the comment
 "    to be nested if need be
-"   -alignRight/alignLeft: 0/1 if the comments delimiters should/shouldnt be
-"    aligned left/right
+"   -align: should be "left" or "both" or "none"
 "   -firstLine/lastLine: the top and bottom lines to comment
-function s:CommentLines(forceNested, alignLeft, alignRight, firstLine, lastLine)
+function s:CommentLines(forceNested, align, firstLine, lastLine)
     " we need to get the left and right indexes of the leftmost char in the
     " block of of lines and the right most char so that we can do alignment of
     " the delimiters if the user has specified
@@ -1182,12 +1185,12 @@ function s:CommentLines(forceNested, alignLeft, alignRight, firstLine, lastLine)
 
             " check if we can comment this line
             if !isCommented || g:NERDUsePlaceHolders || s:Multipart()
-                if a:alignLeft
+                if a:align == "left" || a:align == "both"
                     let theLine = s:AddLeftDelimAligned(s:GetLeft(0,1,0), theLine, leftAlignIndx)
                 else
                     let theLine = s:AddLeftDelim(s:GetLeft(0,1,0), theLine)
                 endif
-                if a:alignRight
+                if a:align == "both"
                     let theLine = s:AddRightDelimAligned(s:GetRight(0,1,0), theLine, rightAlignIndx)
                 else
                     let theLine = s:AddRightDelim(s:GetRight(0,1,0), theLine)
@@ -1436,7 +1439,7 @@ function s:CommentRegion(topLine, topCol, bottomLine, bottomCol, forceNested)
         let topOfRange = a:topLine+1
         let bottomOfRange = a:bottomLine-1
         if topOfRange <= bottomOfRange
-            call s:CommentLines(a:forceNested, 0, 0, topOfRange, bottomOfRange)
+            call s:CommentLines(a:forceNested, "none", topOfRange, bottomOfRange)
         endif
 
         "comment the bottom line
@@ -1494,15 +1497,15 @@ function s:InvertComment(firstLine, lastLine)
     endwhile
 endfunction
 
-" Function: NERDComment(isVisual, alignLeft, alignRight, type) function {{{2
+" Function: NERDComment(isVisual, type) function {{{2
 " This function is a Wrapper for the main commenting functions
 "
 " Args:
 "   -isVisual: a flag indicating whether the comment is requested in visual
 "    mode or not
 "   -type: the type of commenting requested. Can be 'sexy', 'invert',
-"    'minimal', 'toggle', 'alignLeft', 'alignRight', 'alignBoth', 'norm',
-"    'nested', 'toEOL', 'prepend', 'append', 'insert', 'uncomment', 'yank'
+"    'minimal', 'toggle', 'alignLeft', 'alignBoth', 'norm',
+"    'nested', 'toEOL', 'append', 'insert', 'uncomment', 'yank'
 function! NERDComment(isVisual, type) range
     " we want case sensitivity when commenting
     let oldIgnoreCase = &ignorecase
@@ -1528,13 +1531,17 @@ function! NERDComment(isVisual, type) range
         elseif a:isVisual && visualmode() == "v" && (g:NERDCommentWholeLinesInVMode==0 || (g:NERDCommentWholeLinesInVMode==2 && s:HasMultipartDelims()))
             call s:CommentRegion(firstLine, firstCol, lastLine, lastCol, forceNested)
         else
-            call s:CommentLines(forceNested, 0, 0, firstLine, lastLine)
+            call s:CommentLines(forceNested, "none", firstLine, lastLine)
         endif
 
-    elseif a:type == 'alignLeft' || a:type == 'alignRight' || a:type == 'alignBoth'
-        let alignLeft = (a:type == 'alignLeft' || a:type == 'alignBoth')
-        let alignRight = (a:type == 'alignRight' || a:type == 'alignBoth')
-        call s:CommentLines(forceNested, alignLeft, alignRight, firstLine, lastLine)
+    elseif a:type == 'alignLeft' || a:type == 'alignBoth'
+        let align = "none"
+        if a:type == "alignLeft"
+            let align = "left"
+        elseif a:type == "alignBoth"
+            let align = "both"
+        endif
+        call s:CommentLines(forceNested, align, firstLine, lastLine)
 
     elseif a:type == 'invert'
         call s:InvertComment(firstLine, lastLine)
@@ -1543,7 +1550,7 @@ function! NERDComment(isVisual, type) range
         try
             call s:CommentLinesSexy(firstLine, lastLine)
         catch /NERDCommenter.Delimiters/
-            call s:CommentLines(forceNested, 0, 0, firstLine, lastLine)
+            call s:CommentLines(forceNested, "none", firstLine, lastLine)
         catch /NERDCommenter.Nesting/
             call s:NerdEcho("Sexy comment aborted. Nested sexy cannot be nested", 0)
         endtry
@@ -1571,9 +1578,6 @@ function! NERDComment(isVisual, type) range
         call s:CommentBlock(firstLine, firstLine, col("."), col("$")-1, 1)
         call s:RestoreScreenState()
 
-    elseif a:type == 'prepend'
-        call s:PrependCommentToLine()
-
     elseif a:type == 'append'
         call s:AppendCommentToLine()
 
@@ -1585,11 +1589,11 @@ function! NERDComment(isVisual, type) range
 
     elseif a:type == 'yank'
         if a:isVisual
-            normal gvy
+            normal! gvy
         elseif countWasGiven
             execute firstLine .','. lastLine .'yank'
         else
-            normal Y
+            normal! yy
         endif
         execute firstLine .','. lastLine .'call NERDComment('. a:isVisual .', "norm")'
     endif
@@ -1626,19 +1630,19 @@ function s:PlaceDelimitersAndInsBetween()
     " place the delimiters down. We do it differently depending on whether
     " there is a left AND right delimiter
     if lenRight > 0
-        execute ":normal " . insOrApp . left . right
-        execute ":normal " . lenRight . "h"
+        execute ":normal! " . insOrApp . left . right
+        execute ":normal! " . lenRight . "h"
     else
-        execute ":normal " . insOrApp . left
+        execute ":normal! " . insOrApp . left
 
         " if we are tacking the delim on the EOL then we gotta add a space
         " after it cos when we go out of insert mode the cursor will move back
         " one and the user wont be in position to type the comment.
         if isDelimOnEOL
-            execute 'normal a '
+            execute 'normal! a '
         endif
     endif
-    normal l
+    normal! l
 
     "if needed convert spaces back to tabs and adjust the cursors col
     "accordingly
@@ -1651,46 +1655,6 @@ function s:PlaceDelimitersAndInsBetween()
     startinsert
 endfunction
 
-" Function: s:PrependCommentToLine(){{{2
-" This function prepends comment delimiters to the start of line and places
-" the cursor in position to start typing the comment
-function s:PrependCommentToLine()
-    " get the left and right delimiters without any escape chars in them
-    let left = s:GetLeft(0, 1, 0)
-    let right = s:GetRight(0, 1, 0)
-
-    " get the len of the right delim
-    let lenRight = strlen(right)
-
-
-    "if the line is empty then we need to know about this later on
-    let isLineEmpty = strlen(getline(".")) == 0
-
-    "stick the delimiters down at the start of the line. We have to format the
-    "comment with spaces as appropriate
-    if lenRight > 0
-        execute ":normal I" . left . right
-    else
-        execute ":normal I" . left
-    endif
-
-    " if there is a right delimiter then we gotta move the cursor left
-    " by the len of the right delimiter so we insert between the delimiters
-    if lenRight > 0
-        let leftMoveAmount = lenRight
-        execute ":normal " . leftMoveAmount . "h"
-    endif
-    normal l
-
-    "if the line was empty then we gotta add an extra space on the end because
-    "the cursor will move back one more at the end of the last "execute"
-    "command
-    if isLineEmpty && lenRight == 0
-        execute ":normal a "
-    endif
-
-    startinsert
-endfunction
 " Function: s:RemoveDelimiters(left, right, line) {{{2
 " this function is called to remove the first left comment delimiter and the
 " last right delimiter of the given line.
@@ -1847,7 +1811,7 @@ function s:UncommentLinesSexy(topline, bottomline)
     " if the first line contains only the left delim then just delete it
     if theLine =~ '^[ \t]*' . left . '[ \t]*$' && !g:NERDCompactSexyComs
         call cursor(a:topline, 1)
-        normal dd
+        normal! dd
         let bottomline = bottomline - 1
 
     " topline contains more than just the left delim
@@ -1871,7 +1835,7 @@ function s:UncommentLinesSexy(topline, bottomline)
     " if the bottomline contains only the right delim then just delete it
     if theLine =~ '^[ \t]*' . right . '[ \t]*$'
         call cursor(bottomline, 1)
-        normal dd
+        normal! dd
 
     " the last line contains more than the right delim
     else
@@ -3084,7 +3048,7 @@ function s:RestoreScreenState()
     endif
 
     call cursor(t:NERDComOldTopLine, 0)
-    normal zt
+    normal! zt
     call setpos(".", t:NERDComOldPos)
 endfunction
 
@@ -3260,10 +3224,6 @@ vmap <silent> <plug>NERDCommenterYank <ESC>:call NERDComment(1, "yank")<CR>
 nnoremap <silent> <plug>NERDCommenterAlignLeft :call NERDComment(0, "alignLeft")<cr>
 vnoremap <silent> <plug>NERDCommenterAlignLeft <ESC>:call NERDComment(1, "alignLeft")<cr>
 
-" right aligned comments
-nnoremap <silent> <plug>NERDCommenterAlignRight :call NERDComment(0, "alignRight")<cr>
-vnoremap <silent> <plug>NERDCommenterAlignRight <ESC>:call NERDComment(1, "alignRight")<cr>
-
 " left and right aligned comments
 nnoremap <silent> <plug>NERDCommenterAlignBoth :call NERDComment(0, "alignBoth")<cr>
 vnoremap <silent> <plug>NERDCommenterAlignBoth <ESC>:call NERDComment(1, "alignBoth")<cr>
@@ -3282,9 +3242,6 @@ nnoremap <silent> <plug>NERDCommenterToEOL :call NERDComment(0, "toEOL")<cr>
 " append comments
 nmap <silent> <plug>NERDCommenterAppend :call NERDComment(0, "append")<cr>
 
-" prepend comments
-nmap <silent> <plug>NERDCommenterPrepend :call NERDComment(0, "prepend")<cr>
-
 " insert comments
 inoremap <silent> <plug>NERDCommenterInInsert <SPACE><BS><ESC>:call NERDComment(0, "insert")<CR>
 
@@ -3300,23 +3257,21 @@ function! s:CreateMaps(target, combo)
 endfunction
 
 if g:NERDCreateDefaultMappings
-    call s:CreateMaps('<plug>NERDCommenterComment',    '<leader>cc')
-    call s:CreateMaps('<plug>NERDCommenterToggle',     '<leader>c<space>')
-    call s:CreateMaps('<plug>NERDCommenterMinimal',    '<leader>cm')
-    call s:CreateMaps('<plug>NERDCommenterSexy',       '<leader>cs')
-    call s:CreateMaps('<plug>NERDCommenterInvert',     '<leader>ci')
-    call s:CreateMaps('<plug>NERDCommenterYank',       '<leader>cy')
-    call s:CreateMaps('<plug>NERDCommenterAlignLeft',  '<leader>cl')
-    call s:CreateMaps('<plug>NERDCommenterAlignRight', '<leader>cr')
-    call s:CreateMaps('<plug>NERDCommenterAlignBoth',  '<leader>cb')
-    call s:CreateMaps('<plug>NERDCommenterNest',       '<leader>cn')
-    call s:CreateMaps('<plug>NERDCommenterUncomment',  '<leader>cu')
-    call s:CreateMaps('<plug>NERDCommenterToEOL',      '<leader>c$')
-    call s:CreateMaps('<plug>NERDCommenterAppend',     '<leader>cA')
-    call s:CreateMaps('<plug>NERDCommenterPrepend',    '<leader>cI')
+    call s:CreateMaps('<plug>NERDCommenterComment',    ',cc')
+    call s:CreateMaps('<plug>NERDCommenterToggle',     ',c<space>')
+    call s:CreateMaps('<plug>NERDCommenterMinimal',    ',cm')
+    call s:CreateMaps('<plug>NERDCommenterSexy',       ',cs')
+    call s:CreateMaps('<plug>NERDCommenterInvert',     ',ci')
+    call s:CreateMaps('<plug>NERDCommenterYank',       ',cy')
+    call s:CreateMaps('<plug>NERDCommenterAlignLeft',  ',cl')
+    call s:CreateMaps('<plug>NERDCommenterAlignBoth',  ',cb')
+    call s:CreateMaps('<plug>NERDCommenterNest',       ',cn')
+    call s:CreateMaps('<plug>NERDCommenterUncomment',  ',cu')
+    call s:CreateMaps('<plug>NERDCommenterToEOL',      ',c$')
+    call s:CreateMaps('<plug>NERDCommenterAppend',     ',cA')
 
     if !hasmapto('<plug>NERDCommenterAltDelims', 'n')
-        nmap <leader>ca <plug>NERDCommenterAltDelims
+        nmap ,ca <plug>NERDCommenterAltDelims
     endif
 endif
 
@@ -3349,10 +3304,8 @@ if g:NERDMenuMode != 0
     call s:CreateMenuItems('<plug>NERDCommenterSexy',       'Sexy', menuRoot)
     call s:CreateMenuItems('<plug>NERDCommenterYank',       'Yank\ then\ comment', menuRoot)
     exec 'nmenu <silent> '. menuRoot .'.Append <plug>NERDCommenterAppend'
-    exec 'nmenu <silent> '. menuRoot .'.Prepend <plug>NERDCommenterPrepend'
     exec 'menu <silent> '. menuRoot .'.-Sep-    :'
     call s:CreateMenuItems('<plug>NERDCommenterAlignLeft',  'Left\ aligned', menuRoot)
-    call s:CreateMenuItems('<plug>NERDCommenterAlignRight', 'Right\ aligned', menuRoot)
     call s:CreateMenuItems('<plug>NERDCommenterAlignBoth',  'Left\ and\ right\ aligned', menuRoot)
     exec 'menu <silent> '. menuRoot .'.-Sep2-    :'
     call s:CreateMenuItems('<plug>NERDCommenterUncomment',  'Uncomment', menuRoot)
