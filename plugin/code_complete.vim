@@ -12,35 +12,62 @@
 "                  ctags -R --c-kinds=+p --fields=+S .
 "
 " Usage:
-"           hotkey:
-"               "<tab>" (default value of g:completekey)
-"               Do all the jobs with this key, see
-"           example:
-"               press <tab> after function name and (
-"                 foo ( <tab>
-"               becomes:
-"                 foo ( `<first param>`,`<second param>` )
-"               press <tab> after code template
-"                 if <tab>
-"               becomes:
-"                 if( `<...>` )
-"                 {
-"                     `<...>`
-"                 }
+"   hotkey:
+"       "<tab>" (default value of g:completekey) Do all the jobs with this key
+"
+"   example:
+"       press <tab> after function name and (
+"         foo ( <tab>
+"       becomes:
+"         foo ( `<first param>`,`<second param>` )
+"       press <tab> after code template
+"         if <tab>
+"       becomes:
+"         if( `<...>` )
+"         {
+"             `<...>`
+"         }
 "
 "
-"           variables:
+" Variables:
+"   g:completekey
+"       the key used to complete function parameters and key words.
+"   g:rs
+"       region start
+"   g:re
+"       region end
+"   g:rsd
+"       start a region with a default value
 "
-"               g:completekey
-"                   the key used to complete function
-"                   parameters and key words.
+" Defining Templates:
+"   Use the function CodeCompleteAddTemplate(filetype, keyword, expansion) for
+"   filetype specific templates.
 "
-"               g:rs, g:re
-"                   region start and stop
-"               you can change them as you like.
+"   Use the function CodeCompleteAddGlobalTemplate(keyword, expansion) for
+"   global templates (available for all filetypes)
 "
-"           key words:
-"               see "templates" section.
+"   Put all your templates in ~/.vim/after/plugin/ or split them up for each
+"   filetype and put them in ~/.vim/ftplugin
+"
+"
+" Example Template: a for loop template for java
+"   call CodeCompleteAddTemplate("java", "for", "for(`<=int i=0>`; `<condition>`; `<=i++>`){\<CR>`<>`\<CR>}")
+"
+"   There are 4 markers:
+"       1. `<=int i=0>`
+"       2. `<condition>`
+"       3. `<=i++>`
+"       4. `<>`
+"
+"   1 and 3 have default values. If you "tab over" them, they will be replaced
+"   with the text "int i=0" and "i++".
+"
+"   2 is a normal marker that must be replaced with the real for loop
+"   condition
+"
+"   4 is an empty marker, these markers are removed when the cursor "arrives"
+"   on them.
+"
 "==================================================
 
 if v:version < 700
@@ -279,14 +306,6 @@ function! s:RemoveDefaultMarkers()
     endif
 endfunction
 
-" Templates: {{{1
-"
-" To add new templates, use the CodeCompleteAddTemplate() function below.
-"
-" Example:
-"
-"  call CodeCompleteAddTemplate('java', 'println', 'System.out.println('.g:rs.g:re.')')
-"
 function! CodeCompleteAddTemplate(filetype, keyword, expansion)
     if !has_key(s:templates, a:filetype)
         let s:templates[a:filetype] = {}
@@ -297,6 +316,10 @@ function! CodeCompleteAddTemplate(filetype, keyword, expansion)
     endif
 
     call add(s:templates[a:filetype][a:keyword], a:expansion)
+endfunction
+
+function! CodeCompleteAddGlobalTemplate(keyword, expansion)
+    call CodeCompleteAddTemplate('_', a:keyword, a:expansion)
 endfunction
 
 " vim: set ft=vim ff=unix fdm=marker :
