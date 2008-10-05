@@ -1,0 +1,365 @@
+*CSApprox.txt*  Bringing GVim colorschemes to the terminal!
+
+                                                     *csapprox* *csapprox.vim*
+
+                  _____ ____ ___                               ~
+                 / ___// __// _ |  ___   ___   ____ ___  __ __ ~
+                / /__ _\ \ / __ | / _ \ / _ \ / __// _ \ \ \ / ~
+                \___//___//_/ |_|/ .__// .__//_/   \___//_\_\  ~
+                                /_/   /_/                      ~
+                                                  For Vim version 7.0 or newer
+                                                      Last changed 05 Oct 2008
+
+                               By Matt Wozniski
+                                mjw@drexel.edu
+
+                              Reference Manual~
+
+                                                                *csapprox-toc*
+
+1. Description                                        |csapprox-intro|
+2. Requirements                                       |csapprox-requirements|
+3. Configuration                                      |csapprox-configure|
+4. Rationale/Design                                   |csapprox-design|
+5. Known Bugs and Limitations                         |csapprox-limitations|
+6. Appendix - Terminals and Palettes                  |csapprox-terminal-list|
+7. Changelog                                          |csapprox-changelog|
+8. Contact Info                                       |csapprox-author|
+
+The functionality mentioned here is a plugin, see |add-plugin|.
+You can avoid loading this plugin by setting the "CSApprox_loaded" global
+variable in your |vimrc| file: >
+    :let g:CSApprox_loaded = 1
+
+==============================================================================
+1. Description                                                *csapprox-intro*
+
+There is a wealth of colorschemes available for Vim.  Unfortunately, since
+traditional terminal emulators have only supported 2, 8 or 16 colors,
+colorscheme authors have tended to avoid writing colorschemes for terminal
+Vim, sticking instead to GVim.  Even now that nearly every popular terminal
+supports either 88 or 256 colors, few colorschemes are written to support
+them.  This may be because the terminal color codes are just numbers from 0 to
+87 or 255 with no semantic meaning, or because the same number doesn't yield
+the same color in all terminals, or simply because the colorscheme author
+doesn't use the terminal and doesn't want to take the time to support
+terminals.
+
+Whatever the reason, this leaves users of many modern terminal emulators in
+the awkward position of having a terminal emulator that supports many colors,
+but having very few colorschemes that were written to utilize those colors.
+
+This is where CSApprox comes in.  It attempts to fill this void by making GVim
+colorschemes transparently backwards compatible with terminal Vim in a high
+color terminal.  Basically, whenever a colorscheme sets some colors for the
+GUI, this script runs and tries to figure out the closest color available in
+the terminal's color palette to the color the colorscheme author wanted.
+Unfortunately, this does not work well all the time, and it has some
+limitations (see |csapprox-limitations|).  Most of the time, however, this
+gives a very close approximation to the GVim colors without requiring any
+changes to the colorscheme, or any user interaction.
+
+==============================================================================
+2. Requirements                                        *csapprox-requirements*
+
+For CSApprox to work, there are 2 major requirements that must be met.
+
+a) GUI support                          *csapprox-gui-support* *csapprox-+gui*
+
+The "vim" binary must be built with GUI support (see |csapprox-limitations|
+for an explanation).  Unfortunately, several Linux distributions only include
+GUI support in their "gvim" binary, and not in their "vim" binary.  You can
+check if GUI support is available by doing: >
+    :echo has('gui')
+
+If that prints 0, the first thing to try would be searching for a larger vim
+package provided by your distribution, like "vim-enhanced" on RedHat/CentOS
+or "vim" or "vim-gnome" on Debian/Ubuntu.
+
+If you are unable to obtain a "vim" binary that includes GUI support, but
+have a "gvim" binary available, you can probably launch Vim with GUI support
+anyway by calling gvim with the |-v| flag in the shell: >
+    gvim -v
+
+If that does not work and no package with GUI support is available, you will
+need to compile Vim yourself and ensure that GUI support is included.  If this
+is inconvenient for you, make sure that the Vim maintainer for your
+distribution knows it.
+
+b) Properly configured terminal                            *csapprox-terminal*
+
+As said above, many modern terminals support 88 or 256 colors, but most of
+these default to setting $TERM to something generic (usually "xterm").  Since
+Vim uses the value of the "colors" attribute for the current $TERM in terminfo
+to figure out the number of colors used internally as 't_Co', this plugin will
+either need for 't_Co' to be set to 88 or 256 in |vimrc|, or for $TERM to be
+set to something that implies high color support.  Possible choices include
+"xterm-256color" for 256 color support and "rxvt-unicode" for 88 color
+support.
+                                                              *csapprox-palettes*
+Also, there are three different 256 color cube palettes available and CSApprox
+has no way to tell which you're using unless $TERM is set to something that is
+specific to the terminal, like "konsole" or "Eterm".  Because of this, the
+most sane behavior is assuming the user is using the most popular palette,
+which is used by all but Konsole and Eterm, whenever $TERM is set to something
+generic like 'xterm' or 'screen'.  You can provide a different default,
+however - see |csapprox-configuration|.
+
+                                                   *csapprox-terminal-example*
+To turn on high color support without fixing $TERM, you can put something like
+this into your |vimrc|: >
+    if &term == 'xterm' && $HOSTNAME == 'my-machine'
+        " On my machine, I use Konsole with 256 color support
+        set t_Co=256
+        let g:CSApprox_konsole = 1
+    endif
+
+==============================================================================
+3. Configuration                                          *csapprox-configure*
+
+There are several global variables that can be set to configure the behavior
+of CSApprox.  They are listed roughly based on the likelihood that the end
+user might want to know about them.
+
+g:CSApprox_loaded                                          *g:CSApprox_loaded*
+    If set in your |vimrc|, CSApprox is not loaded.
+
+g:CSApprox_verbose_level                            *g:CSApprox_verbose_level*
+    When CSApprox is run, the 'verbose' option will be temporarily raised to
+    the value held in this variable unless it is already greater.  The default
+    value is 1, which allows CSApprox to default to warning whenever something
+    is wrong, even if it is recoverable, but allows the user to quiet us if he
+    wants by changing this variable to 0.  The most important messages will be
+    shown at verbosity level 1; some less important ones will be shown at
+    higher verbosity levels.
+
+g:CSApprox_eterm                                            *g:CSApprox_eterm*
+    If set, CSApprox will use the Eterm palette when 'term' is "xterm" or
+    "screen*".  Otherwise, the xterm palette would be used.
+
+g:CSApprox_konsole                                        *g:CSApprox_konsole*
+    If set, CSApprox will use the Konsole palette when 'term' is "xterm" or
+    "screen*".  Otherwise, the xterm palette would be used.
+
+g:CSApprox_attr_map                                      *g:CSApprox_attr_map*
+    Since some attributes (like 'guisp') can't be used in a terminal, and
+    others (like 'italic') are often very ugly in terminals, a generic way to
+    map between a requested attribute and another attribute is included.  This
+    variable should be set to a Dictionary, where the keys are strings
+    representing the attributes the author wanted set, and the values are the
+    strings that the user wants set instead.  If a value is '', it means the
+    attribute should just be ignored.  The default is to replace 'italic' with
+    'underline', and to use 'fg' instead of 'sp': >
+        let g:CSApprox_attr_map = { 'italic' : 'underline', 'sp' : 'fg' }
+<
+    Your author prefers disabling bold and italic entirely, so uses this: >
+        let g:CSApprox_attr_map = { 'bold' : '', 'italic' : '', 'sp' : 'fg' }
+<
+    Note: You can only map an attribute representing a color to another
+          attribute representing a color; likewise with boolean attributes.
+          After all, sp -> bold and italic -> fg would be nonsensical.
+
+g:CSApprox_extra_rgb_txt_dirs                  *g:CSApprox_extra_rgb_txt_dirs*
+    When the colorscheme author uses a color by name, CSApprox needs to figure
+    out what #rrggbb value it stands for.  It does this by parsing rgb.txt,
+    but first needs to locate it.  It has a default search path included, but
+    should it fail to find rgb.txt, this variable can be set to a List of
+    other directories that ought to be searched.  Default search path: >
+    [ /usr/local/share/X11, /usr/share/X11, /etc/X11, /usr/local/lib/X11,
+      /usr/lib/X11, /usr/local/X11R6/lib/X11, /usr/X11R6/lib/X11]
+
+g:CSApprox_approximator_function            *g:CSApprox_approximator_function*
+    If the default approximation function doesn't work well enough, the user
+    (or another author wishing to extend this plugin) can write another
+    approximation function.  This function should take three numbers,
+    representing r, g, and b in decimal, and return the index on the color
+    cube that best matches those colors.  Assigning a |Funcref| to this
+    variable will override the default approximator with the one the Funcref
+    references.
+
+g:CSApprox_redirfallback                            *g:CSApprox_redirfallback*
+    As of Vim 7.2.018, there is a bug in the Vim function synIDattr() that
+    stops it from correctly reporting information for the 'guisp' attribute.
+    CSApprox includes a workaround for this problem, as well as a test that
+    ought to disable this workaround once synIDattr() is working properly.
+    If this test should happen to give improper results somehow, the user can
+    force the behavior with this variable.  When set to 1, the workaround will
+    always be used, and when set to 0, synIDattr() is blindly used.
+
+==============================================================================
+4. Rationale/Design                                          *csapprox-design*
+
+Ideally, the aim is for CSApprox to be completely transparent to the user.
+This is why the approach I take is entirely different from the GuiColorScheme
+script, which will break on any but the simplest colorschemes.  Unfortunately,
+given the difficulty of determining exactly which terminal emulator the user
+is running, and what features it supports, and which color palette it's using,
+perfect transparency is difficult.  So, to this end, I've attempted to default
+to settings that make it unlikely that this script ever makes things worse
+(this is why I chose not to override t_Co to 256 myself), and I've attempted
+to make it easy to override my choice of defaults when necessary (through
+g:CSApprox_approximator_function, g:CSApprox_konsole, g:CSApprox_eterm,
+g:CSApprox_attr_map, etc).  If any of my choices seem to be causing extra work
+with no real advantages, though, I'd like to hear about it.  Feel free to
+email me with any improvements upon my design you might want to suggest.
+
+==============================================================================
+5. Known Bugs and Limitations                           *csapprox-limitations*
+
+GUI support is required.
+
+  There is nothing I can do about this given my chosen design.  CSApprox works
+  by being notified every time a colorscheme sets some GUI colors, then
+  approximating those colors to similar terminal colors.  Unfortunately, when
+  Vim is not built with GUI support, it doesn't bother to store the GUI
+  colors, so querying for them fails.  This leaves me completely unable to
+  tell what the colorscheme was trying to do.  See |csapprox-+gui| for some
+  potential work arounds if your distribution doesn't provide a Vim with +gui.
+
+User intervention is sometimes required for information about the terminal.
+
+  This is really an insurmountable problem.  Unfortunately, most terminal
+  emulators default to setting $TERM to 'xterm', even when they're not really
+  compatible with an xterm.  $TERM is really the only reliable way to
+  find anything at all out about the terminal you're running in, so there's no
+  way to know if the terminal supports 88 or 256 colors without either the
+  terminal telling me (using $TERM) or the user telling me (using t_Co).
+  Similarly, unless $TERM is set to something that implies a certain color
+  palette ought to be used, there's no way for me to know, so I'm forced to
+  default to the most common, xterm's palette, and allow the user to override
+  my choice with |g:CSApprox_konsole| or |g:CSApprox_eterm|.  An example of
+  configuring Vim to work around a terminal where $TERM is set to something
+  generic without configuring the terminal properly is shown at
+  |csapprox-terminal-example|.
+
+Some colorschemes could fail if they try to be too smart.
+
+  A colorscheme could decide to only set colors for the mode Vim is running
+  in.  If a scheme only sets GUI colors when the GUI is running, instead of
+  using the usual approach of setting all colors and letting Vim choose which
+  to use, my approach falls apart.  My method for figuring out what the scheme
+  author wants the scheme to look like absolutely depends upon him setting the
+  GUI colors in all modes.  Fortunately, the few colorschemes that do this
+  seem to be, by and large, intended for 256 color terminals already, meaning
+  that skipping them is the proper behavior.
+
+It's slow.
+
+  For me, it takes Vim's startup time from 0.15 seconds to 0.35 seconds.  This
+  is probably still acceptable, but it is definitely worth trying to cut down
+  on this time in future versions.
+
+==============================================================================
+6. Appendix - Terminals and Palettes                  *csapprox-terminal-list*
+
+What follows is a list of terminals known to have and known not to have high
+color support.  This list is certainly incomplete; feel free to contact me
+with more to add to either list.
+
+                                                     *csapprox-terminals-good*
+------------------------------- Good Terminals -------------------------------
+
+The most recent versions of each of these terminals can be compiled with
+either 88 or 256 color support.
+
+                                                              *csapprox-xterm*
+xterm:
+    256 color palette
+    Colors composed of: [ 0x00, 0x5F, 0x87, 0xAF, 0xD7, 0xFF ]
+    Greys composed of:  [ 0x08, 0x12, 0x1C, 0x26, 0x30, 0x3A, 0x44, 0x4E,
+                          0x58, 0x62, 0x6C, 0x76, 0x80, 0x8A, 0x94, 0x9E,
+                          0xA8, 0xB2, 0xBC, 0xC6, 0xD0, 0xDA, 0xE4, 0xEE ]
+
+                                                              *csapprox-urxvt*
+rxvt-unicode (urxvt):
+    88 colors by default (but a patch is available to use xterm's palette)
+    Colors composed of: [ 0x00, 0x8B, 0xCD, 0xFF ]
+    Greys composed of:  [ 0x2E, 0x5C, 0x73, 0x8B, 0xA2, 0xB9, 0xD0, 0xE7 ]
+
+                                               *csapprox-pterm* *csapprox-putty*
+PuTTY (pterm; putty.exe):
+    256 colors; same palette as xterm
+
+                                                              *csapprox-mrxvt*
+Mrxvt (mrxvt):
+    256 colors; same palette as xterm
+
+                                                     *csapprox-gnome-terminal*
+GNOME Terminal (gnome-terminal):
+    256 colors; same palette as xterm
+
+                                                            *csapprox-roxterm*
+ROXTerm (roxterm):
+    256 colors; same palette as xterm
+
+                                                     *csapprox-xfce4-terminal*
+Terminal (xfce4-terminal):
+    256 colors; same palette as xterm
+
+                                                          *csapprox-iterm.app*
+iTerm (iTerm.app):
+    256 colors; same palette as xterm
+                                                            *csapprox-konsole*
+Konsole (konsole):
+    256 color palette
+    Colors composed of: [ 0x00, 0x33, 0x66, 0x99, 0xCC, 0xFF ]
+    Same greyscales as xterm
+    You should set the g:CSApprox_konsole variable unless $TERM begins with
+    'konsole', case insensitive
+
+                                                              *csapprox-eterm*
+eterm (Eterm):
+    256 color palette
+    Colors composed of: [ 0x00, 0x2A, 0x55, 0x7F, 0xAA, 0xD4 ]
+    Same greyscales as xterm
+    You should set the g:CSApprox_eterm variable unless $TERM begins with
+    'eterm', case insensitive
+
+                                                             *csapprox-screen*
+GNU Screen (screen):
+    256 color support.  Internally, uses the xterm palette, but this is only
+    relevant when running screen inside a terminal with fewer than 256 colors,
+    in which case screen will attempt to map between its own 256 color cube
+    and the colors supported by the real terminal to the best of its ability.
+
+                                                      *csapprox-terminals-bad*
+-------------------------------- Bad Terminals -------------------------------
+This is a list of terminals known *_not_* to have high color support:
+
+                                                       *csapprox-terminal.app*
+Terminal.app (as of OS X 10.5.2)
+
+                                                              *csapprox-aterm*
+aterm (as of version 1.00.01)
+
+                                                             *csapprox-xiterm*
+xiterm (as of version 0.5)
+
+                                                              *csapprox-wterm*
+wterm (as of version 6.2.9)
+
+                                                             *csapprox-mlterm*
+mlterm (as of version 2.9.4)
+
+                                                              *csapprox-kterm*
+kterm (as of version 6.2.0)
+
+==============================================================================
+7. Changelog                                              *csapprox-changelog*
+
+ 1.00   04 Oct 2008   First public release
+
+ 0.90   14 Sep 2008   Initial beta release
+
+==============================================================================
+8. Contact Info                                              *csapprox-author*
+
+Your author, a Vim nerd with some free time, was sick of seeing terminals
+always get the short end of the stick.  He'd like to be notified of any
+problems you find - after all, he took the time to write all this lovely
+documentation, and this plugin, which took more time than you could possibly
+imagine to get working transparently for every colorscheme he could get his
+hands on.  You can contact him with any problems or praises at mjw@drexel.edu
+
+==============================================================================
+vim:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ts=8:ft=help:norl:
