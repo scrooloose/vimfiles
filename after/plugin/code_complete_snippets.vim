@@ -77,18 +77,26 @@ call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".g:rs."condition".g:re.
 "eruby {{{1
 
 "eruby mappings
-call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-call CodeCompleteAddTemplate("eruby", "<%", "<% ".g:rs.g:re." -%>")
-call CodeCompleteAddTemplate("eruby", "<%=", "<%= ".g:rs.g:re." %>")
-call CodeCompleteAddTemplate("eruby", "<%=h", "<%=h ".g:rs.g:re." %>")
-call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".g:rs."object".g:re.", ".g:rs."method".g:re.", ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[options]".g:re.", ".g:rs."[html_options]".g:re." %>")
-call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[selected_value]".g:re." %>")
-call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".g:rs.g:re."\" %>")
-call CodeCompleteAddTemplate("eruby", "jsit", "<%= javascript_include_tag \"".g:rs.g:re."\" %>")
-call CodeCompleteAddTemplate("eruby", "it", "<%= image_tag \"".g:rs.g:re."\" %>")
-call CodeCompleteAddTemplate("eruby", "lt", "<%= link_to \"".g:rs.g:re."\", ".g:rs."dest".g:re." %>")
+
+"add rails snippets if we start vim in a rails project... its hax but it'll do
+"for now
+if filereadable(getcwd() . '/config/environment.rb')
+    call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "<%", "<% ".g:rs.g:re." -%>")
+    call CodeCompleteAddTemplate("eruby", "<%=", "<%= ".g:rs.g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "<%=h", "<%=h ".g:rs.g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".g:rs."object".g:re.", ".g:rs."method".g:re.", ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[options]".g:re.", ".g:rs."[html_options]".g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[selected_value]".g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".g:rs.g:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "jsit", "<%= javascript_include_tag \"".g:rs.g:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "it", "<%= image_tag \"".g:rs.g:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "lt", "<%= link_to \"".g:rs.g:re."\", ".g:rs."dest".g:re." %>")
+else
+    "create merb snippets
+
+endif
 call s:AddHTMLMapsFor('eruby')
 
 "html {{{1
