@@ -1,12 +1,13 @@
 function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "label", "<label for=\"".g:rs."id".g:re."\">".g:rs."label_text".g:re."</label>")
     call CodeCompleteAddTemplate(a:ft, "table", "<table class=\"".g:rs.g:re."\">\<CR>".g:rs.g:re."\<CR></table>")
-    call CodeCompleteAddTemplate(a:ft, "table", "<table cellspacing=\"0\" cellpadding=\"0\"".g:rs.g:re.">\<CR>".g:rs.g:re."\<CR></table>")
+    call CodeCompleteAddTemplate(a:ft, "table", "<table border=\"".g:rsd."0".g:re."\" cellspacing=\"".g:rsd."5".g:re."\" cellpadding=\"".g:rsd."5".g:re."\"".g:rs.g:re.">\<CR><tr>\<CR><th>".g:rs.g:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
     call CodeCompleteAddTemplate(a:ft, "span", "<span class=\"".g:rs.g:re."\">".g:rs.g:re."</span>")
-    call CodeCompleteAddTemplate(a:ft, "div", "<div class=\"".g:rs.g:re."\">\<CR>".g:rs.g:re."\<CR></div>")
+    call CodeCompleteAddTemplate(a:ft, "div", "<div".g:rsd.g:re.">\<CR>".g:rs.g:re."\<CR></div>")
     call CodeCompleteAddTemplate(a:ft, "id", "id=\"".g:rs.g:re."\"")
     call CodeCompleteAddTemplate(a:ft, "img", "<img src=\"".g:rs.g:re."\"".g:rs.g:re." />")
-    call CodeCompleteAddTemplate(a:ft, "select", "<select id=\"".g:rs.g:re."\" name=\"".g:rs.g:re."\"".g:rs.g:re.">".g:rs.g:re."</select>")
+    call CodeCompleteAddTemplate(a:ft, "select", "<select id=\"".g:rs.g:re."\" name=\"".g:rs.g:re."\"".g:rs.g:re.">\<CR><option></option>\<CR>".g:rs.g:re."\<CR></select>")
+    call CodeCompleteAddTemplate(a:ft, "option", "<option value=\"".g:rs.g:re."\"".g:rs.g:re.">".g:rs.g:re."</option>")
     call CodeCompleteAddTemplate(a:ft, "script", "<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">\<CR>//<![CDATA[\<CR>".g:rs.g:re."\<CR>//]]>\<CR></script>")
     call CodeCompleteAddTemplate(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR>/*<![CDATA[*/\<CR>".g:rs.g:re."\<CR>/*]]>*/\<CR></style>\<CR>")
     call CodeCompleteAddTemplate(a:ft, "href", "<a href=\"".g:rs.g:re."\">".g:rs.g:re."</a>")
@@ -71,8 +72,6 @@ call CodeCompleteAddTemplate("ruby", "ife", "if ".g:rs."condition".g:re."\<CR>".
 
 call CodeCompleteAddTemplate("ruby", "unless", "unless ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
-
-
 
 "eruby {{{1
 
