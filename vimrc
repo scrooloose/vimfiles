@@ -25,11 +25,21 @@ set statusline+=%h      "help file flag
 set statusline+=%m      "modified flag
 set statusline+=%r      "read only flag
 set statusline+=%y      "filetype
+set statusline+=[%{StatuslineCurrentHighlight()}]
 set statusline+=%=      "left/right separator
 set statusline+=%c,     "cursor column
 set statusline+=%l/%L   "cursor line/total lines
 set statusline+=\ %P    "percent through file
 set laststatus=2
+
+"return the syntax highlight group under the cursor or "none"
+function! StatuslineCurrentHighlight()
+    let name = synIDattr(synID(line('.'),col('.'),1),'name')
+    if name == ""
+        let name = "none"
+    endif
+    return name
+endfunction
 
 "indent settings
 set shiftwidth=4
