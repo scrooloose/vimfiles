@@ -79,6 +79,11 @@ let g:rs = '<+'
 let g:rsd = '<+='
 let g:re = '+>'
 
+"dont load csapprox if we no gui support - silences an annoying warning
+if !has("gui")
+    let g:CSApprox_loaded = 1
+endif
+
 "make <c-l> clear the highlight as well as redraw
 nnoremap <C-L> :nohls<CR><C-L>
 inoremap <C-L> <C-O>:nohls<CR>
