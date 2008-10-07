@@ -27,22 +27,30 @@ function! CamelCasedFilename()
     return name
 endfunction
 
+function s:InRailsEnvironment()
+    return filereadable(getcwd() . '/config/environment.rb')
+endfunction
+
 "ruby {{{1
 
-call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of ".g:rs.g:re)
-call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".g:rs.g:re)
-call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re)
+if s:InRailsEnvironment()
+    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re)
+    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re)
 
-call CodeCompleteAddTemplate("ruby", "RDL", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
+    call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".g:rs.g:re)
+    call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re)
 
-call CodeCompleteAddTemplate("ruby", "mrmc", "remove_column :".g:rs."table".g:re.", :".g:rs."column".g:re."")
-call CodeCompleteAddTemplate("ruby", "mrnc", "rename_column :".g:rs."table".g:re.", :".g:rs."old".g:re.", :".g:rs."new".g:re."")
-call CodeCompleteAddTemplate("ruby", "mac", "add_column :".g:rs."table".g:re.", :".g:rs."column".g:re.", :".g:rs."type".g:re."")
-call CodeCompleteAddTemplate("ruby", "mct", "create_table :".g:rs."table_name".g:re." do |t|\<CR>t.column :".g:rs."name".g:re.", :".g:rs."type".g:re."\<CR>end")
+    call CodeCompleteAddTemplate("ruby", "RDL", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
 
-call CodeCompleteAddTemplate("ruby", "chm", "check_has_many :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", ".g:rs."klass".g:re.", ".g:rs."number".g:re."")
-call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
-call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
+    call CodeCompleteAddTemplate("ruby", "mrmc", "remove_column :".g:rs."table".g:re.", :".g:rs."column".g:re."")
+    call CodeCompleteAddTemplate("ruby", "mrnc", "rename_column :".g:rs."table".g:re.", :".g:rs."old".g:re.", :".g:rs."new".g:re."")
+    call CodeCompleteAddTemplate("ruby", "mac", "add_column :".g:rs."table".g:re.", :".g:rs."column".g:re.", :".g:rs."type".g:re."")
+    call CodeCompleteAddTemplate("ruby", "mct", "create_table :".g:rs."table_name".g:re." do |t|\<CR>t.column :".g:rs."name".g:re.", :".g:rs."type".g:re."\<CR>end")
+
+    call CodeCompleteAddTemplate("ruby", "chm", "check_has_many :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", ".g:rs."klass".g:re.", ".g:rs."number".g:re."")
+    call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
+    call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
+endif
 
 call CodeCompleteAddTemplate("ruby", "def", "def ".g:rs."function_name".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "class", "class ".g:rsd."\<c-r>=CamelCasedFilename()\<CR>".g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
@@ -53,19 +61,19 @@ call CodeCompleteAddTemplate("ruby", "select", "select {|".g:rsd."element".g:re.
 call CodeCompleteAddTemplate("ruby", "selecto", "select do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "reject", "reject {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "rejecto", "reject do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "sort", "sort {|".g:rs."var1".g:re.",".g:rs."var2".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "sorto", "sort do |".g:rs."var1".g:re.",".g:rs."var2".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "each", "each {|".g:rsd."element".g:re."| ".g:rs."".g:re."}")
+call CodeCompleteAddTemplate("ruby", "sort", "sort {|".g:rsd."x".g:re.",".g:rsd."y".g:re."| ".g:rs."body".g:re."}")
+call CodeCompleteAddTemplate("ruby", "sorto", "sort do |".g:rsd."x".g:re.",".g:rsd."y".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "each", "each {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "eacho", "each do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "each_with_index", "each_with_index {|".g:rsd."element".g:re.",i| ".g:rs.g:re."}")
-call CodeCompleteAddTemplate("ruby", "each_with_indexo", "each_with_index do |".g:rsd."element".g:re.",i|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "each_with_index", "each_with_index {|".g:rsd."element".g:re.",".g:rsd."i".g:re."| ".g:rs.g:re."}")
+call CodeCompleteAddTemplate("ruby", "each_with_indexo", "each_with_index do |".g:rsd."element".g:re.",".g:rsd."i".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "inject", "inject {|".g:rsd."total".g:re.",".g:rsd."next".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "injecto", "inject do |".g:rs."total".g:re.",".g:rs."next_var".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "injecto", "inject do |".g:rsd."total".g:re.",".g:rsd."next".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "detect", "detect {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "detecto", "detect do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
 
 call CodeCompleteAddTemplate("ruby", "do", "do\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "case", "case ".g:rs."subject".g:re."\<CR>when ".g:rs."value".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "case", "case ".g:rs."object".g:re."\<CR>when ".g:rs."value".g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
 
 call CodeCompleteAddTemplate("ruby", "if", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
 call CodeCompleteAddTemplate("ruby", "ife", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
@@ -77,9 +85,7 @@ call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".g:rs."condition".g:re.
 
 "eruby mappings
 
-"add rails snippets if we start vim in a rails project... its hax but it'll do
-"for now
-if filereadable(getcwd() . '/config/environment.rb')
+if s:InRailsEnvironment()
     call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
