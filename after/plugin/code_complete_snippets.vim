@@ -11,7 +11,7 @@ function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR>/*<![CDATA[*/\<CR>".g:rs.g:re."\<CR>/*]]>*/\<CR></style>\<CR>")
     call CodeCompleteAddTemplate(a:ft, "href", "<a href=\"".g:rs.g:re."\">".g:rs.g:re."</a>")
     call CodeCompleteAddTemplate(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"".g:rs.g:re."\" />")
-    call CodeCompleteAddTemplate(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\<CR>\<tab>\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">".g:rs.g:re)
+    call CodeCompleteAddTemplate(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">".g:rs.g:re)
     call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".g:rs."email".g:re."?subject=".g:rs."subject".g:re."\">".g:rs.g:re."</a>")
 endfunction
 
@@ -84,9 +84,6 @@ if filereadable(getcwd() . '/config/environment.rb')
     call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "<%", "<% ".g:rs.g:re." -%>")
-    call CodeCompleteAddTemplate("eruby", "<%=", "<%= ".g:rs.g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "<%=h", "<%=h ".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".g:rs."object".g:re.", ".g:rs."method".g:re.", ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[options]".g:re.", ".g:rs."[html_options]".g:re." %>")
     call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[selected_value]".g:re." %>")
     call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".g:rs.g:re."\" %>")
@@ -133,7 +130,7 @@ endfunction
 
 
 call CodeCompleteAddGlobalTemplate("modeline", "\<c-r>=ModelineSnippet()\<cr>")
-
+call CodeCompleteAddGlobalTemplate("time", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>".g:rs.g:re)
 
 " modeline {{{1
 " vim: set fdm=marker:
