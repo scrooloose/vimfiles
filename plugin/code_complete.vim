@@ -19,13 +19,13 @@
 "       press <tab> after function name and (
 "         foo ( <tab>
 "       becomes:
-"         foo ( `<first param>`,`<second param>` )
+"         foo ( <+first param+>,<+second param+> )
 "       press <tab> after code template
 "         if <tab>
 "       becomes:
-"         if( `<...>` )
+"         if( <+...+> )
 "         {
-"             `<...>`
+"             <+...+>
 "         }
 "
 "
@@ -51,13 +51,13 @@
 "
 "
 " Example Template: a for loop template for java
-"   call CodeCompleteAddTemplate("java", "for", "for(`<=int i=0>`; `<condition>`; `<=i++>`){\<CR>`<>`\<CR>}")
+"   call CodeCompleteAddTemplate("java", "for", "for(<+=int i=0+>; <+condition+>; <+=i+++>){\<CR><++>\<CR>}")
 "
 "   There are 4 markers:
-"       1. `<=int i=0>`
-"       2. `<condition>`
-"       3. `<=i++>`
-"       4. `<>`
+"       1. <+=int i=0+>
+"       2. <+condition+>
+"       3. <+=i+++>
+"       4. <++>
 "
 "   1 and 3 have default values. If you "tab over" them, they will be replaced
 "   with the text "int i=0" and "i++".
@@ -78,6 +78,11 @@ if v:version < 700
     finish
 endif
 
+if exists("loaded_code_complete_plugin")
+    finish
+endif
+let loaded_code_complete_plugin = 1
+
 " Variable Definations: {{{1
 " options, define them as you like in vimrc:
 if !exists("g:completekey")
@@ -85,15 +90,15 @@ if !exists("g:completekey")
 endif
 
 if !exists("g:rs")
-    let g:rs = '`<'    "region start
+    let g:rs = '<+'    "region start
 endif
 
 if !exists("g:re")
-    let g:re = '>`'    "region stop
+    let g:re = '+>'    "region stop
 endif
 
 if !exists("g:rsd")
-    let g:rsd = '`<+'    "region start with default value
+    let g:rsd = '<+='    "region start with default value
 endif
 
 " ----------------------------
@@ -104,30 +109,33 @@ let s:doappend = 1
 let s:templates = {}
 let s:templates['_'] = {}
 
+command! -nargs=0 CodeCompleteStart call s:CodeCompleteStart()
+command! -nargs=0 CodeCompleteStop call s:CodeCompleteStop()
+
 " Autocommands: {{{1
-autocmd BufReadPost,BufNewFile * call CodeCompleteStart()
+autocmd BufReadPost,BufNewFile * CodeCompleteStart
 
 " Menus:
-menu <silent>       &Tools.Code\ Complete\ Start          :call CodeCompleteStart()<CR>
-menu <silent>       &Tools.Code\ Complete\ Stop           :call CodeCompleteStop()<CR>
+menu <silent>       &Tools.Code\ Complete\ Start          :CodeCompleteStart<cr>
+menu <silent>       &Tools.Code\ Complete\ Stop           :CodeCompleteStop<cr>
 
 " Function Definations: {{{1
 
-function! CodeCompleteStart()
+function! s:CodeCompleteStart()
     exec "silent! iunmap  <buffer> ".g:completekey
     exec "silent! nunmap  <buffer> ".g:completekey
-    exec "inoremap <buffer> ".g:completekey." <c-r>=CodeComplete()<cr><c-r>=SwitchRegion(0)<cr>"
-    exec "nnoremap <buffer> ".g:completekey." i<c-r>=SwitchRegion(0)<cr>"
-    exec "snoremap <buffer> ".g:completekey." <esc>i<c-r>=SwitchRegion(1)<cr>"
+    exec "inoremap <buffer> ".g:completekey." <c-r>=CodeComplete()<cr><c-r>=CodeComplete_SwitchRegion(0)<cr>"
+    exec "nnoremap <buffer> ".g:completekey." i<c-r>=CodeComplete_SwitchRegion(0)<cr>"
+    exec "snoremap <buffer> ".g:completekey." <esc>i<c-r>=CodeComplete_SwitchRegion(1)<cr>"
 endfunction
 
-function! CodeCompleteStop()
+function! s:CodeCompleteStop()
     exec "silent! iunmap <buffer> ".g:completekey
     exec "silent! nunmap <buffer> ".g:completekey
     exec "silent! sunmap <buffer> ".g:completekey
 endfunction
 
-function! FunctionComplete(fun)
+function! s:FunctionComplete(fun)
     let s:signature_list=[]
     let signature_word=[]
     let ftags=taglist("^".a:fun."$")
@@ -164,7 +172,7 @@ function! FunctionComplete(fun)
     endif
 endfunction
 
-function! ExpandTemplate(cword)
+function! s:ExpandTemplate(cword)
     let snippets = []
     if has_key(s:templates,&ft)
         if has_key(s:templates[&ft],a:cword)
@@ -187,7 +195,7 @@ function! ExpandTemplate(cword)
     return ''
 endfunction
 
-function! SwitchRegion(removeDefaults)
+function! CodeComplete_SwitchRegion(removeDefaults)
     if len(s:signature_list)>1
         let s:signature_list=[]
         return ''
@@ -202,11 +210,9 @@ function! SwitchRegion(removeDefaults)
     endif
 
     if search(g:rs.'.\{-}'.g:re, 'c') != 0
-        call search(g:rs,'c',line('.'))
-        let start_col = col(".")
+        let start_col =  searchpos(g:rs,'c',line('.'))[1]
         normal v
-        call search(g:re,'e',line('.'))
-        let end_col = col(".")
+        let end_col = searchpos(g:re,'e',line('.'))[1]
         if &selection == "exclusive"
             exec "norm " . "\<right>"
         endif
@@ -231,29 +237,19 @@ function! CodeComplete()
     let s:doappend = 1
     let function_name = matchstr(getline('.')[:(col('.')-2)],'\zs\w*\ze\s*(\s*$')
     if function_name != ''
-        let funcres = FunctionComplete(function_name)
+        let funcres = s:FunctionComplete(function_name)
         if funcres != ''
             let s:doappend = 0
         endif
         return funcres
     else
         let template_name = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
-        let tempres = ExpandTemplate(template_name)
+        let tempres = s:ExpandTemplate(template_name)
         if tempres != ''
             let s:doappend = 0
         endif
         return tempres
     endif
-endfunction
-
-
-" [Get converted file name like __THIS_FILE__ ]
-function! GetFileName()
-    let filename=expand("%:t")
-    let filename=toupper(filename)
-    let _name=substitute(filename,'\.','_',"g")
-    let _name="__"._name."__"
-    return _name
 endfunction
 
 "asks the user to select a snippet from the given list
@@ -289,7 +285,7 @@ endfunction
 "removes a set of default markers for the current cursor postion
 "
 "i.e. turn this
-"   foo `<=foobar>` foo
+"   foo <+=foobar+> foo
 
 "into this
 "

@@ -43,7 +43,7 @@ function s:inRailsEnv()
 endfunction
 
 function Snippet_Sweeper()
-    let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)_sweeper.rb', '\1', ''))
+    let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)\(_sweeper\.rb\|\.rb\)', '\1', ''))
     let instance = s:underscore(class)
     return "class ".g:rsd.class.g:re."Sweeper < ActionController::Caching::Sweeper\<CR>".
            \ "observe ".g:rsd.class.g:re."\<CR>\<CR>".
@@ -64,6 +64,7 @@ endfunction
 if s:inRailsEnv()
     call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re)
     call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re)
+    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.g:rsd.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re.g:re)
 
     call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".g:rs.g:re)
     call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re)
@@ -139,7 +140,7 @@ call s:AddHTMLMapsFor('eruby')
 call s:AddHTMLMapsFor('html')
 
 
-"php mappings
+"php mappings {{{1
 call CodeCompleteAddTemplate("php", "func", "function ".g:rs."name".g:re."(".g:rs.g:re.") {\<CR>".g:rs.g:re."\<CR>}\<CR>")
 call CodeCompleteAddTemplate("php", "log", "error_log(var_export(".g:rs.g:re.", true));")
 call CodeCompleteAddTemplate("php", "var", "var_export(".g:rs.g:re.");")
@@ -155,13 +156,14 @@ call CodeCompleteAddTemplate("vim", "try", "try\<CR>".g:rs.g:re."\<CR>catch /".g
 
 "java {{{1
 call CodeCompleteAddTemplate("java", "for", "for(".g:rsd."int i".g:re."; ".g:rs."condition".g:re."; ".g:rsd."i++".g:re."){\<CR>".g:rs.g:re."\<CR>}")
+call CodeCompleteAddTemplate("java", "ife", "if(".g:rs.g:re."){\<CR>".g:rs.g:re."\<CR>}else{\<CR>".g:rs.g:re."\<CR>}")
 
 
 "global {{{1
 
 function! Snippet_Modeline()
     let start_comment = substitute(&commentstring, '^\([^ ]*\)\s*%s\(.*\)$', '\1', '')
-    let end_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\2', '')
+    let end_comment = substitute(&commentstring, '^.*%s\(.*\)$', '\1', '')
     return start_comment . " vim: set " . g:rs."settings".g:re . ":" . end_comment
 endfunction
 
