@@ -16,31 +16,59 @@ function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".g:rs."email".g:re."?subject=".g:rs."subject".g:re."\">".g:rs.g:re."</a>")
 endfunction
 
-function! CamelCasedFilename()
+function! Snippet_ClassNameFromFilename()
     let name = expand("%:t")
     "chop off the extension
     let name = substitute(name, '^\(.*\)\..*$', '\1', '')
-    "upcase the first letter
-    let name = substitute(name, '^\(.\)', '\=toupper(submatch(1))', '')
-    "turn all '_x' into 'X'
-    let name = substitute(name, '_\(.\)', '\=toupper(submatch(1))', 'g')
-    return name
+
+    return s:camelCase(name)
 endfunction
 
-function s:InRailsEnvironment()
+function s:camelCase(s)
+    "upcase the first letter
+    let toReturn = substitute(a:s, '^\(.\)', '\=toupper(submatch(1))', '')
+    "turn all '_x' into 'X'
+    return substitute(toReturn, '_\(.\)', '\=toupper(submatch(1))', 'g')
+endfunction
+
+function s:underscore(s)
+    "down the first letter
+    let toReturn = substitute(a:s, '^\(.\)', '\=tolower(submatch(1))', '')
+    "turn all 'X' into '_x'
+    return substitute(toReturn, '\([A-Z]\)', '\=tolower("_".submatch(1))', 'g')
+endfunction
+
+function s:inRailsEnv()
     return filereadable(getcwd() . '/config/environment.rb')
+endfunction
+
+function Snippet_Sweeper()
+    let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)_sweeper.rb', '\1', ''))
+    let instance = s:underscore(class)
+    return "class ".g:rsd.class.g:re."Sweeper < ActionController::Caching::Sweeper\<CR>".
+           \ "observe ".g:rsd.class.g:re."\<CR>\<CR>".
+           \ "def after_save(".g:rsd.instance.g:re.")\<CR>".
+           \   "expire_cache(".g:rsd.instance.g:re.")\<CR>".
+           \ "end\<CR>\<CR>".
+           \ "def after_destroy(".g:rsd.instance.g:re.")\<CR>".
+           \   "expire_cache(".g:rsd.instance.g:re.")\<CR>".
+           \ "end\<CR>\<CR>".
+           \ "def expire_cache(".g:rsd.instance.g:re.")\<CR>".
+           \   "expire_page\<CR>".
+           \ "end\<CR>".
+           \"end\<CR>"
 endfunction
 
 "ruby {{{1
 
-if s:InRailsEnvironment()
+if s:inRailsEnv()
     call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re)
     call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re)
 
     call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".g:rs.g:re)
     call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re)
 
-    call CodeCompleteAddTemplate("ruby", "RDL", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
+    call CodeCompleteAddTemplate("ruby", "log", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
 
     call CodeCompleteAddTemplate("ruby", "mrmc", "remove_column :".g:rs."table".g:re.", :".g:rs."column".g:re."")
     call CodeCompleteAddTemplate("ruby", "mrnc", "rename_column :".g:rs."table".g:re.", :".g:rs."old".g:re.", :".g:rs."new".g:re."")
@@ -50,10 +78,14 @@ if s:InRailsEnvironment()
     call CodeCompleteAddTemplate("ruby", "chm", "check_has_many :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", ".g:rs."klass".g:re.", ".g:rs."number".g:re."")
     call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
     call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
+
+    call CodeCompleteAddTemplate("ruby", "sweeper", "\<c-r>=Snippet_Sweeper()\<CR>")
 endif
 
+call CodeCompleteAddTemplate("ruby", "require", "require '".g:rs.g:re."'")
+
 call CodeCompleteAddTemplate("ruby", "def", "def ".g:rs."function_name".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "class", "class ".g:rsd."\<c-r>=CamelCasedFilename()\<CR>".g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
+call CodeCompleteAddTemplate("ruby", "class", "class ".g:rsd."\<c-r>=Snippet_ClassNameFromFilename()\<CR>".g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
 
 call CodeCompleteAddTemplate("ruby", "map", "map {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
 call CodeCompleteAddTemplate("ruby", "mapo", "map do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
@@ -85,7 +117,7 @@ call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".g:rs."condition".g:re.
 
 "eruby mappings
 
-if s:InRailsEnvironment()
+if s:inRailsEnv()
     call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
     call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
@@ -127,15 +159,17 @@ call CodeCompleteAddTemplate("java", "for", "for(".g:rsd."int i".g:re."; ".g:rs.
 
 "global {{{1
 
-function! ModelineSnippet()
+function! Snippet_Modeline()
     let start_comment = substitute(&commentstring, '^\([^ ]*\)\s*%s\(.*\)$', '\1', '')
     let end_comment = substitute(&commentstring, '^\(.*\)%s\(.*\)$', '\2', '')
     return start_comment . " vim: set " . g:rs."settings".g:re . ":" . end_comment
 endfunction
 
 
-call CodeCompleteAddGlobalTemplate("modeline", "\<c-r>=ModelineSnippet()\<cr>")
+call CodeCompleteAddGlobalTemplate("modeline", "\<c-r>=Snippet_Modeline()\<cr>")
 call CodeCompleteAddGlobalTemplate("time", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>".g:rs.g:re)
+call CodeCompleteAddGlobalTemplate("lorem", "Lorem ipsum dolor sit amet, consectetur magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum".g:rs.g:re."\<c-o>:normal! gqq\<CR>")
+
 
 " modeline {{{1
 " vim: set fdm=marker:
