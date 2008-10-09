@@ -43,7 +43,7 @@ function s:inRailsEnv()
 endfunction
 
 function Snippet_Sweeper()
-    let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)\(_sweeper\.rb\|\.rb\)', '\1', ''))
+    let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)_sweeper\.rb', '\1', ''))
     let instance = s:underscore(class)
     return "class ".g:rsd.class.g:re."Sweeper < ActionController::Caching::Sweeper\<CR>".
            \ "observe ".g:rsd.class.g:re."\<CR>\<CR>".
