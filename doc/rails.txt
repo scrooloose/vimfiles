@@ -104,9 +104,9 @@ If you are new to Vim, you need to create a vimrc.  For Windows, this file
 goes in ~\_vimrc (try :e ~\_vimrc if you don't know where this is).  On other
 platforms, use ~/.vimrc.  A very minimal example file is shown below.
 >
-  set nocompatible
-  syntax on
-  filetype plugin indent on
+	set nocompatible
+	syntax on
+	filetype plugin indent on
 >
 Installing and Using the Plugin ~
 						*rails-install-plugin*
@@ -309,8 +309,8 @@ Two commands, :A and :R, are used quickly jump to an "alternate" and a
 					*rails-alternate* *rails-related*
 The alternate file is most frequently the test file, though there are
 exceptions.  The related file varies, and is sometimes dependent on current
-current location in the file.  For example, when editing a controller, the
-related file is template for the method currently being edited.
+location in the file.  For example, when editing a controller, the related
+file is template for the method currently being edited.
 
 The easiest way to learn these commands is to experiment.  A few examples of
 alternate and related files follow:
@@ -983,6 +983,8 @@ Modelines can also be local to a method.  Example: >
 	  # rset alternate=app/models/comment.rb
 These two forms differ only in case.
 
+Modelines are deprecated.
+
 ==============================================================================
 GLOBAL SETTINGS					*rails-global-settings*
 
@@ -1054,8 +1056,7 @@ Modelines set buffer-local options using the :Rset command.
 Also enables method specific modelines (note the case difference): >
 	  def show
 	    # rset preview=blog/show/1
-Modelines are extremely useful but may cause security concerns when editing
-projects from an untrusted source. Enabled by default.
+Modelines are deprecated and disabled by default.
 
 						*g:rails_menu*  >
 	let g:rails_menu=1
@@ -1108,8 +1109,8 @@ The latest stable version can be found at
 In Vim 7, you can keep up to date with |GetLatestVimScripts|.
 
 The very latest development versions can be retrieved from Git:
-    http://git.tpope.net/?p=vim-rails.git
-    git clone git://git.tpope.net/git/vim-rails.git
+    http://github.com/tpope/vim-rails
+    git clone git://github.com/tpope/vim-rails.git
 
 Feedback is highly desired on this plugin.  Please send all comments,
 complaints, and compliments to the author.  No bug is too small to report.
