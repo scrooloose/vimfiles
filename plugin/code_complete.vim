@@ -231,7 +231,7 @@ function! CodeComplete_SwitchRegion(removeDefaults)
         endif
     catch /CodeComplete.NoMarkersFoundError/
         if s:doappend == 1
-            if g:completekey == "<tab>"
+            if g:code_complete_complete_key == "<tab>"
                 return "\<tab>"
             endif
         endif
