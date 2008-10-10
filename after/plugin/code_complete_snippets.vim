@@ -1,19 +1,23 @@
+let s:rs = g:code_complete_marker_start
+let s:rsd = g:code_complete_marker_start_default
+let s:re = g:code_complete_marker_end
+
 function! s:AddHTMLMapsFor(ft)
-    call CodeCompleteAddTemplate(a:ft, "label", "<label for=\"".g:rs."id".g:re."\">".g:rs."label_text".g:re."</label>")
-    call CodeCompleteAddTemplate(a:ft, "table", "<table class=\"".g:rs.g:re."\">\<CR>".g:rs.g:re."\<CR></table>")
-    call CodeCompleteAddTemplate(a:ft, "table", "<table border=\"".g:rsd."0".g:re."\" cellspacing=\"".g:rsd."5".g:re."\" cellpadding=\"".g:rsd."5".g:re."\"".g:rs.g:re.">\<CR><tr>\<CR><th>".g:rs.g:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
-    call CodeCompleteAddTemplate(a:ft, "span", "<span class=\"".g:rs.g:re."\">".g:rs.g:re."</span>")
-    call CodeCompleteAddTemplate(a:ft, "div", "<div".g:rsd.g:re.">\<CR>".g:rs.g:re."\<CR></div>")
-    call CodeCompleteAddTemplate(a:ft, "id", "id=\"".g:rs.g:re."\"")
-    call CodeCompleteAddTemplate(a:ft, "img", "<img src=\"".g:rs.g:re."\"".g:rs.g:re." />")
-    call CodeCompleteAddTemplate(a:ft, "select", "<select id=\"".g:rs.g:re."\" name=\"".g:rs.g:re."\"".g:rs.g:re.">\<CR><option></option>\<CR>".g:rs.g:re."\<CR></select>")
-    call CodeCompleteAddTemplate(a:ft, "option", "<option value=\"".g:rs.g:re."\"".g:rs.g:re.">".g:rs.g:re."</option>")
-    call CodeCompleteAddTemplate(a:ft, "script", "<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">\<CR>//<![CDATA[\<CR>".g:rs.g:re."\<CR>//]]>\<CR></script>")
-    call CodeCompleteAddTemplate(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR>/*<![CDATA[*/\<CR>".g:rs.g:re."\<CR>/*]]>*/\<CR></style>\<CR>")
-    call CodeCompleteAddTemplate(a:ft, "href", "<a href=\"".g:rs.g:re."\">".g:rs.g:re."</a>")
-    call CodeCompleteAddTemplate(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"".g:rs.g:re."\" />")
-    call CodeCompleteAddTemplate(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">".g:rs.g:re)
-    call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".g:rs."email".g:re."?subject=".g:rs."subject".g:re."\">".g:rs.g:re."</a>")
+    call CodeCompleteAddTemplate(a:ft, "label", "<label for=\"".s:rs."id".s:re."\">".s:rs."label_text".s:re."</label>")
+    call CodeCompleteAddTemplate(a:ft, "table", "<table class=\"".s:rs.s:re."\">\<CR>".s:rs.s:re."\<CR></table>")
+    call CodeCompleteAddTemplate(a:ft, "table", "<table border=\"".s:rsd."0".s:re."\"".s:rsd." cellspacing=\"".s:rsd."5".s:re."\" cellpadding=\"".s:rsd."5".s:re."\"".s:rs.s:re.s:re.">\<CR><tr>\<CR><th>".s:rs.s:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
+    call CodeCompleteAddTemplate(a:ft, "span", "<span class=\"".s:rs.s:re."\">".s:rs.s:re."</span>")
+    call CodeCompleteAddTemplate(a:ft, "div", "<div".s:rsd.s:re.">\<CR>".s:rs.s:re."\<CR></div>")
+    call CodeCompleteAddTemplate(a:ft, "id", "id=\"".s:rs.s:re."\"")
+    call CodeCompleteAddTemplate(a:ft, "img", "<img src=\"".s:rs.s:re."\"".s:rs.s:re." />")
+    call CodeCompleteAddTemplate(a:ft, "select", "<select id=\"".s:rs.s:re."\" name=\"".s:rs.s:re."\"".s:rs.s:re.">\<CR><option></option>\<CR>".s:rs.s:re."\<CR></select>")
+    call CodeCompleteAddTemplate(a:ft, "option", "<option value=\"".s:rs.s:re."\"".s:rs.s:re.">".s:rs.s:re."</option>")
+    call CodeCompleteAddTemplate(a:ft, "script", "<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">\<CR>//<![CDATA[\<CR>".s:rs.s:re."\<CR>//]]>\<CR></script>")
+    call CodeCompleteAddTemplate(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR>/*<![CDATA[*/\<CR>".s:rs.s:re."\<CR>/*]]>*/\<CR></style>\<CR>")
+    call CodeCompleteAddTemplate(a:ft, "href", "<a href=\"".s:rs.s:re."\">".s:rs.s:re."</a>")
+    call CodeCompleteAddTemplate(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"".s:rs.s:re."\" />")
+    call CodeCompleteAddTemplate(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">".s:rs.s:re)
+    call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".s:rs."email".s:re."?subject=".s:rs."subject".s:re."\">".s:rs.s:re."</a>")
 endfunction
 
 function! Snippet_ClassNameFromFilename()
@@ -45,15 +49,15 @@ endfunction
 function Snippet_Sweeper()
     let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)_sweeper\.rb', '\1', ''))
     let instance = s:underscore(class)
-    return "class ".g:rsd.class.g:re."Sweeper < ActionController::Caching::Sweeper\<CR>".
-           \ "observe ".g:rsd.class.g:re."\<CR>\<CR>".
-           \ "def after_save(".g:rsd.instance.g:re.")\<CR>".
-           \   "expire_cache(".g:rsd.instance.g:re.")\<CR>".
+    return "class ".s:rsd.class.s:re."Sweeper < ActionController::Caching::Sweeper\<CR>".
+           \ "observe ".s:rsd.class.s:re."\<CR>\<CR>".
+           \ "def after_save(".s:rsd.instance.s:re.")\<CR>".
+           \   "expire_cache(".s:rsd.instance.s:re.")\<CR>".
            \ "end\<CR>\<CR>".
-           \ "def after_destroy(".g:rsd.instance.g:re.")\<CR>".
-           \   "expire_cache(".g:rsd.instance.g:re.")\<CR>".
+           \ "def after_destroy(".s:rsd.instance.s:re.")\<CR>".
+           \   "expire_cache(".s:rsd.instance.s:re.")\<CR>".
            \ "end\<CR>\<CR>".
-           \ "def expire_cache(".g:rsd.instance.g:re.")\<CR>".
+           \ "def expire_cache(".s:rsd.instance.s:re.")\<CR>".
            \   "expire_page\<CR>".
            \ "end\<CR>".
            \"end\<CR>"
@@ -62,72 +66,71 @@ endfunction
 "ruby {{{1
 
 if s:inRailsEnv()
-    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re)
-    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re)
-    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".g:rs."attr_names".g:re.g:rsd.", :message => '".g:rs."error message".g:re."', :on => ".g:rs.":save|:create|:update".g:re.", :if => ".g:rs."method or proc".g:re.g:re)
+    call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".s:rs."attr_names".s:re.s:rsd.", :message => '".s:rs."error message".s:re."', :on => ".s:rs.":save|:create|:update".s:re.", :if => ".s:rs."method|proc".s:re.s:re)
+    call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".s:rs.s:re)
+    call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".s:rs.s:re)
+    call CodeCompleteAddTemplate("ruby", "bt", "belongs_to :".s:rs."association_name".s:re.s:rsd.", :class_name => '".s:rs.s:re."', :foreign_key => '".s:rs.s:re."'".s:re)
+    call CodeCompleteAddTemplate("ruby", "hm", "has_many :".s:rs."association_name".s:re.s:rsd.", :class_name => '".s:rs.s:re."'".s:re)
 
-    call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".g:rs.g:re)
-    call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".g:rs.g:re)
+    call CodeCompleteAddTemplate("ruby", "log", "RAILS_DEFAULT_LOGGER.".s:rsd."debug".s:re." ".s:rs.s:re)
 
-    call CodeCompleteAddTemplate("ruby", "log", "RAILS_DEFAULT_LOGGER.".g:rsd."debug".g:re." ".g:rs.g:re)
+    call CodeCompleteAddTemplate("ruby", "mrmc", "remove_column :".s:rs."table".s:re.", :".s:rs."column".s:re."")
+    call CodeCompleteAddTemplate("ruby", "mrnc", "rename_column :".s:rs."table".s:re.", :".s:rs."old".s:re.", :".s:rs."new".s:re."")
+    call CodeCompleteAddTemplate("ruby", "mac", "add_column :".s:rs."table".s:re.", :".s:rs."column".s:re.", :".s:rs."type".s:re."")
+    call CodeCompleteAddTemplate("ruby", "mct", "create_table :".s:rs."table_name".s:re." do |t|\<CR>t.column :".s:rs."name".s:re.", :".s:rs."type".s:re."\<CR>end")
 
-    call CodeCompleteAddTemplate("ruby", "mrmc", "remove_column :".g:rs."table".g:re.", :".g:rs."column".g:re."")
-    call CodeCompleteAddTemplate("ruby", "mrnc", "rename_column :".g:rs."table".g:re.", :".g:rs."old".g:re.", :".g:rs."new".g:re."")
-    call CodeCompleteAddTemplate("ruby", "mac", "add_column :".g:rs."table".g:re.", :".g:rs."column".g:re.", :".g:rs."type".g:re."")
-    call CodeCompleteAddTemplate("ruby", "mct", "create_table :".g:rs."table_name".g:re." do |t|\<CR>t.column :".g:rs."name".g:re.", :".g:rs."type".g:re."\<CR>end")
-
-    call CodeCompleteAddTemplate("ruby", "chm", "check_has_many :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", ".g:rs."klass".g:re.", ".g:rs."number".g:re."")
-    call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
-    call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".g:rs."accessor".g:re.", :".g:rs."fixture".g:re.", :".g:rs."expected_fixture".g:re."")
+    call CodeCompleteAddTemplate("ruby", "chm", "check_has_many :".s:rs."accessor".s:re.", :".s:rs."fixture".s:re.", ".s:rs."klass".s:re.", ".s:rs."number".s:re."")
+    call CodeCompleteAddTemplate("ruby", "cbt", "check_belongs_to :".s:rs."accessor".s:re.", :".s:rs."fixture".s:re.", :".s:rs."expected_fixture".s:re."")
+    call CodeCompleteAddTemplate("ruby", "cho", "check_has_one :".s:rs."accessor".s:re.", :".s:rs."fixture".s:re.", :".s:rs."expected_fixture".s:re."")
 
     call CodeCompleteAddTemplate("ruby", "sweeper", "\<c-r>=Snippet_Sweeper()\<CR>")
 endif
 
-call CodeCompleteAddTemplate("ruby", "require", "require '".g:rs.g:re."'")
+call CodeCompleteAddTemplate("ruby", "require", "require '".s:rs.s:re."'")
 
-call CodeCompleteAddTemplate("ruby", "def", "def ".g:rs."function_name".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "class", "class ".g:rsd."\<c-r>=Snippet_ClassNameFromFilename()\<CR>".g:re."\<CR>def initialize".g:rs.g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>end")
+call CodeCompleteAddTemplate("ruby", "def", "def ".s:rs."function_name".s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "class", "class ".s:rsd."\<c-r>=Snippet_ClassNameFromFilename()\<CR>".s:re."\<CR>def initialize".s:rs.s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>end")
 
-call CodeCompleteAddTemplate("ruby", "map", "map {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "mapo", "map do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "select", "select {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "selecto", "select do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "reject", "reject {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "rejecto", "reject do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "sort", "sort {|".g:rsd."x".g:re.",".g:rsd."y".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "sorto", "sort do |".g:rsd."x".g:re.",".g:rsd."y".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "each", "each {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "eacho", "each do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "each_with_index", "each_with_index {|".g:rsd."element".g:re.",".g:rsd."i".g:re."| ".g:rs.g:re."}")
-call CodeCompleteAddTemplate("ruby", "each_with_indexo", "each_with_index do |".g:rsd."element".g:re.",".g:rsd."i".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "inject", "inject {|".g:rsd."total".g:re.",".g:rsd."next".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "injecto", "inject do |".g:rsd."total".g:re.",".g:rsd."next".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "detect", "detect {|".g:rsd."element".g:re."| ".g:rs."body".g:re."}")
-call CodeCompleteAddTemplate("ruby", "detecto", "detect do |".g:rsd."element".g:re."|\<CR>".g:rs."body".g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "map", "map {|".s:rsd."element".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "mapo", "map do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "select", "select {|".s:rsd."element".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "selecto", "select do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "reject", "reject {|".s:rsd."element".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "rejecto", "reject do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "sort", "sort {|".s:rsd."x".s:re.",".s:rsd."y".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "sorto", "sort do |".s:rsd."x".s:re.",".s:rsd."y".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "each", "each {|".s:rsd."element".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "eacho", "each do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "each_with_index", "each_with_index {|".s:rsd."element".s:re.",".s:rsd."i".s:re."| ".s:rs.s:re."}")
+call CodeCompleteAddTemplate("ruby", "each_with_indexo", "each_with_index do |".s:rsd."element".s:re.",".s:rsd."i".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "inject", "inject {|".s:rsd."total".s:re.",".s:rsd."next".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "injecto", "inject do |".s:rsd."total".s:re.",".s:rsd."next".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "detect", "detect {|".s:rsd."element".s:re."| ".s:rs."body".s:re."}")
+call CodeCompleteAddTemplate("ruby", "detecto", "detect do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
 
-call CodeCompleteAddTemplate("ruby", "do", "do\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "case", "case ".g:rs."object".g:re."\<CR>when ".g:rs."value".g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "do", "do\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "case", "case ".s:rs."object".s:re."\<CR>when ".s:rs."value".s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
-call CodeCompleteAddTemplate("ruby", "if", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "ife", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "if", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "ife", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
-call CodeCompleteAddTemplate("ruby", "unless", "unless ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "unless", "unless ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
 "eruby {{{1
 
 "eruby mappings
 
 if s:inRailsEnv()
-    call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".g:rs."file".g:re."\"".g:rs.g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".g:rs."object".g:re.", ".g:rs."method".g:re.", ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[options]".g:re.", ".g:rs."[html_options]".g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".g:rs."collection".g:re.", ".g:rs."value_method".g:re.", ".g:rs."text_method".g:re.", ".g:rs."[selected_value]".g:re." %>")
-    call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".g:rs.g:re."\" %>")
-    call CodeCompleteAddTemplate("eruby", "jsit", "<%= javascript_include_tag \"".g:rs.g:re."\" %>")
-    call CodeCompleteAddTemplate("eruby", "it", "<%= image_tag \"".g:rs.g:re."\" %>")
-    call CodeCompleteAddTemplate("eruby", "lt", "<%= link_to \"".g:rs.g:re."\", ".g:rs."dest".g:re." %>")
+    call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".s:rs."object".s:re.", ".s:rs."method".s:re.", ".s:rs."collection".s:re.", ".s:rs."value_method".s:re.", ".s:rs."text_method".s:re.", ".s:rs."[options]".s:re.", ".s:rs."[html_options]".s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".s:rs."collection".s:re.", ".s:rs."value_method".s:re.", ".s:rs."text_method".s:re.", ".s:rs."[selected_value]".s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".s:rs.s:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "jsit", "<%= javascript_include_tag \"".s:rs.s:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "it", "<%= image_tag \"".s:rs.s:re."\" %>")
+    call CodeCompleteAddTemplate("eruby", "lt", "<%= link_to \"".s:rs.s:re."\", ".s:rs."dest".s:re." %>")
 else
     "create merb snippets
 
@@ -141,22 +144,22 @@ call s:AddHTMLMapsFor('html')
 
 
 "php mappings {{{1
-call CodeCompleteAddTemplate("php", "func", "function ".g:rs."name".g:re."(".g:rs.g:re.") {\<CR>".g:rs.g:re."\<CR>}\<CR>")
-call CodeCompleteAddTemplate("php", "log", "error_log(var_export(".g:rs.g:re.", true));")
-call CodeCompleteAddTemplate("php", "var", "var_export(".g:rs.g:re.");")
+call CodeCompleteAddTemplate("php", "func", "function ".s:rs."name".s:re."(".s:rs.s:re.") {\<CR>".s:rs.s:re."\<CR>}\<CR>")
+call CodeCompleteAddTemplate("php", "log", "error_log(var_export(".s:rs.s:re.", true));")
+call CodeCompleteAddTemplate("php", "var", "var_export(".s:rs.s:re.");")
 
 
 "vim {{{1
-call CodeCompleteAddTemplate("vim", "if", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>endif\<CR>")
-call CodeCompleteAddTemplate("vim", "ife", "if ".g:rs."condition".g:re."\<CR>".g:rs.g:re."\<CR>else\<CR>".g:rs.g:re."\<CR>endif\<CR>")
-call CodeCompleteAddTemplate("vim", "func", "function! ".g:rs."name".g:re."(".g:rs.g:re.")\<CR>".g:rs.g:re."\<CR>endfunction\<CR>")
-call CodeCompleteAddTemplate("vim", "au", "autocmd ".g:rs."events".g:re." ".g:rs."pattern".g:re." ".g:rs."command".g:re)
-call CodeCompleteAddTemplate("vim", "com", "command! -nargs=".g:rs."number_of_args".g:re." ".g:rs."other_params".g:re." ".g:rs."name".g:re." ".g:rs."command".g:re)
-call CodeCompleteAddTemplate("vim", "try", "try\<CR>".g:rs.g:re."\<CR>catch /".g:rs.g:re."/\<CR>".g:rs.g:re."\<CR>endtry")
+call CodeCompleteAddTemplate("vim", "if", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>endif\<CR>")
+call CodeCompleteAddTemplate("vim", "ife", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>endif\<CR>")
+call CodeCompleteAddTemplate("vim", "func", "function! ".s:rs."name".s:re."(".s:rs.s:re.")\<CR>".s:rs.s:re."\<CR>endfunction\<CR>")
+call CodeCompleteAddTemplate("vim", "au", "autocmd ".s:rs."events".s:re." ".s:rs."pattern".s:re." ".s:rs."command".s:re)
+call CodeCompleteAddTemplate("vim", "com", "command! -nargs=".s:rs."number_of_args".s:re." ".s:rs."other_params".s:re." ".s:rs."name".s:re." ".s:rs."command".s:re)
+call CodeCompleteAddTemplate("vim", "try", "try\<CR>".s:rs.s:re."\<CR>catch /".s:rs.s:re."/\<CR>".s:rs.s:re."\<CR>endtry")
 
 "java {{{1
-call CodeCompleteAddTemplate("java", "for", "for(".g:rsd."int i".g:re."; ".g:rs."condition".g:re."; ".g:rsd."i++".g:re."){\<CR>".g:rs.g:re."\<CR>}")
-call CodeCompleteAddTemplate("java", "ife", "if(".g:rs.g:re."){\<CR>".g:rs.g:re."\<CR>}else{\<CR>".g:rs.g:re."\<CR>}")
+call CodeCompleteAddTemplate("java", "for", "for(".s:rsd."int i".s:re."; ".s:rs."condition".s:re."; ".s:rsd."i++".s:re."){\<CR>".s:rs.s:re."\<CR>}")
+call CodeCompleteAddTemplate("java", "ife", "if(".s:rs.s:re."){\<CR>".s:rs.s:re."\<CR>}else{\<CR>".s:rs.s:re."\<CR>}")
 
 
 "global {{{1
@@ -164,13 +167,13 @@ call CodeCompleteAddTemplate("java", "ife", "if(".g:rs.g:re."){\<CR>".g:rs.g:re.
 function! Snippet_Modeline()
     let start_comment = substitute(&commentstring, '^\([^ ]*\)\s*%s\(.*\)$', '\1', '')
     let end_comment = substitute(&commentstring, '^.*%s\(.*\)$', '\1', '')
-    return start_comment . " vim: set " . g:rs."settings".g:re . ":" . end_comment
+    return start_comment . " vim: set " . s:rs."settings".s:re . ":" . end_comment
 endfunction
 
 
 call CodeCompleteAddGlobalTemplate("modeline", "\<c-r>=Snippet_Modeline()\<cr>")
-call CodeCompleteAddGlobalTemplate("time", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>".g:rs.g:re)
-call CodeCompleteAddGlobalTemplate("lorem", "Lorem ipsum dolor sit amet, consectetur magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum".g:rs.g:re."\<c-o>:normal! gqq\<CR>")
+call CodeCompleteAddGlobalTemplate("time", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>".s:rs.s:re)
+call CodeCompleteAddGlobalTemplate("lorem", "Lorem ipsum dolor sit amet, consectetur magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum".s:rs.s:re."\<c-o>:normal! gqq\<CR>")
 
 
 " modeline {{{1
