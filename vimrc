@@ -98,6 +98,9 @@ endif
 nnoremap <C-L> :nohls<CR><C-L>
 inoremap <C-L> <C-O>:nohls<CR>
 
+"map to the textmate-like fuzzy finder mode
+nnoremap <C-F> :FuzzyFinderTextMate<cr>
+
 "map Q to something useful
 noremap Q gq
 
