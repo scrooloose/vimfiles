@@ -729,7 +729,7 @@ See |NERDComAltDelim| for switching commenting styles at runtime.
 4. Key mapping customisation                                *NERDComMappings*
 
 To change a mapping just map another key combo to the internal <plug> mapping.
-For example, to remap the *NERDComComment* mapping to ",omg" you would put
+For example, to remap the |NERDComComment| mapping to ",omg" you would put
 this line in your vimrc: >
     map ,omg <plug>NERDCommenterComment
 <
@@ -797,6 +797,10 @@ if your face looked like a toaster and a t-rex put together? :(
 
 ==============================================================================
 8. Changelog                                                *NERDComChangelog*
+
+2.x.x
+    - add support for newlisp, thanks to Matthew Lee Hinman.
+    - fix automake comments, thanks to Elias Pipping
 
 2.2.0
     - rewrote the mappings system to be more "standard".
@@ -955,6 +959,8 @@ Thanks to Elias Pipping for sending me a bug report about haskell commenting.
 
 Thanks to mntnoe for pointing out incorrect delimiters for haskell.
 
+Thanks to Mark S. for pointing out a bug in the doc.
+
 Not to forget! Thanks to the following people for sending me new filetypes to
 support :D
 
@@ -996,7 +1002,7 @@ Greg Weber                          D, haml
 Bruce Sherrod                       velocity
 timberke                            cobol, calibre
 Aaron Schaefer                      factor
-Laurent ARNOUD                      asterisk, mplayerconf
+Mr X                                asterisk, mplayerconf
 Kuchma Michael                      plsql
 Brett Warneke                       spectre
 Pipp                                lhaskell
@@ -1026,6 +1032,8 @@ Bernhard Grotz                      potwiki
 sgronblo                            man
 François                            txt2tags
 Giacomo Mariani                     SVNinfo
+Matthew Lee Hinman                  newlisp
+Elias Pipping                       automake
 
 ==============================================================================
 9. License                                                    *NERDComLicense*
