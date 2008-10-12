@@ -5,7 +5,7 @@ let s:re = g:code_complete_marker_end
 function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "label", "<label for=\"".s:rs."id".s:re."\">".s:rs."label_text".s:re."</label>")
     call CodeCompleteAddTemplate(a:ft, "table", "<table class=\"".s:rs.s:re."\">\<CR>".s:rs.s:re."\<CR></table>")
-    call CodeCompleteAddTemplate(a:ft, "table", "<table border=\"".s:rsd."0".s:re."\"".s:rsd." cellspacing=\"".s:rsd."5".s:re."\" cellpadding=\"".s:rsd."5".s:re."\"".s:rs.s:re.s:re.">\<CR><tr>\<CR><th>".s:rs.s:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
+    call CodeCompleteAddTemplate(a:ft, "table", "<table ".s:rsd."width=\"".s:rsd."100%".s:re."\" border=\"".s:rsd."0".s:re."\" cellspacing=\"".s:rsd."0".s:re."\" cellpadding=\"".s:rsd."5".s:re."\"".s:rs.s:re.s:re.">\<CR><tr>\<CR><th>".s:rs.s:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
     call CodeCompleteAddTemplate(a:ft, "span", "<span class=\"".s:rs.s:re."\">".s:rs.s:re."</span>")
     call CodeCompleteAddTemplate(a:ft, "div", "<div".s:rsd.s:re.">\<CR>".s:rs.s:re."\<CR></div>")
     call CodeCompleteAddTemplate(a:ft, "id", "id=\"".s:rs.s:re."\"")
@@ -17,7 +17,7 @@ function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "href", "<a href=\"".s:rs.s:re."\">".s:rs.s:re."</a>")
     call CodeCompleteAddTemplate(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"".s:rs.s:re."\" />")
     call CodeCompleteAddTemplate(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">".s:rs.s:re)
-    call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".s:rs."email".s:re."?subject=".s:rs."subject".s:re."\">".s:rs.s:re."</a>")
+    call CodeCompleteAddTemplate(a:ft, "mailto", "<a href=\"mailto:".s:rs."email".s:re.s:rsd."?subject=".s:rs."subject".s:re.s:re."\">".s:rs.s:re."</a>")
 endfunction
 
 function! Snippet_ClassNameFromFilename()
