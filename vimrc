@@ -101,6 +101,9 @@ inoremap <C-L> <C-O>:nohls<CR>
 "map to the textmate-like fuzzy finder mode
 nnoremap <C-F> :FuzzyFinderTextMate<cr>
 
+"map to bufexplorer
+nnoremap <C-B> :BufExplorer<cr>
+
 "map Q to something useful
 noremap Q gq
 
