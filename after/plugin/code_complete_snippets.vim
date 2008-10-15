@@ -5,7 +5,7 @@ let s:re = g:code_complete_marker_end
 function! s:AddHTMLMapsFor(ft)
     call CodeCompleteAddTemplate(a:ft, "label", "<label for=\"".s:rs."id".s:re."\">".s:rs."label_text".s:re."</label>")
     call CodeCompleteAddTemplate(a:ft, "table", "<table class=\"".s:rs.s:re."\">\<CR>".s:rs.s:re."\<CR></table>")
-    call CodeCompleteAddTemplate(a:ft, "table", "<table ".s:rsd."width=\"".s:rsd."100%".s:re."\" border=\"".s:rsd."0".s:re."\" cellspacing=\"".s:rsd."0".s:re."\" cellpadding=\"".s:rsd."5".s:re."\"".s:rs.s:re.s:re.">\<CR><tr>\<CR><th>".s:rs.s:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
+    call CodeCompleteAddTemplate(a:ft, "table", "<table".s:rsd." width=\"".s:rsd."100%".s:re."\" border=\"".s:rsd."0".s:re."\" cellspacing=\"".s:rsd."0".s:re."\" cellpadding=\"".s:rsd."5".s:re."\"".s:rs.s:re.s:re.">\<CR><tr>\<CR><th>".s:rs.s:re."</th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
     call CodeCompleteAddTemplate(a:ft, "span", "<span class=\"".s:rs.s:re."\">".s:rs.s:re."</span>")
     call CodeCompleteAddTemplate(a:ft, "div", "<div".s:rsd.s:re.">\<CR>".s:rs.s:re."\<CR></div>")
     call CodeCompleteAddTemplate(a:ft, "id", "id=\"".s:rs.s:re."\"")
@@ -69,6 +69,7 @@ if s:inRailsEnv()
     call CodeCompleteAddTemplate("ruby", "vpo", "validates_presence_of :".s:rs."attr_names".s:re.s:rsd.", :message => '".s:rs."error message".s:re."', :on => ".s:rs.":save|:create|:update".s:re.", :if => ".s:rs."method|proc".s:re.s:re)
     call CodeCompleteAddTemplate("ruby", "vno", "validates_numericality_of ".s:rs.s:re)
     call CodeCompleteAddTemplate("ruby", "vuo", "validates_uniqueness_of ".s:rs.s:re)
+    call CodeCompleteAddTemplate("ruby", "flash", "flash[".s:rsd.":notice".s:re."] = '".s:rs.s:re."'")
     call CodeCompleteAddTemplate("ruby", "bt", "belongs_to :".s:rs."association_name".s:re.s:rsd.", :class_name => '".s:rs.s:re."', :foreign_key => '".s:rs.s:re."'".s:re)
     call CodeCompleteAddTemplate("ruby", "hm", "has_many :".s:rs."association_name".s:re.s:rsd.", :class_name => '".s:rs.s:re."'".s:re)
 
@@ -109,23 +110,28 @@ call CodeCompleteAddTemplate("ruby", "detect", "detect {|".s:rsd."element".s:re.
 call CodeCompleteAddTemplate("ruby", "detecto", "detect do |".s:rsd."element".s:re."|\<CR>".s:rs."body".s:re."\<CR>end\<CR>")
 
 call CodeCompleteAddTemplate("ruby", "do", "do\<CR>".s:rs.s:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "case", "case ".s:rs."object".s:re."\<CR>when ".s:rs."value".s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "case", "case ".s:rs.s:re."\<CR>when ".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
-call CodeCompleteAddTemplate("ruby", "if", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "ife", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "if", "if ".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "ife", "if ".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
-call CodeCompleteAddTemplate("ruby", "unless", "unless ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>end\<CR>")
-call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "unless", "unless ".s:rs.s:re."\<CR>end\<CR>")
+call CodeCompleteAddTemplate("ruby", "unlesse", "unless ".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>end\<CR>")
 
 "eruby {{{1
 
 "eruby mappings
+call CodeCompleteAddTemplate("eruby", "if", "<% if ".s:rs.s:re." -%>\<CR>".s:rs.s:re."\<CR><% end -%>")
+call CodeCompleteAddTemplate("eruby", "ife", "<% if ".s:rs.s:re." -%>\<CR>".s:rs.s:re."\<CR><% else -%>\<CR>".s:rs.s:re."\<CR><% end -%>")
+
+call CodeCompleteAddTemplate("eruby", "unless", "<% unless ".s:rs.s:re." -%>\<CR>".s:rs.s:re."\<CR><% end -%>")
+call CodeCompleteAddTemplate("eruby", "unlesse", "<% if ".s:rs.s:re." -%>\<CR>".s:rs.s:re."\<CR><% else -%>\<CR>".s:rs.s:re."\<CR><% end -%>")
 
 if s:inRailsEnv()
     call CodeCompleteAddTemplate("eruby", "rp", "<%= render :partial => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
     call CodeCompleteAddTemplate("eruby", "rt", "<%= render :template => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
     call CodeCompleteAddTemplate("eruby", "rf", "<%= render :file => \"".s:rs."file".s:re."\"".s:rs.s:re." %>")
-    call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".s:rs."object".s:re.", ".s:rs."method".s:re.", ".s:rs."collection".s:re.", ".s:rs."value_method".s:re.", ".s:rs."text_method".s:re.", ".s:rs."[options]".s:re.", ".s:rs."[html_options]".s:re." %>")
+    call CodeCompleteAddTemplate("eruby", "cs", "<%= collection_select ".s:rs."object".s:re.", ".s:rs."method".s:re.", ".s:rs."collection".s:re.", ".s:rs."value_method".s:re.", ".s:rs."text_method".s:re.s:rsd.", ".s:rs."[options]".s:re.", ".s:rs."[html_options]".s:re.s:re." %>")
     call CodeCompleteAddTemplate("eruby", "ofcfs", "<%= options_from_collection_for_select ".s:rs."collection".s:re.", ".s:rs."value_method".s:re.", ".s:rs."text_method".s:re.", ".s:rs."[selected_value]".s:re." %>")
     call CodeCompleteAddTemplate("eruby", "sslt", "<%= stylesheet_link_tag \"".s:rs.s:re."\" %>")
     call CodeCompleteAddTemplate("eruby", "jsit", "<%= javascript_include_tag \"".s:rs.s:re."\" %>")
@@ -150,9 +156,9 @@ call CodeCompleteAddTemplate("php", "var", "var_export(".s:rs.s:re.");")
 
 
 "vim {{{1
-call CodeCompleteAddTemplate("vim", "if", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>endif\<CR>")
-call CodeCompleteAddTemplate("vim", "ife", "if ".s:rs."condition".s:re."\<CR>".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>endif\<CR>")
-call CodeCompleteAddTemplate("vim", "func", "function! ".s:rs."name".s:re."(".s:rs.s:re.")\<CR>".s:rs.s:re."\<CR>endfunction\<CR>")
+call CodeCompleteAddTemplate("vim", "if", "if ".s:rs.s:re."\<CR>endif\<CR>")
+call CodeCompleteAddTemplate("vim", "ife", "if ".s:rs.s:re."\<CR>else\<CR>".s:rs.s:re."\<CR>endif\<CR>")
+call CodeCompleteAddTemplate("vim", "func", "function! ".s:rs.s:re."(".s:rs.s:re.")\<CR>".s:rs.s:re."\<CR>endfunction\<CR>")
 call CodeCompleteAddTemplate("vim", "au", "autocmd ".s:rs."events".s:re." ".s:rs."pattern".s:re." ".s:rs."command".s:re)
 call CodeCompleteAddTemplate("vim", "com", "command! -nargs=".s:rs."number_of_args".s:re." ".s:rs."other_params".s:re." ".s:rs."name".s:re." ".s:rs."command".s:re)
 call CodeCompleteAddTemplate("vim", "try", "try\<CR>".s:rs.s:re."\<CR>catch /".s:rs.s:re."/\<CR>".s:rs.s:re."\<CR>endtry")
