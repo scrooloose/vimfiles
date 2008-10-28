@@ -20,12 +20,10 @@ set linebreak   "wrap lines at convenient points
 "Add the variable with the name a:varName to the statusline. Highlight it as
 "'error' unless its value is in a:goodValues (a comma separated string)
 function! AddStatuslineFlag(varName, goodValues)
-  set statusline+=[
   set statusline+=%#error#
   exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',1)}"
   set statusline+=%*
   exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',0)}"
-  set statusline+=]
 endfunction
 
 "returns a:value or ''
@@ -37,10 +35,10 @@ endfunction
 "'error'
 "
 function! RenderStlFlag(value, goodValues, error)
-  let goodValues = split(a:goodValues, ',')
+  let goodValues = split(a:goodValues, ',', 1)
   let good = index(goodValues, a:value) != -1
   if (a:error && !good) || (!a:error && good)
-    return a:value
+    return '[' . a:value . ']'
   else
     return ''
   endif
@@ -48,8 +46,8 @@ endfunction
 
 "statusline setup
 set statusline=%t       "tail of the filename
-call AddStatuslineFlag('&ff', 'unix')    "fileformat
-call AddStatuslineFlag('&fenc', 'utf-8') "file encoding
+call AddStatuslineFlag('&ff', 'unix,')    "fileformat
+call AddStatuslineFlag('&fenc', 'utf-8,') "file encoding
 set statusline+=%h      "help file flag
 set statusline+=%m      "modified flag
 set statusline+=%r      "read only flag
