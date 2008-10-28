@@ -14,6 +14,8 @@ function! s:AddHTMLMapsFor(ft)
     call NERDSnippet(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"<++>\" />")
     call NERDSnippet(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><++>")
     call NERDSnippet(a:ft, "mailto", "<a href=\"mailto:<+email+><+?subject=<+subject+>+>\"><++></a>")
+
+    call NERDSnippet(a:ft, "input", '<input type="text" name="<++>" <+value="<++>"+> <+size="<++>"+> <+maxlength="<++>"+> />')
 endfunction
 
 function! Snippet_ClassNameFromFilename()
@@ -24,25 +26,25 @@ function! Snippet_ClassNameFromFilename()
     return s:camelCase(name)
 endfunction
 
-function s:camelCase(s)
+function! s:camelCase(s)
     "upcase the first letter
     let toReturn = substitute(a:s, '^\(.\)', '\=toupper(submatch(1))', '')
     "turn all '_x' into 'X'
     return substitute(toReturn, '_\(.\)', '\=toupper(submatch(1))', 'g')
 endfunction
 
-function s:underscore(s)
+function! s:underscore(s)
     "down the first letter
     let toReturn = substitute(a:s, '^\(.\)', '\=tolower(submatch(1))', '')
     "turn all 'X' into '_x'
     return substitute(toReturn, '\([A-Z]\)', '\=tolower("_".submatch(1))', 'g')
 endfunction
 
-function s:inRailsEnv()
+function! s:inRailsEnv()
     return filereadable(getcwd() . '/config/environment.rb')
 endfunction
 
-function Snippet_Sweeper()
+function! Snippet_Sweeper()
     let class = s:camelCase(substitute(expand("%:t"), '^\(.*\)_sweeper\.rb', '\1', ''))
     let instance = s:underscore(class)
     return "class <+".class."+>Sweeper < ActionController::Caching::Sweeper\<CR>".
@@ -149,6 +151,7 @@ call s:AddHTMLMapsFor('html')
 call NERDSnippet("php", "func", "function <+name+>(<++>) {\<CR><++>\<CR>}\<CR>")
 call NERDSnippet("php", "log", "error_log(var_export(<++>, true));")
 call NERDSnippet("php", "var", "var_export(<++>);")
+call s:AddHTMLMapsFor('php')
 
 
 "vim {{{1
