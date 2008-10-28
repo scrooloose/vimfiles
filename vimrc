@@ -17,15 +17,50 @@ set hlsearch    "hilight searches by default
 set nowrap      "dont wrap lines
 set linebreak   "wrap lines at convenient points
 
+"Add the variable with the name a:varName to the statusline. Highlight it as
+"'error' unless its value is in a:goodValues (a comma separated string)
+function! AddStatuslineFlag(varName, goodValues)
+  set statusline+=[
+  set statusline+=%#error#
+  exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',1)}"
+  set statusline+=%*
+  exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',0)}"
+  set statusline+=]
+endfunction
+
+"returns a:value or ''
+"
+"a:goodValues is a comma separated string of values that shouldn't be
+"highlighted with the error group
+"
+"a:error indicates whether the string that is returned will be highlighted as
+"'error'
+"
+function! RenderStlFlag(value, goodValues, error)
+  let goodValues = split(a:goodValues, ',')
+  let good = index(goodValues, a:value) != -1
+  if (a:error && !good) || (!a:error && good)
+    return a:value
+  else
+    return ''
+  endif
+endfunction
+
 "statusline setup
 set statusline=%t       "tail of the filename
-set statusline+=[%{strlen(&fenc)?&fenc:'none'}, "file encoding
-set statusline+=%{&ff}] "file format
+call AddStatuslineFlag('&ff', 'unix')    "fileformat
+call AddStatuslineFlag('&fenc', 'utf-8') "file encoding
 set statusline+=%h      "help file flag
 set statusline+=%m      "modified flag
 set statusline+=%r      "read only flag
 set statusline+=%y      "filetype
 set statusline+=[%{StatuslineCurrentHighlight()}]
+
+"display a warning if we shouldnt have &et set
+set statusline+=%#error#
+set statusline+=%{StatuslineTabWarning()}
+set statusline+=%*
+
 set statusline+=%=      "left/right separator
 set statusline+=%c,     "cursor column
 set statusline+=%l/%L   "cursor line/total lines
@@ -40,6 +75,18 @@ function! StatuslineCurrentHighlight()
     endif
     return name
 endfunction
+
+"return '[&et]' if leading tabs are found and &et is set
+function! StatuslineTabWarning()
+    if !exists("b:statusline_tabs_found")
+        let b:statusline_tabs_found = search('^\t', 'nw') != 0
+    endif
+    if b:statusline_tabs_found && &expandtab
+        return '[&et]'
+    endif
+    return ''
+endfunction
+
 
 "indent settings
 set shiftwidth=4
@@ -144,7 +191,7 @@ command! -nargs=0 Lorem :normal iLorem ipsum dolor sit amet, consectetur
 
 "define :HighlightExcessColumns command to highlight the offending parts of
 "lines that are "too long". where "too long" is defined by &textwidth or an
-"arg passed to the command 
+"arg passed to the command
 command! -nargs=? HighlightExcessColumns call s:HighlightExcessColumns('<args>')
 function! s:HighlightExcessColumns(width)
     let targetWidth = a:width != '' ? a:width : &textwidth
