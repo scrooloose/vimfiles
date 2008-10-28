@@ -124,8 +124,8 @@ hi WarningMsg guibg=black guifg=blue gui=bold
 hi ErrorMsg guibg=black guifg=red gui=bold
 
 " Folding
-hi Folded guibg=black guifg=white
-hi FoldColumn guibg=black guifg=white
+hi Folded guibg=black guifg=grey50
+hi FoldColumn guibg=black guifg=grey30
 
 " Misc
 hi Ignore guibg=black guifg=grey45
@@ -141,6 +141,7 @@ hi Directory guibg=black guifg=cyan
 " Vim 7.x only
 " ----------------------------------------------------------------------------
 hi MatchParen guibg=purple guifg=yellow
-hi CursorLine guibg=black gui=underline
+hi CursorLine guibg=grey15 
+hi CursorColumn guibg=grey15
 hi Pmenu guibg=grey20 guifg=white
 hi PmenuSel guibg=lightblue guifg=black

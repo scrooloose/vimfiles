@@ -1,7 +1,7 @@
 " Vim colour scheme
-" Maintainer:	Georg Dahn
-" Last Change:	26 April 2006
-" Version:	1.6
+" Maintainer:   Georg Dahn
+" Last Change:  26 April 2006
+" Version:  1.6
 "
 " This color scheme has both light and dark styles with harmonic colors
 " easy to distinguish. Terminals are not supported, therefore you should

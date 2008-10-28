@@ -1,7 +1,7 @@
 " Vim color file
-" Maintainer:	Billy McIntosh <billymcintosh@ntlworld.com>
-" Last Change:	June 24, 2003
-" Licence:	    Public Domain
+" Maintainer:   Billy McIntosh <billymcintosh@ntlworld.com>
+" Last Change:  June 24, 2003
+" Licence:      Public Domain
 
 " This package offers a eye-catching color scheme for PHP syntax
 
@@ -52,30 +52,30 @@ hi Ignore guifg=#c0c0c0
 hi Identifier guifg=#000080 guibg=#d3e4f8
 hi Type guifg=#00BB00 guibg=#d3e4f8
 
-hi link IncSearch		Visual
-hi link String			Constant
-hi link Character		Constant
-hi link Number			Constant
-hi link Boolean			Constant
-hi link Float			Number
-hi link Function		Identifier
-hi link Conditional		Statement
-hi link Repeat			Statement
-hi link Label			Statement
-hi link Operator		Statement
-hi link Keyword			Statement
-hi link Exception		Statement
-hi link Include			PreProc
-hi link Define			PreProc
-hi link Macro			PreProc
-hi link PreCondit		PreProc
-hi link StorageClass	Type
-hi link Structure		Type
-hi link Typedef			Type
-hi link Tag				Special
-hi link SpecialChar		Special
-hi link Delimiter		Special
-hi link SpecialComment	Special
-hi link Debug			Special
+hi link IncSearch       Visual
+hi link String          Constant
+hi link Character       Constant
+hi link Number          Constant
+hi link Boolean         Constant
+hi link Float           Number
+hi link Function        Identifier
+hi link Conditional     Statement
+hi link Repeat          Statement
+hi link Label           Statement
+hi link Operator        Statement
+hi link Keyword         Statement
+hi link Exception       Statement
+hi link Include         PreProc
+hi link Define          PreProc
+hi link Macro           PreProc
+hi link PreCondit       PreProc
+hi link StorageClass    Type
+hi link Structure       Type
+hi link Typedef         Type
+hi link Tag             Special
+hi link SpecialChar     Special
+hi link Delimiter       Special
+hi link SpecialComment  Special
+hi link Debug           Special
 
 " vim: sw=2

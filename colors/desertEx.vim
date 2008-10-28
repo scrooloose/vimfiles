@@ -8,12 +8,12 @@ if version > 580
     " complaining
     hi clear
     if exists("syntax_on")
-	syntax reset
+    syntax reset
     endif
 endif
 let g:colors_name="desertEx"
 
-hi Normal	guifg=gray guibg=grey17 gui=none
+hi Normal   guifg=gray guibg=grey17 gui=none
 
 " AlignCtrl default
 " AlignCtrl =P0 guifg guibg gui
@@ -41,7 +41,7 @@ hi WarningMsg   guifg=salmon         gui=none
 hi Pmenu        guifg=white          guibg=#445599  gui=none
 hi PmenuSel     guifg=#445599        guibg=gray
 hi WildMenu     guifg=gray           guibg=gray17   gui=none
-hi MatchParen	guifg=cyan           guibg=NONE     gui=bold
+hi MatchParen   guifg=cyan           guibg=NONE     gui=bold
 hi DiffAdd      guifg=black          guibg=wheat1
 hi DiffChange   guifg=black          guibg=skyblue1
 hi DiffText     guifg=black          guibg=hotpink1  gui=none

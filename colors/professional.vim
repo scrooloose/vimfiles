@@ -20,16 +20,16 @@
 set background=light
 hi clear
 if exists("syntax_on")
-	syntax reset
+    syntax reset
 endif
 let g:colors_name="professional"
 
-hi Normal   guifg=black	 guibg=#ffffdd 
+hi Normal   guifg=black  guibg=#ffffdd 
 hi Statusline    gui=none guibg=#006666 guifg=#ffffff
 hi  VertSplit    gui=none guibg=#006666 guifg=#ffffff
 hi StatuslineNC  gui=none guibg=#666633 guifg=#ffffff
 
-hi Title    guifg=black	 guibg=white gui=BOLD
+hi Title    guifg=black  guibg=white gui=BOLD
 hi lCursor  guibg=Cyan   guifg=NONE
 hi LineNr   guifg=white guibg=#006666 
 "guibg=#8c9bfa
@@ -40,7 +40,7 @@ hi Operator   guifg=#ff0000
 
 hi Identifier guifg=#339900 gui=NONE
 
-hi Statement	 guifg=orange gui=NONE
+hi Statement     guifg=orange gui=NONE
 hi TypeDef       guifg=#c000c8 gui=NONE
 hi Type          guifg=#0000c8 gui=NONE
 hi Boolean       guifg=#0000aa gui=NONE

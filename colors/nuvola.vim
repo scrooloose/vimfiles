@@ -1,10 +1,10 @@
 " local syntax file - set colors on a per-machine basis:
 " vim: tw=0 ts=4 sw=4
 " Vim color file
-" Maintainer:	Dr. J. Pfefferl <johann.pfefferl@agfa.com>
-" Source:	$Source: /MISC/projects/cvsroot/user/pfefferl/vim/colors/nuvola.vim,v $
-" Id:	$Id: nuvola.vim,v 1.14 2003/08/11 14:03:28 pfefferl Exp $
-" Last Change:	$Date: 2003/08/11 14:03:28 $
+" Maintainer:   Dr. J. Pfefferl <johann.pfefferl@agfa.com>
+" Source:   $Source: /MISC/projects/cvsroot/user/pfefferl/vim/colors/nuvola.vim,v $
+" Id:   $Id: nuvola.vim,v 1.14 2003/08/11 14:03:28 pfefferl Exp $
+" Last Change:  $Date: 2003/08/11 14:03:28 $
 
 " Intro {{{1
 set background=light
@@ -71,28 +71,28 @@ hi Statement term=BOLD ctermfg=DarkRed gui=NONE guifg=#F06F00
 hi Tag term=BOLD ctermfg=DarkGreen guifg=DarkGreen
 hi Todo term=STANDOUT ctermbg=Yellow ctermfg=blue guifg=Blue guibg=Yellow
 hi Type term=UNDERLINE ctermfg=Blue gui=NONE guifg=Blue
-hi! link String	Constant
-hi! link Character	Constant
-hi! link Boolean	Constant
-hi! link Float		Number
-hi! link Function	Identifier
-hi! link Conditional	Statement
-hi! link Repeat	Statement
-hi! link Label		Statemengreen
-hi! link Operator	Statement
-hi! link Keyword	Statement
-hi! link Exception	Statement
-hi! link Include	PreProc
-hi! link Define	PreProc
-hi! link Macro		PreProc
-hi! link PreCondit	PreProc
-hi! link StorageClass	Type
-hi! link Structure	Type
-hi! link Typedef	Type
-hi! link SpecialChar	Special
-hi! link Delimiter	Special
+hi! link String Constant
+hi! link Character  Constant
+hi! link Boolean    Constant
+hi! link Float      Number
+hi! link Function   Identifier
+hi! link Conditional    Statement
+hi! link Repeat Statement
+hi! link Label      Statemengreen
+hi! link Operator   Statement
+hi! link Keyword    Statement
+hi! link Exception  Statement
+hi! link Include    PreProc
+hi! link Define PreProc
+hi! link Macro      PreProc
+hi! link PreCondit  PreProc
+hi! link StorageClass   Type
+hi! link Structure  Type
+hi! link Typedef    Type
+hi! link SpecialChar    Special
+hi! link Delimiter  Special
 hi! link SpecialComment Special
-hi! link Debug		Special
+hi! link Debug      Special
 
 " HTML {{{1
 hi htmlLink                 gui=UNDERLINE guifg=#0000ff guibg=NONE

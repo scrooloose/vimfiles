@@ -1,6 +1,10 @@
 " Vim color file
 " Maintainer: Tom Regner <vim@tomsdiner.org>
 " Last Change:
+"
+" 2007-10-16 change by Alexei Alexandrov
+" - highlight CursorColumn
+"
 " 2007-08-20 change by Diederick Niehorster
 " - highlight CursorLine
 "
@@ -15,7 +19,7 @@
 " - more console-colors
 " - added console-colors, clean-up
 "
-" Version: 1.2.4
+" Version: 1.2.5
 " URL: http://vim.sourceforge.net/script.php?script_id=368
 
 
@@ -32,6 +36,7 @@ let g:colors_name = "oceandeep"
 highlight Cursor        gui=None guibg=PaleTurquoise3 guifg=White
 highlight CursorIM      gui=bold guifg=white guibg=PaleTurquoise3
 highlight CursorLine    gui=None guibg=#003853
+highlight CursorColumn  gui=None guibg=#003853
 highlight Directory     guifg=LightSeaGreen guibg=bg
 highlight DiffAdd       gui=None guifg=fg guibg=DarkCyan
 highlight DiffChange    gui=None guifg=fg guibg=Green4

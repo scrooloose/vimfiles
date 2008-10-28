@@ -1,6 +1,6 @@
 " Vim colour file
 " Maintainer: Matthew Hawkins <matt@mh.dropbear.id.au>
-" Last Change:	Mon, 22 Apr 2002 15:28:04 +1000
+" Last Change:  Mon, 22 Apr 2002 15:28:04 +1000
 " URI: http://mh.dropbear.id.au/vim/navajo-night.png
 "
 " This colour scheme uses a "navajo-black" background

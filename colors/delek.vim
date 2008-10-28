@@ -1,6 +1,6 @@
 " Vim color file
-" Maintainer:	David Schweikert <dws@ee.ethz.ch>
-" Last Change:	2001 Mai 14
+" Maintainer:   David Schweikert <dws@ee.ethz.ch>
+" Last Change:  2001 Mai 14
 
 " First remove all existing highlighting.
 hi clear
@@ -34,8 +34,8 @@ hi DiffAdd term=bold ctermbg=LightBlue guibg=LightBlue
 hi DiffChange term=bold ctermbg=LightMagenta guibg=LightMagenta
 hi DiffDelete term=bold ctermfg=Blue ctermbg=LightCyan gui=bold guifg=Blue guibg=LightCyan
 
-hi StatusLine	cterm=bold ctermbg=blue ctermfg=yellow guibg=gold guifg=blue
-hi StatusLineNC	cterm=bold ctermbg=blue ctermfg=black  guibg=gold guifg=blue
+hi StatusLine   cterm=bold ctermbg=blue ctermfg=yellow guibg=gold guifg=blue
+hi StatusLineNC cterm=bold ctermbg=blue ctermfg=black  guibg=gold guifg=blue
 hi NonText term=bold ctermfg=Blue gui=bold guifg=gray guibg=white
 hi Cursor guibg=fg guifg=bg
 
@@ -46,7 +46,7 @@ hi Comment    term=NONE      cterm=NONE ctermfg=darkred      gui=NONE guifg=red2
 hi Constant   term=underline cterm=NONE ctermfg=darkgreen    gui=NONE guifg=green3
 hi Special    term=bold      cterm=NONE ctermfg=lightred     gui=NONE guifg=deeppink
 hi Statement  term=bold      cterm=bold ctermfg=blue         gui=bold guifg=blue
-hi Type	      term=underline cterm=NONE ctermfg=blue         gui=bold guifg=blue 
+hi Type       term=underline cterm=NONE ctermfg=blue         gui=bold guifg=blue 
 
 if exists("syntax_on")
   let syntax_cmd = "enable"

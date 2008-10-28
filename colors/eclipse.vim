@@ -1,8 +1,8 @@
 " Vim color file
-" Maintainer:	Juan frias <juandfrias at gmail dot com>
-" Last Change:	2007 Feb 25
-" Version:	1.0.1
-" URL:		http://www.axisym3.net/jdany/vim-the-editor/#eclipse
+" Maintainer:   Juan frias <juandfrias at gmail dot com>
+" Last Change:  2007 Feb 25
+" Version:  1.0.1
+" URL:      http://www.axisym3.net/jdany/vim-the-editor/#eclipse
 set background=light
 highlight clear
 if exists("syntax_on")

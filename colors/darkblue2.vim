@@ -32,7 +32,7 @@ hi VertSplit            gui=bold guifg=NONE guibg=gray80
 "hi Folded
 "hi FoldColumn
 "hi IncSearch
-hi LineNr				gui=bold guifg=lightsteelblue guibg=#132b4a
+hi LineNr               gui=bold guifg=lightsteelblue guibg=#132b4a
 hi ModeMsg              gui=bold
 "hi MoreMsg
 "hi NonText
@@ -48,7 +48,7 @@ hi VisualNOS            gui=bold guifg=steelblue guibg=fg
 hi WarningMsg           guifg=White guibg=Tomato
 "hi WildMenu
 
-hi User2				guifg=lightskyblue guibg=#021a39 gui=bold
+hi User2                guifg=lightskyblue guibg=#021a39 gui=bold
 
 " If using Motif/Athena
 hi Menu                 guibg=#233b5a guifg=#fff8dc

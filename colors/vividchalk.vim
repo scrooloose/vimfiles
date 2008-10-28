@@ -114,8 +114,7 @@ high link Directory     Identifier
 highlight ErrorMsg      guibg=Red ctermbg=DarkRed guifg=NONE ctermfg=NONE
 highlight Search        guifg=NONE ctermfg=NONE gui=none cterm=none
 call s:hibg("Search"    ,"#555555","Black",81)
-highlight IncSearch     guifg=Black guibg=White ctermfg=Black ctermbg=Gray
-highlight Search        guifg=Black guibg=White ctermfg=Black ctermbg=Gray
+highlight IncSearch     guifg=White guibg=Black ctermfg=White ctermbg=Black
 highlight MoreMsg       guifg=#00AA00 ctermfg=Green
 highlight LineNr        guifg=#DDEEFF ctermfg=White
 call s:hibg("LineNr"    ,"#222222","DarkBlue",80)
