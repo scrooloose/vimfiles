@@ -130,12 +130,6 @@ set t_Co=256
 "hide buffers when not displayed
 set hidden
 
-"use these place holders with code_complete.vim, the defaults screw up
-"indenting with ruby
-"let g:rs = '<+'
-"let g:rsd = '<+='
-"let g:re = '+>'
-
 "dont load csapprox if we no gui support - silences an annoying warning
 if !has("gui")
     let g:CSApprox_loaded = 1
