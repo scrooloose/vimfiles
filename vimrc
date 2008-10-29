@@ -54,7 +54,7 @@ set statusline+=%r      "read only flag
 set statusline+=%y      "filetype
 set statusline+=[%{StatuslineCurrentHighlight()}]
 
-"display a warning if we shouldnt have &et set
+"display a warning if &et is wrong, or we have mixed-indenting
 set statusline+=%#error#
 set statusline+=%{StatuslineTabWarning()}
 set statusline+=%*
@@ -74,17 +74,28 @@ function! StatuslineCurrentHighlight()
     return name
 endfunction
 
-"return '[&et]' if leading tabs are found and &et is set
-function! StatuslineTabWarning()
-    if !exists("b:statusline_tabs_found")
-        let b:statusline_tabs_found = search('^\t', 'nw') != 0
-    endif
-    if b:statusline_tabs_found && &expandtab
-        return '[&et]'
-    endif
-    return ''
-endfunction
 
+"recalculate the tab warning flag when idle and after writing
+autocmd cursorhold,bufwritepost * unlet! b:statusline_tab_warning
+
+"return '[&et]' if &et is set wrong
+"return '[mixed-indenting]' if spaces and tabs are used to indent
+"return an empty string if everything is fine
+function! StatuslineTabWarning()
+    if !exists("b:statusline_tab_warning")
+        let tabs = search('^\t\+[^ \t]*', 'nw') != 0
+        let spaces = search('^ \+[^ \t]*', 'nw') != 0
+
+        if tabs && spaces
+            let b:statusline_tab_warning =  '[mixed-indenting]'
+        elseif (spaces && !&et) || (tabs && &et)
+            let b:statusline_tab_warning = '[&et]'
+        else
+            let b:statusline_tab_warning = ''
+        endif
+    endif
+    return b:statusline_tab_warning
+endfunction
 
 "indent settings
 set shiftwidth=4
