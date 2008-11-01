@@ -1,15 +1,20 @@
+call NERDSnippetsReset()
+
 function! s:AddHTMLMapsFor(ft)
     call NERDSnippet(a:ft, "label", "<label for=\"<+id+>\"><+label_text+></label>")
-    call NERDSnippet(a:ft, "table", "<table class=\"<++>\">\<CR><++>\<CR></table>")
-    call NERDSnippet(a:ft, "table", "<table<+ width=\"<+100%+>\" border=\"<+0+>\" cellspacing=\"<+0+>\" cellpadding=\"<+5+>\"<++>+>>\<CR><tr>\<CR><th><++></th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>")
+    call NERDSnippet(a:ft, "table", "<table class=\"<++>\">\<CR><++>\<CR></table>", 'simple')
+    call NERDSnippet(a:ft, "table", "<table<+ width=\"<+100%+>\" border=\"<+0+>\" cellspacing=\"<+0+>\" cellpadding=\"<+5+>\"<++>+>>\<CR><tr>\<CR><th><++></th>\<CR></tr>\<CR>\<CR><tr>\<CR><td></td>\<CR></tr>\<CR></table>", 'hardcore')
     call NERDSnippet(a:ft, "span", "<span class=\"<++>\"><++></span>")
     call NERDSnippet(a:ft, "div", "<div<++>>\<CR><++>\<CR></div>")
     call NERDSnippet(a:ft, "id", "id=\"<++>\"")
     call NERDSnippet(a:ft, "img", "<img src=\"<++>\"<++> />")
     call NERDSnippet(a:ft, "select", "<select id=\"<++>\" name=\"<++>\"<++>>\<CR><option></option>\<CR><++>\<CR></select>")
     call NERDSnippet(a:ft, "option", "<option value=\"<++>\"<++>><++></option>")
-    call NERDSnippet(a:ft, "script", "<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">\<CR>//<![CDATA[\<CR><++>\<CR>//]]>\<CR></script>")
-    call NERDSnippet(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR>/*<![CDATA[*/\<CR><++>\<CR>/*]]>*/\<CR></style>\<CR>")
+
+    call NERDSnippet(a:ft, "script", "<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">\<CR>//<![CDATA[\<CR><++>\<CR>//]]>\<CR></script>", 'inline script')
+    call NERDSnippet(a:ft, "script", "<script type=\"text/javascript\" src=\"<++>\"></script>", 'include script')
+
+    call NERDSnippet(a:ft, "style", "<style type=\"text/css\" media=\"screen\">\<CR><++>\<CR></style>")
     call NERDSnippet(a:ft, "href", "<a href=\"<++>\"><++></a>")
     call NERDSnippet(a:ft, "link", "<link rel=\"stylesheet\" type=\"text/css\" href=\"<++>\" />")
     call NERDSnippet(a:ft, "doctype", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><++>")
@@ -142,9 +147,10 @@ endif
 call s:AddHTMLMapsFor('eruby')
 
 "html {{{1
-
-"html mappings
 call s:AddHTMLMapsFor('html')
+
+"xhtml {{{1
+call s:AddHTMLMapsFor('xhtml')
 
 
 "php mappings {{{1
@@ -164,9 +170,10 @@ call NERDSnippet("vim", "try", "try\<CR><++>\<CR>catch /<++>/\<CR><++>\<CR>endtr
 call NERDSnippet("vim", "log", "echomsg <++>")
 
 "java {{{1
-call NERDSnippet("java", "for", "for(<+int i+>; <+condition+>; <+i+++>){\<CR><++>\<CR>}")
+call NERDSnippet("java", "for", "for(<+int i=0+>; <+condition+>; <+i+++>){\<CR><++>\<CR>}")
 call NERDSnippet("java", "ife", "if(<++>){\<CR><++>\<CR>}else{\<CR><++>\<CR>}")
 call NERDSnippet("java", "log", "System.<+out+>.println(<++>)")
+call NERDSnippet("java", "m", "<+public+> <+void+> <+methodName+>(<+args+>) {\<CR><++>\<CR>}")
 
 
 "global {{{1
@@ -185,7 +192,8 @@ endfunction
 
 
 call NERDSnippetGlobal("modeline", "\<c-r>=Snippet_Modeline()\<cr>")
-call NERDSnippetGlobal("time", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr><++>")
+call NERDSnippetGlobal("date", "\<c-r>=strftime(\"%Y-%m-%d\")\<cr><++>", 'date')
+call NERDSnippetGlobal("date", "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr><++>", 'date + time')
 call NERDSnippetGlobal("lorem", "Lorem ipsum dolor sit amet, consectetur magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum<++>\<c-o>:normal! gqq\<CR>")
 
 call NERDSnippetGlobal("todo", "\<c-r>=Snippet_Todo()\<cr>")
