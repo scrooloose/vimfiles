@@ -125,6 +125,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('%', '')
     elseif a:filetype == "acedb"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
+    elseif a:filetype == "actionscript"
+        call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "ada"
         call s:MapDelimitersWithAlternative('--','', '--  ', '')
     elseif a:filetype == "ahdl"
@@ -374,12 +376,14 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype == "h"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "haml"
-        call s:MapDelimiters('/', '')
+        call s:MapDelimitersWithAlternative('-#', '', '/', '')
     elseif a:filetype == "help"
         call s:MapDelimiters('"','')
     elseif a:filetype == "hercules"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "hog"
+        call s:MapDelimiters('#', '')
+    elseif a:filetype == "hostsaccess"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "html"
         call s:MapDelimitersWithAlternative('<!--','-->', '//', '')
@@ -617,12 +621,16 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('%', '')
     elseif a:filetype == "ppwiz"
         call s:MapDelimiters(';;', '')
+    elseif a:filetype == "processing"
+        call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "procmail"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "progress"
         call s:MapDelimiters('/*','*/')
     elseif a:filetype == "prolog"
         call s:MapDelimitersWithAlternative('%','','/*','*/')
+    elseif a:filetype == "ps1"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "psf"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "ptcap"

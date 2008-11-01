@@ -2,7 +2,7 @@
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 20 July, 2008
+" Last Change: 29 October, 2008
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '2.14.1'
+let s:NERD_tree_version = '2.14.2'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -132,15 +132,13 @@ let s:escape_chars =  " \\`\|\"#%&,?()\*^<>"
 let s:NERDTreeWinName = '_NERD_tree_'
 
 let s:tree_wid = 2
-let s:tree_markup_reg = '[ \-+~`|]'
-let s:tree_markup_reg_neg = '[^ \-+~`|]'
+let s:tree_markup_reg = '^[ `|]*[\-+~]'
 let s:tree_up_dir_line = '.. (up a dir)'
 
 let s:os_slash = '/'
 if s:running_windows
     let s:os_slash = '\'
 endif
-
 
 " SECTION: Commands {{{1
 "============================================================
@@ -713,6 +711,7 @@ endfunction
 "
 "Args:
 "path: a path object
+unlet s:TreeDirNode.findNode
 function! s:TreeDirNode.findNode(path)
     if a:path.equals(self.path)
         return self
@@ -731,7 +730,6 @@ function! s:TreeDirNode.findNode(path)
     endif
     return {}
 endfunction
-
 "FUNCTION: TreeDirNode.getChildCount() {{{3
 "Returns the number of children this node has
 function! s:TreeDirNode.getChildCount()
@@ -887,6 +885,7 @@ endfunction
 "
 "Args:
 "path: a path object representing the full filesystem path to the file/dir that the node represents
+unlet s:TreeDirNode.New
 function! s:TreeDirNode.New(path)
     if a:path.isDirectory != 1
         throw "NERDTree.TreeDirNode.InvalidArguments exception. A TreeDirNode object must be instantiated with a directory Path object."
@@ -948,6 +947,7 @@ function! s:TreeDirNode._openRecursively2(forceOpen)
 endfunction
 
 "FUNCTION: TreeDirNode.refresh() {{{3
+unlet s:TreeDirNode.refresh
 function! s:TreeDirNode.refresh()
     call self.path.refresh()
 
@@ -2061,7 +2061,7 @@ function! s:findNodeLineNumber(treenode)
 
         let curLine = getline(lnum)
 
-        let indent = match(curLine,s:tree_markup_reg_neg) / s:tree_wid
+        let indent = s:indentLevelFor(curLine)
         if indent == curPathComponent
             let curLine = s:stripMarkupFromLine(curLine, 1)
 
@@ -2092,6 +2092,21 @@ function! s:findRootNodeLineNumber()
     return rootLine
 endfunction
 
+"FUNCTION: s:firstNormalWindow(){{{2
+"find the window number of the first normal window
+function! s:firstNormalWindow()
+    let i = 1
+    while i <= winnr("$")
+        let bnum = winbufnr(i)
+        if bnum != -1 && getbufvar(bnum, '&buftype') == ''
+                    \ && !getwinvar(i, '&previewwindow')
+            return i
+        endif
+
+        let i += 1
+    endwhile
+    return -1
+endfunction
 "FUNCTION: s:getPath(ln) {{{2
 "Gets the full path to the node that is rendered on the given line number
 "
@@ -2119,9 +2134,7 @@ function! s:getPath(ln)
         return t:NERDTreeRoot.path.getParent()
     endif
 
-    "get the indent level for the file (i.e. how deep in the tree it is)
-    let indent = match(line, s:tree_markup_reg_neg) / s:tree_wid
-
+    let indent = s:indentLevelFor(line)
 
     "remove the tree parts and the leading space
     let curFile = s:stripMarkupFromLine(line, 0)
@@ -2146,7 +2159,7 @@ function! s:getPath(ln)
             break
         endif
         if curLineStripped =~ '/$'
-            let lpindent = match(curLine,s:tree_markup_reg_neg) / s:tree_wid
+            let lpindent = s:indentLevelFor(curLine)
             if lpindent < indent
                 let indent = indent - 1
 
@@ -2209,10 +2222,43 @@ function! s:getTreeWinNum()
         return -1
     endif
 endfunction
-
+"FUNCTION: s:indentLevelFor(line) {{{2
+function! s:indentLevelFor(line)
+    return match(a:line, '[^ \-+~`|]') / s:tree_wid
+endfunction
 "FUNCTION: s:isTreeOpen() {{{2
 function! s:isTreeOpen()
     return s:getTreeWinNum() != -1
+endfunction
+"FUNCTION: s:isWindowUsable(winnumber) {{{2
+"Returns 1 if opening a file from the tree in the given window requires it to
+"be split
+"
+"Args:
+"winnumber: the number of the window in question
+function! s:isWindowUsable(winnumber)
+    "gotta split if theres only one window (i.e. the NERD tree)
+    if winnr("$") == 1
+        return 0
+    endif
+
+    let oldwinnr = winnr()
+    exec a:winnumber . "wincmd p"
+    let specialWindow = getbufvar("%", '&buftype') != '' || getwinvar('%', '&previewwindow')
+    let modified = &modified
+    exec oldwinnr . "wincmd p"
+
+    "if its a special window e.g. quickfix or another explorer plugin then we
+    "have to split
+    if specialWindow
+        return 0
+    endif
+
+    if &hidden
+        return 1
+    endif
+
+    return !modified || s:bufInWindows(winbufnr(a:winnumber)) >= 2
 endfunction
 
 " FUNCTION: s:jumpToChild(direction) {{{2
@@ -2284,18 +2330,24 @@ function! s:openFileNode(treenode)
     if winnr != -1
         exec winnr . "wincmd w"
 
-    elseif s:shouldSplitToOpen(winnr("#"))
-        call s:openFileNodeSplit(a:treenode)
     else
-        try
-            wincmd p
-            exec ("edit " . a:treenode.path.strForEditCmd())
-        catch /^Vim\%((\a\+)\)\=:E37/
-            call s:putCursorInTreeWin()
-            call s:echo("Cannot open file, it is already open and modified")
-        catch /^Vim\%((\a\+)\)\=:/
-            echo v:exception
-        endtry
+        if !s:isWindowUsable(winnr("#")) && s:firstNormalWindow() == -1
+            call s:openFileNodeSplit(a:treenode)
+        else
+            try
+                if !s:isWindowUsable(winnr("#"))
+                    exec s:firstNormalWindow() . "wincmd w"
+                else
+                    wincmd p
+                endif
+                exec ("edit " . a:treenode.path.strForEditCmd())
+            catch /^Vim\%((\a\+)\)\=:E37/
+                call s:putCursorInTreeWin()
+                call s:echo("Cannot open file, it is already open and modified")
+            catch /^Vim\%((\a\+)\)\=:/
+                echo v:exception
+            endtry
+        endif
     endif
 endfunction
 
@@ -2582,11 +2634,14 @@ endfunction
 "scroll position
 function! s:saveScreenState()
     let win = winnr()
-    call s:putCursorInTreeWin()
-    let t:NERDTreeOldPos = getpos(".")
-    let t:NERDTreeOldTopLine = line("w0")
-    let t:NERDTreeOldWindowSize = s:shouldSplitVertically() ? winwidth("") : winheight("")
-    exec win . "wincmd w"
+    try
+        call s:putCursorInTreeWin()
+        let t:NERDTreeOldPos = getpos(".")
+        let t:NERDTreeOldTopLine = line("w0")
+        let t:NERDTreeOldWindowSize = s:shouldSplitVertically() ? winwidth("") : winheight("")
+        exec win . "wincmd w"
+    catch /NERDTree.view.InvalidOperation/
+    endtry
 endfunction
 
 "FUNCTION: s:setupSyntaxHighlighting() {{{2
@@ -2680,37 +2735,6 @@ function! s:setupSyntaxHighlighting()
     hi def link NERDTreeCurrentNode Search
 endfunction
 
-"FUNCTION: s:shouldSplitToOpen() {{{2
-"Returns 1 if opening a file from the tree in the given window requires it to
-"be split
-"
-"Args:
-"winnumber: the number of the window in question
-function! s:shouldSplitToOpen(winnumber)
-    "gotta split if theres only one window (i.e. the NERD tree)
-    if winnr("$") == 1
-        return 1
-    endif
-
-    let oldwinnr = winnr()
-    exec a:winnumber . "wincmd p"
-    let specialWindow = getbufvar("%", '&buftype') != '' || getwinvar('%', '&previewwindow')
-    let modified = &modified
-    exec oldwinnr . "wincmd p"
-
-    "if its a special window e.g. quickfix or another explorer plugin then we
-    "have to split
-    if specialWindow
-        return 1
-    endif
-
-    if &hidden
-        return 0
-    endif
-
-    return modified && s:bufInWindows(winbufnr(a:winnumber)) < 2
-endfunction
-
 " Function: s:shouldSplitVertically()   {{{2
 " Returns 1 if g:NERDTreeWinPos is 'left' or 'right'
 function! s:shouldSplitVertically()
@@ -2726,7 +2750,7 @@ endfunction
 function! s:stripMarkupFromLine(line, removeLeadingSpaces)
     let line = a:line
     "remove the tree parts and the leading space
-    let line = substitute (line,"^" . s:tree_markup_reg . "*","","")
+    let line = substitute (line, s:tree_markup_reg,"","")
 
     "strip off any read only flag
     let line = substitute (line, ' \[RO\]', "","")
@@ -2905,8 +2929,7 @@ function! s:checkForActivate()
         "if they clicked a dir, check if they clicked on the + or ~ sign
         "beside it
         if currentNode.path.isDirectory
-            let reg = '^' . s:tree_markup_reg .'*[~+]$'
-            if startToCur =~ reg
+            if startToCur =~ s:tree_markup_reg . '$' && char =~ '[+~]'
                 call s:activateNode(0)
                 return
             endif

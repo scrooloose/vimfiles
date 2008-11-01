@@ -17,10 +17,10 @@
 "   Put all your snippets in ~/.vim/after/plugin/ or split them up for each
 "   filetype and put them in ~/.vim/ftplugin
 "
-"   Use the function NERDSnippet(filetype, keyword, expansion) for filetype
+"   Use the function NERDSnippet(filetype, keyword, expansion [, name]) for filetype
 "   specific snippets.
 "
-"   Use the function NERDSnippetGlobal(keyword, expansion) for global
+"   Use the function NERDSnippetGlobal(keyword, expansion [, name]) for global
 "   snippets (available for all filetypes)
 "
 "
@@ -69,6 +69,16 @@
 "
 "   You can have up to 9 snippets bound to a single keyword.
 "
+"   When binding multiple snippets to one keyword, you can assign the snippets
+"   a name to make it easier for the user to identify which snippet to use.
+"
+" Example Snippet: two named snippets bound to a single keyword
+"
+"   call NERDSnippet("html", "table", "<table>\<CR><++></table>", "simple table")
+"   call NERDSnippet("html", "table", "<table class=\"<++>\">\<CR><++></table>", "table with class")
+"
+"   Notice that we pass the name in as the last argument.
+"
 "
 " Variables:
 "   g:NERDSnippets_key                        default: <tab>
@@ -113,6 +123,30 @@ let s:snippets['_'] = {}
 exec "inoremap ".g:NERDSnippets_key." <c-r>=NERDSnippets_ExpandSnippet()<cr><c-r>=NERDSnippets_SwitchRegion(1)<cr>"
 exec "nnoremap ".g:NERDSnippets_key." i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
 exec "snoremap ".g:NERDSnippets_key." <esc>i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
+
+
+" Snippet class {{{1
+let s:Snippet = {}
+
+function s:Snippet.New(expansion, ...)
+    let newSnippet = copy(self)
+    let newSnippet.expansion = a:expansion
+    if a:0
+        let newSnippet.name = a:1
+    else
+        let newSnippet.name = ''
+    endif
+    return newSnippet
+endfunction
+
+function s:Snippet.stringForPrompt()
+    if self.name != ''
+        return self.name
+    else
+        return substitute(self.expansion, "\r", '<CR>', 'g')
+    endif
+endfunction
+"}}}1
 
 function! NERDSnippets_ExpandSnippet()
     let snippet_name = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
@@ -207,7 +241,7 @@ function! s:ChooseSnippet(snippets)
     let prompt = ""
     let i = 0
     while i < len(a:snippets)
-        let prompt .= i+1 . ". " . substitute(a:snippets[i], "\r", '<CR>', 'g') . "\n"
+        let prompt .= i+1 . ". " . a:snippets[i].stringForPrompt() . "\n"
         let i += 1
     endwhile
     let prompt .= "\nSelect a snippet:"
@@ -225,27 +259,27 @@ function! s:ChooseSnippet(snippets)
         return ""
     endif
 
-    return a:snippets[choice-1]
+    return a:snippets[choice-1]['expansion']
 endfunction
 
-"get a snippet for the given name, if multiple snippets are found then prompt
+"get a snippet for the given keyword, if multiple snippets are found then prompt
 "the user to choose.
 "
 "if no snippets are found, return ''
-function! s:SnippetFor(name)
+function! s:SnippetFor(keyword)
     let snippets = []
     if has_key(s:snippets,&ft)
-        if has_key(s:snippets[&ft],a:name)
-            let snippets = extend(snippets, s:snippets[&ft][a:name])
+        if has_key(s:snippets[&ft],a:keyword)
+            let snippets = extend(snippets, s:snippets[&ft][a:keyword])
         endif
     endif
-    if has_key(s:snippets['_'],a:name)
-        let snippets = extend(snippets, s:snippets['_'][a:name])
+    if has_key(s:snippets['_'],a:keyword)
+        let snippets = extend(snippets, s:snippets['_'][a:keyword])
     endif
 
     if len(snippets)
         if len(snippets) == 1
-            return snippets[0]
+            return snippets[0].expansion
         else
             return s:ChooseSnippet(snippets)
         endif
@@ -283,7 +317,7 @@ function! s:RemoveMarkers()
 endfunction
 
 "add a new snippet for the given filetype and keyword
-function! NERDSnippet(filetype, keyword, expansion)
+function! NERDSnippet(filetype, keyword, expansion, ...)
     if !has_key(s:snippets, a:filetype)
         let s:snippets[a:filetype] = {}
     endif
@@ -292,12 +326,34 @@ function! NERDSnippet(filetype, keyword, expansion)
         let s:snippets[a:filetype][a:keyword] = []
     endif
 
-    call add(s:snippets[a:filetype][a:keyword], a:expansion)
+    let snippetName = ''
+    if a:0
+        let snippetName = a:1
+    endif
+
+    let newSnippet = s:Snippet.New(a:expansion, snippetName)
+
+    call add(s:snippets[a:filetype][a:keyword], newSnippet)
 endfunction
 
+function! Snippets()
+    return s:snippets
+endfunction
+
+
 "add a new global snippet for the given keyword
-function! NERDSnippetGlobal(keyword, expansion)
-    call NERDSnippet('_', a:keyword, a:expansion)
+function! NERDSnippetGlobal(keyword, expansion, ...)
+    let snippetName = ''
+    if a:0
+        let snippetName = a:1
+    endif
+    call NERDSnippet('_', a:keyword, a:expansion, snippetName)
+endfunction
+
+"remove all snippets
+function! NERDSnippetsReset()
+    let s:snippets = {}
+    let s:snippets['_'] = {}
 endfunction
 
 " vim: set ft=vim ff=unix fdm=marker :
