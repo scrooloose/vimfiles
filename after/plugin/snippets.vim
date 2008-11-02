@@ -23,14 +23,6 @@ function! s:AddHTMLMapsFor(ft)
     call NERDSnippet(a:ft, "input", '<input type="text" name="<++>" <+value="<++>"+> <+size="<++>"+> <+maxlength="<++>"+> />')
 endfunction
 
-function! Snippet_ClassNameFromFilename()
-    let name = expand("%:t")
-    "chop off the extension
-    let name = substitute(name, '^\(.*\)\..*$', '\1', '')
-
-    return s:camelCase(name)
-endfunction
-
 function! s:camelCase(s)
     "upcase the first letter
     let toReturn = substitute(a:s, '^\(.\)', '\=toupper(submatch(1))', '')
@@ -67,6 +59,10 @@ function! Snippet_Sweeper()
 endfunction
 
 "ruby {{{1
+function! Snippet_RubyClassNameFromFilename()
+    let name = expand("%:t:r")
+    return s:camelCase(name)
+endfunction
 
 if s:inRailsEnv()
     call NERDSnippet("ruby", "vpo", "validates_presence_of :<+attr_names+><+, :message => '<+error message+>', :on => <+:save|:create|:update+>, :if => <+method|proc+>+>")
@@ -93,7 +89,7 @@ endif
 call NERDSnippet("ruby", "require", "require '<++>'")
 
 call NERDSnippet("ruby", "def", "def <+function_name+>\<CR><++>\<CR>end\<CR>")
-call NERDSnippet("ruby", "class", "class <+\<c-r>=Snippet_ClassNameFromFilename()\<CR>+>\<CR>def initialize<++>\<CR><++>\<CR>end\<CR>end")
+call NERDSnippet("ruby", "class", "class <+\<c-r>=Snippet_RubyClassNameFromFilename()\<CR>+>\<CR>def initialize<++>\<CR><++>\<CR>end\<CR>end")
 
 call NERDSnippet("ruby", "map", "map {|<+element+>| <+body+>}")
 call NERDSnippet("ruby", "mapo", "map do |<+element+>|\<CR><+body+>\<CR>end\<CR>")
@@ -170,11 +166,18 @@ call NERDSnippet("vim", "try", "try\<CR><++>\<CR>catch /<++>/\<CR><++>\<CR>endtr
 call NERDSnippet("vim", "log", "echomsg <++>")
 
 "java {{{1
+function! Snippet_JavaClassNameFromFilename()
+    return expand("%:t:r")
+endfunction
+
 call NERDSnippet("java", "for", "for(<+int i=0+>; <+condition+>; <+i+++>){\<CR><++>\<CR>}")
+call NERDSnippet("java", "if", "if(<++>){\<CR><++>\<CR>}")
 call NERDSnippet("java", "ife", "if(<++>){\<CR><++>\<CR>}else{\<CR><++>\<CR>}")
 call NERDSnippet("java", "log", "System.<+out+>.println(<++>)")
-call NERDSnippet("java", "m", "<+public+> <+void+> <+methodName+>(<+args+>) {\<CR><++>\<CR>}")
-
+call NERDSnippet("java", "m", "<+public+> <+void+> <+methodName+>(<++>) {\<CR><++>\<CR>}")
+call NERDSnippet("java", "class", "<+public+> class <+\<C-R>=Snippet_JavaClassNameFromFilename()\<CR>+><++> {\<CR><++>\<CR>}", 'basic')
+call NERDSnippet("java", "class", "<+public+> class <+\<C-R>=Snippet_JavaClassNameFromFilename()\<CR>+><++> {\<CR>\<CR>public <+\<C-R>=Snippet_JavaClassNameFromFilename()\<CR>+>(<++>) {\<CR>}\<CR>\<CR>}", 'basic + constructor')
+call NERDSnippet("java", "class", "<+public+> class <+\<C-R>=Snippet_JavaClassNameFromFilename()\<CR>+><++> {\<CR>\<CR>public <+\<C-R>=Snippet_JavaClassNameFromFilename()\<CR>+>(<++>) {\<CR>}\<CR>\<CR>public static void main(String args[]) {\<CR>}\<CR>\<CR>}", 'basic + constructor + main')
 
 "global {{{1
 
