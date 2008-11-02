@@ -72,7 +72,7 @@ if s:inRailsEnv()
     call NERDSnippet("ruby", "vpo", "validates_presence_of :<+attr_names+><+, :message => '<+error message+>', :on => <+:save|:create|:update+>, :if => <+method|proc+>+>")
     call NERDSnippet("ruby", "vno", "validates_numericality_of <++>")
     call NERDSnippet("ruby", "vuo", "validates_uniqueness_of <++>")
-    call NERDSnippet("ruby", "flash", "flash[<+:notice+>] = '<++>'")
+    call NERDSnippet("ruby", "flash", "flash[:<+notice+>] = '<++>'")
     call NERDSnippet("ruby", "bt", "belongs_to :<+association_name+><+, :class_name => '<++>', :foreign_key => '<++>'+>")
     call NERDSnippet("ruby", "hm", "has_many :<+association_name+><+, :class_name => '<++>'+>")
 
