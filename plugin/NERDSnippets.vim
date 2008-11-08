@@ -249,9 +249,13 @@ function! s:ChooseSnippet(snippets)
     "input(save|restore) needed because this function is called during a
     "mapping
     redraw!
-    echon prompt
     call inputsave()
-    let choice = nr2char(getchar())
+    if len(a:snippets) < 10
+        echon prompt
+        let choice = nr2char(getchar())
+    else
+        let choice = input(prompt)
+    endif
     call inputrestore()
     redraw!
 
@@ -259,7 +263,7 @@ function! s:ChooseSnippet(snippets)
         return ""
     endif
 
-    return a:snippets[choice-1]['expansion']
+    return a:snippets[choice-1].expansion
 endfunction
 
 "get a snippet for the given keyword, if multiple snippets are found then prompt
@@ -354,6 +358,129 @@ endfunction
 function! NERDSnippetsReset()
     let s:snippets = {}
     let s:snippets['_'] = {}
+endfunction
+
+
+"Extract snippets from the given directory. The snippet filetype, keyword, and
+"possibly name, are all inferred from the path of the .snippet files relative
+"to a:dir.
+"
+"This assumes a precise file naming scheme:
+"
+"For single snippets
+"    a:dir/<filetype>/<keyword>.snippet
+"
+"eg
+"    a:dir/html/href.snippet
+"
+"For multiple snippets bound to a single keyword
+"    a:dir/<filetype>/<keyword>/<snippet-name>.snippet
+"
+"eg
+"    a:dir/html/table/simple.snippet
+"    a:dir/html/table/hardcore.snippet
+function! NERDSnippetsFromDirectory(dir)
+    let snippetFiles = split(globpath(expand(a:dir), '**/*.snippet'), '\n')
+    for fullpath in snippetFiles
+        let tail = strpart(fullpath, strlen(expand(a:dir)))
+        let filetype = substitute(tail, '^/\([^/]*\).*', '\1', '')
+        let keyword = substitute(tail, '^/[^/]*\(.*\)', '\1', '')
+        call s:extractSnippetFor(fullpath, filetype, keyword)
+    endfor
+endfunction
+
+"Extract snippets from the given directory for the given filetype.
+"
+"The snippet keywords (and possibly names) are interred from the path of the
+".snippet files relative to a:dir
+"
+"This assumes a precise file naming scheme:
+"
+"For single snippets
+"    a:dir/<keyword>.snippet
+"
+"eg
+"    a:dir/href.snippet
+"
+"For multiple snippets bound to a single keyword
+"    a:dir/<keyword>/<snippet-name>.snippet
+"
+"eg
+"    a:dir/table/simple.snippet
+"    a:dir/table/hardcore.snippet
+"
+"The main purpose of this function is to allow users to manually associate a
+"collection of snippets with a filetype. For example, you probably want all
+"your html snippets to also be used for the xhtml filetype. So (somewhere like
+" ~/.vim/after/plugin/snippet_setup.vim) you could call this:
+"
+"    NERDSnippetsFromDirectoryForFiletype('~/.vim/snippets/html', 'xhtml')
+"
+function! NERDSnippetsFromDirectoryForFiletype(dir, filetype)
+    let snippetFiles = split(globpath(expand(a:dir), '**/*.snippet'), '\n')
+    for i in snippetFiles
+        let base = expand(a:dir)
+        let fullpath = expand(i)
+        let tail = strpart(fullpath, strlen(base))
+        call s:extractSnippetFor(fullpath, a:filetype, tail)
+    endfor
+endfunction
+
+"create a snippet from the given file
+"
+"Args:
+"fullpath: full path to snippet file
+"filetype: the filetype for the new snippet
+"tail: the last part of the path containing the keyword and possibly name. eg
+" '/class.snippet'   or  '/class/with_constructor.snippet'
+function! s:extractSnippetFor(fullpath, filetype, tail)
+    let keyword = ""
+    let name = ""
+
+    let slashes = strlen(substitute(a:tail, '[^/]', '', 'g'))
+    if slashes == 1
+        let keyword = substitute(a:tail, '^/\(.*\)\.snippet', '\1', '')
+    elseif slashes == 2
+        let keyword = substitute(a:tail, '^/\([^/]*\)/.*$', '\1', '')
+        let name = substitute(a:tail, '^/[^/]*/\(.*\)\.snippet', '\1', '')
+    else
+        throw 'NERDSnippets.ScrewedSnippetPathError ' . a:fullpath
+    endif
+
+    let snippetContent = s:parseSnippetFile(a:fullpath)
+
+    call NERDSnippet(a:filetype, keyword, snippetContent, name)
+endfunction
+
+
+"Extract and munge the body of the snippet from the given file.
+function! s:parseSnippetFile(path)
+    try
+        let lines = readfile(a:path)
+    catch /E484/
+        throw "NERDSnippet.ScrewedSnippetPathError " . a:path
+    endtry
+
+    let i = 0
+    while i < len(lines)
+        "remove leading whitespace and add \<CR> to the end of the lines
+        if i < len(lines)-1
+            let lines[i] = substitute(lines[i], '^\s*\(.*\)$', '\1' . "\<CR>", "")
+        endif
+
+        "make \<C-R>= function in the templates
+        let lines[i] = substitute(lines[i], '\c\\<c-r>=', "\<c-r>=", "")
+
+        "make \<C-O>= function in the templates
+        let lines[i] = substitute(lines[i], '\c\\<c-o>', "\<c-o>", "")
+
+        "make \<CR> function in templates
+        let lines[i] = substitute(lines[i], '\c\\<cr>', "\<cr>", "")
+
+        let i += 1
+    endwhile
+
+    return join(lines, '')
 endfunction
 
 " vim: set ft=vim ff=unix fdm=marker :
