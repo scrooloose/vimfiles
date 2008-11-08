@@ -8,7 +8,7 @@
                 \___//___//_/ |_|/ .__// .__//_/   \___//_\_\  ~
                                 /_/   /_/                      ~
                                                   For Vim version 7.0 or newer
-                                                      Last changed 05 Oct 2008
+                                                      Last changed 28 Oct 2008
 
                                By Matt Wozniski
                                 mjw@drexel.edu
@@ -162,11 +162,12 @@ g:CSApprox_attr_map                                      *g:CSApprox_attr_map*
 g:CSApprox_extra_rgb_txt_dirs                  *g:CSApprox_extra_rgb_txt_dirs*
     When the colorscheme author uses a color by name, CSApprox needs to figure
     out what #rrggbb value it stands for.  It does this by parsing rgb.txt,
-    but first needs to locate it.  It has a default search path included, but
-    should it fail to find rgb.txt, this variable can be set to a List of
-    other directories that ought to be searched.  Default search path: >
+    but first needs to locate it.  It has a default search path included, and
+    will also search in any directory in the user's 'runtimepath', but first
+    any directory included in this variable will be searched.  Failing to find
+    any valid rgb.txt is an unrecoverable error.  Default search path: >
     [ /usr/local/share/X11, /usr/share/X11, /etc/X11, /usr/local/lib/X11,
-      /usr/lib/X11, /usr/local/X11R6/lib/X11, /usr/X11R6/lib/X11]
+      /usr/lib/X11, /usr/local/X11R6/lib/X11, /usr/X11R6/lib/X11 ]
 
 g:CSApprox_approximator_function            *g:CSApprox_approximator_function*
     If the default approximation function doesn't work well enough, the user
@@ -346,6 +347,9 @@ kterm (as of version 6.2.0)
 
 ==============================================================================
 7. Changelog                                              *csapprox-changelog*
+
+ 1.10   28 Oct 2008   Enable running on systems with no rgb.txt (Penn Su)
+                      Begin distributing a copy of rgb.txt with CSApprox
 
  1.00   04 Oct 2008   First public release
 

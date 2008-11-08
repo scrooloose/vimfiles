@@ -1,7 +1,7 @@
 " CSApprox:    Make gvim-only colorschemes work transparently in terminal vim
 " Maintainer:  Matthew Wozniski (mjw@drexel.edu)
-" Date:        Sun, 05 Oct 2008 00:26:22 -0400
-" Version:     1.00
+" Date:        Tue, 28 Oct 2008 01:35:25 -0400
+" Version:     1.10
 " History:     :help csapprox-changelog
 
 " Whenever you change colorschemes using the :colorscheme command, this script
@@ -294,6 +294,7 @@ function! s:UpdateRgbHash()
                     \ '/usr/lib/X11',
                     \ '/usr/local/X11R6/lib/X11',
                     \ '/usr/X11R6/lib/X11' ]
+                    \ + split(globpath(&rtp, ''), '\n')
     let s:rgb = copy(s:rgb_defaults)
     sil! let lines = readfile(dir . '/rgb.txt')
 
