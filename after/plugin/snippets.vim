@@ -1,3 +1,6 @@
+call NERDSnippetsReset()
+call NERDSnippetsFromDirectory("~/.vim/snippets")
+
 function! s:camelCase(s)
     "upcase the first letter
     let toReturn = substitute(a:s, '^\(.\)', '\=toupper(submatch(1))', '')
