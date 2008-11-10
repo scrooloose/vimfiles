@@ -50,7 +50,7 @@ endif
 
 "eruby {{{1
 if s:inRailsEnv()
-    call NERDSnippetsFromDirectoryForFiletype('~/.vim/snippets/eruby-rails', 'ruby')
+    call NERDSnippetsFromDirectoryForFiletype('~/.vim/snippets/eruby-rails', 'eruby')
 else
     "create merb snippets
 endif
