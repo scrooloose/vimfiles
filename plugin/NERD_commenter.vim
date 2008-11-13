@@ -2,8 +2,8 @@
 " File:        NERD_commenter.vim
 " Description: vim global plugin that provides easy code commenting
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Version:     2.2.0
-" Last Change: 4th October, 2008
+" Version:     2.2.1
+" Last Change: 13th November, 2008
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -145,6 +145,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "apachestyle"
         call s:MapDelimiters('#', '')
+    elseif a:filetype == "asciidoc"
+        call s:MapDelimiters('//', '')
     elseif a:filetype == "applescript"
         call s:MapDelimitersWithAlternative('--', '', '(*', '*)')
     elseif a:filetype == "asm68k"
@@ -213,6 +215,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
     elseif a:filetype == "clipper"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
+    elseif a:filetype == "clojure"
+        call s:MapDelimiters(';', '')
     elseif a:filetype == "cmake"
         call s:MapDelimiters('#','')
     elseif a:filetype == "cobol"
@@ -221,6 +225,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == "config"
         call s:MapDelimiters('dnl ', '')
+    elseif a:filetype == "conkyrc"
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "context"
         call s:MapDelimiters('%','')
     elseif a:filetype == "cpp"
@@ -244,6 +250,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype == "cvs"
         call s:MapDelimiters('CVS:','')
     elseif a:filetype == "CVSAnnotate"
+        call s:MapDelimiters('','')
+    elseif a:filetype == "CVScommit"
         call s:MapDelimiters('','')
     elseif a:filetype == "d"
         call s:MapDelimitersWithAlternative('//','', '/*','*/')
@@ -337,6 +345,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('--', '')
     elseif a:filetype == "geek"
         call s:MapDelimiters('GEEK_COMMENT:', '')
+    elseif a:filetype == "genshi"
+        call s:MapDelimitersWithAlternative('<!--','-->', '{#', '#}')
     elseif a:filetype == "gentoo-conf-d"
         call s:MapDelimiters('#', '')
     elseif a:filetype == "gentoo-env-d"
@@ -351,14 +361,18 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype == 'gentoo-package-use'
         call s:MapDelimiters('#', '')
+    elseif a:filetype == 'git'
+        call s:MapDelimiters('', '')
     elseif a:filetype == 'gitAnnotate'
         call s:MapDelimiters('', '')
     elseif a:filetype == 'gitcommit'
-        call s:MapDelimiters('', '')
+        call s:MapDelimiters('#', '')
     elseif a:filetype == 'gitconfig'
         call s:MapDelimiters(';', '')
     elseif a:filetype == 'gitdiff'
         call s:MapDelimiters('', '')
+    elseif a:filetype == 'gitrebase'
+        call s:MapDelimiters('#', '')
     elseif a:filetype == "gnuplot"
         call s:MapDelimiters('#','')
     elseif a:filetype == "groovy"
@@ -481,6 +495,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#','')
     elseif a:filetype == "make"
         call s:MapDelimiters('#','')
+    elseif a:filetype == "mako"
+        call s:MapDelimiters('##', '')
     elseif a:filetype == "man"
         call s:MapDelimiters('."', '')
     elseif a:filetype == "map"
@@ -772,6 +788,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype == "SVKAnnotate"
         call s:MapDelimiters('','')
     elseif a:filetype == "svn"
+        call s:MapDelimiters('','')
+    elseif a:filetype == "SVNannotate"
         call s:MapDelimiters('','')
     elseif a:filetype == "SVNAnnotate"
         call s:MapDelimiters('','')
