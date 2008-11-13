@@ -469,13 +469,13 @@ function! s:parseSnippetFile(path)
         endif
 
         "make \<C-R>= function in the templates
-        let lines[i] = substitute(lines[i], '\c\\<c-r>=', "\<c-r>=", "")
+        let lines[i] = substitute(lines[i], '\c\\<c-r>=', "\<c-r>=", "g")
 
         "make \<C-O>= function in the templates
-        let lines[i] = substitute(lines[i], '\c\\<c-o>', "\<c-o>", "")
+        let lines[i] = substitute(lines[i], '\c\\<c-o>', "\<c-o>", "g")
 
         "make \<CR> function in templates
-        let lines[i] = substitute(lines[i], '\c\\<cr>', "\<cr>", "")
+        let lines[i] = substitute(lines[i], '\c\\<cr>', "\<cr>", "g")
 
         let i += 1
     endwhile
