@@ -1,0 +1,13 @@
+Usage: 
+
+mkdir Projects
+cd Projects
+git clone git://github.com/scrooloose/vimfiles.git
+cd
+ln -s Projects/vimfiles .vim
+cat >.vimrc <<-EOT
+source ~/.vim/vimrc
+
+let g:NERDTreeMapOpenSplit = 'i' 
+colorscheme elflord
+EOT
