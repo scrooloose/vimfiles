@@ -47,6 +47,11 @@ function! Snippet_MigrationNameFromFilename()
     return s:camelCase(name)
 endfunction
 
+function! Snippet_MigrationNameFromFilename()
+    let name = substitute(expand("%:t:r"), '^.\{-}_', '', '')
+    return s:camelCase(name)
+endfunction
+
 if s:inRailsEnv()
     call NERDSnippetsFromDirectoryForFiletype('~/.vim/snippets/ruby-rails', 'ruby')
 else
