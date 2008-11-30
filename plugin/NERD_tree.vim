@@ -1539,11 +1539,20 @@ endfunction
 "Return: the string for this path that is suitable to be used with the :edit
 "command
 function! s:Path.strForEditCmd()
+    let p = self.str(1)
+    let cwd = getcwd()
+
     if s:running_windows
-        return self.strForOS(0)
-    else
-        return self.str(1)
+        let p = tolower(self.strForOS(0))
+        let cwd = tolower(getcwd())
     endif
+
+    "return a relative path if we can
+    if stridx(p, cwd) == 0
+        let p = strpart(p, strlen(cwd)+1)
+    endif
+
+    return p
 
 endfunction
 "FUNCTION: Path.strForGlob() {{{3
@@ -1668,8 +1677,14 @@ function! s:initNerdTree(name)
     if s:Bookmark.BookmarkExistsFor(a:name)
         let path = s:Bookmark.BookmarkFor(a:name).path
     else
-        let dir = a:name == '' ? expand('%:p:h') : a:name
+        let dir = a:name == '' ? getcwd() : a:name
+
+        "hack to get an absolute path if a relative path is given
+        if dir =~ '^\.'
+            let dir = getcwd() . s:os_slash . dir
+        endif
         let dir = resolve(dir)
+
         try
             let path = s:Path.New(dir)
         catch /NERDTree.Path.InvalidArguments/
