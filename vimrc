@@ -45,7 +45,7 @@ function! RenderStlFlag(value, goodValues, error)
 endfunction
 
 "statusline setup
-set statusline=%t       "tail of the filename
+set statusline=%f       "tail of the filename
 call AddStatuslineFlag('&ff', 'unix,')    "fileformat
 call AddStatuslineFlag('&fenc', 'utf-8,') "file encoding
 set statusline+=%h      "help file flag
