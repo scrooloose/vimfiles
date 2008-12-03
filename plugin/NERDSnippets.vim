@@ -9,86 +9,6 @@
 "              Want To Public License, Version 2, as published by Sam Hocevar.
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
-" Installation:
-"   Put this file in your ~/.vim/plugin dir.
-"
-"
-" Defining Snippets:
-"   Put all your snippets in ~/.vim/after/plugin/ or split them up for each
-"   filetype and put them in ~/.vim/ftplugin
-"
-"   Use the function NERDSnippet(filetype, keyword, expansion [, name]) for filetype
-"   specific snippets.
-"
-"   Use the function NERDSnippetGlobal(keyword, expansion [, name]) for global
-"   snippets (available for all filetypes)
-"
-"
-" Example Snippet: a for loop snippet for java
-"   call NERDSnippet("java", "for", "for(<+int i=0+>; <+condition+>; <+i+++>){\<CR><++>\<CR>}")
-"
-"   There are 4 markers:
-"       1. <+int i=0+>
-"       2. <+condition+>
-"       3. <+i+++>
-"       4. <++>
-"
-"   1, 2 and 3 have default values. When you tab to them, they will be
-"   replaced with the text "int i=0", "condition" and "i++".
-"
-"   4 is an empty marker, these markers are removed when the cursor arrives on
-"   them.
-"
-"
-" Example Snippet: validates_presence_of for rails
-"   call NERDSnippet("ruby", "vpo", "validates_presence_of :<++><+, :message => '<++>', :on => <++>, :if => <++>+>")
-"
-"   Notice how the second marker:
-"   "<+, :message => '<++>', :on => <++>, :if => <++>+>"
-"   has 3 markers nested inside it. When you tab to this marker you can either
-"   hit tab again to "tab into" it, or hit backspace/ctrl-h or enter to delete
-"   it and move on. This way you can create "optional" parts to a snippet.
-"
-"
-" Example Snippet: global modeline snippet
-"   function! ModelineSnippet()
-"       let start = substitute(&commentstring, '^\([^ ]*\)\s*%s\(.*\)$', '\1', '')
-"       let end = substitute(&commentstring, '^.*%s\(.*\)$', '\1', '')
-"       return start . " vim: set <+settings+>:" . end
-"   endfunction
-
-"   call NERDSnippetGlobal("modeline", "\<c-r>=ModelineSnippet()\<CR>")
-"
-"   Here we have a snippet that uses some more complex logic, so we get a
-"   function to generate the snippet code for us.
-"
-"
-" Duplicate Keywords:
-"   If multiple snippets exist for the same keyword then the script will
-"   ask you which one you want to insert.
-"
-"   You can have up to 9 snippets bound to a single keyword.
-"
-"   When binding multiple snippets to one keyword, you can assign the snippets
-"   a name to make it easier for the user to identify which snippet to use.
-"
-" Example Snippet: two named snippets bound to a single keyword
-"
-"   call NERDSnippet("html", "table", "<table>\<CR><++></table>", "simple table")
-"   call NERDSnippet("html", "table", "<table class=\"<++>\">\<CR><++></table>", "table with class")
-"
-"   Notice that we pass the name in as the last argument.
-"
-"
-" Variables:
-"   g:NERDSnippets_key                        default: <tab>
-"       expands snippets and jumps to markers
-"   g:NERDSnippets_marker_start               default: <+
-"       start of marker tags
-"   g:NERDSnippets_marker_end                 default: +>
-"       end of marker tags
-"
-"==================================================
 
 if v:version < 700
     finish
@@ -115,20 +35,32 @@ if !exists("g:NERDSnippets_marker_end")
 endif
 let s:end = g:NERDSnippets_marker_end
 
+let s:in_windows = has("win16") ||  has("win32") || has("win64")
+
 let s:topOfSnippet = -1
 let s:appendTab = 1
 let s:snippets = {}
 let s:snippets['_'] = {}
 
-exec "inoremap ".g:NERDSnippets_key." <c-r>=NERDSnippets_ExpandSnippet()<cr><c-r>=NERDSnippets_SwitchRegion(1)<cr>"
-exec "nnoremap ".g:NERDSnippets_key." i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
-exec "snoremap ".g:NERDSnippets_key." <esc>i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
+function! s:enableMaps()
+    exec "inoremap ".g:NERDSnippets_key." <c-r>=NERDSnippets_ExpandSnippet()<cr><c-r>=NERDSnippets_SwitchRegion(1)<cr>"
+    exec "nnoremap ".g:NERDSnippets_key." i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
+    exec "snoremap ".g:NERDSnippets_key." <esc>i<c-r>=NERDSnippets_SwitchRegion(0)<cr>"
+endfunction
+command! -nargs=0 NERDSnippetsEnable call <SID>enableMaps()
+call s:enableMaps()
 
+function! s:disableMaps()
+    exec "iunmap ".g:NERDSnippets_key
+    exec "nunmap ".g:NERDSnippets_key
+    exec "sunmap ".g:NERDSnippets_key
+endfunction
+command! -nargs=0 NERDSnippetsDisable call <SID>disableMaps()
 
 " Snippet class {{{1
 let s:Snippet = {}
 
-function s:Snippet.New(expansion, ...)
+function! s:Snippet.New(expansion, ...)
     let newSnippet = copy(self)
     let newSnippet.expansion = a:expansion
     if a:0
@@ -139,7 +71,7 @@ function s:Snippet.New(expansion, ...)
     return newSnippet
 endfunction
 
-function s:Snippet.stringForPrompt()
+function! s:Snippet.stringForPrompt()
     if self.name != ''
         return self.name
     else
@@ -150,7 +82,7 @@ endfunction
 
 function! NERDSnippets_ExpandSnippet()
     let snippet_name = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
-    let snippet = s:SnippetFor(snippet_name)
+    let snippet = s:snippetFor(snippet_name)
     if snippet != ''
         let s:appendTab = 0
         let s:topOfSnippet = line('.')
@@ -172,11 +104,11 @@ function! NERDSnippets_SwitchRegion(allowAppend)
     endif
 
     try
-        let markerPos = s:NextMarker()
+        let markerPos = s:nextMarker()
         let markersEmpty = stridx(getline("."), s:start.s:end) == markerPos[0]-1
 
         let removedMarkers = 0
-        if s:RemoveMarkers()
+        if s:removeMarkers()
             let markerPos[1] -= (strlen(s:start) + strlen(s:end))
             let removedMarkers = 1
         endif
@@ -206,7 +138,7 @@ endfunction
 "jump the cursor to the start of the next marker and return an array of the
 "for [start_column, end_column], where start_column points to the start of
 "<+ and end_column points to the start of +>
-function! s:NextMarker()
+function! s:nextMarker()
     let start = searchpos('\V'.s:start.'\.\{-\}'.s:end, 'c')[1]
     if start == 0
         throw "NERDSnippets.NoMarkersFoundError"
@@ -236,7 +168,7 @@ endfunction
 "asks the user to select a snippet from the given list
 "
 "returns the body of the chosen snippet
-function! s:ChooseSnippet(snippets)
+function! s:chooseSnippet(snippets)
     "build the dialog/choice list
     let prompt = ""
     let i = 0
@@ -270,7 +202,7 @@ endfunction
 "the user to choose.
 "
 "if no snippets are found, return ''
-function! s:SnippetFor(keyword)
+function! s:snippetFor(keyword)
     let snippets = []
     if has_key(s:snippets,&ft)
         if has_key(s:snippets[&ft],a:keyword)
@@ -285,7 +217,7 @@ function! s:SnippetFor(keyword)
         if len(snippets) == 1
             return snippets[0].expansion
         else
-            return s:ChooseSnippet(snippets)
+            return s:chooseSnippet(snippets)
         endif
     endif
 
@@ -300,9 +232,9 @@ endfunction
 "into this
 "
 "  foo foobar foo
-function! s:RemoveMarkers()
+function! s:removeMarkers()
     try
-        let marker = s:NextMarker()
+        let marker = s:nextMarker()
         if strpart(getline('.'), marker[0]-1, strlen(s:start)) == s:start
 
             "remove them
@@ -339,11 +271,6 @@ function! NERDSnippet(filetype, keyword, expansion, ...)
 
     call add(s:snippets[a:filetype][a:keyword], newSnippet)
 endfunction
-
-function! Snippets()
-    return s:snippets
-endfunction
-
 
 "add a new global snippet for the given keyword
 function! NERDSnippetGlobal(keyword, expansion, ...)
@@ -383,6 +310,11 @@ function! NERDSnippetsFromDirectory(dir)
     let snippetFiles = split(globpath(expand(a:dir), '**/*.snippet'), '\n')
     for fullpath in snippetFiles
         let tail = strpart(fullpath, strlen(expand(a:dir)))
+
+        if s:in_windows
+            let tail = substitute(tail, '\\', '/', 'g')
+        endif
+
         let filetype = substitute(tail, '^/\([^/]*\).*', '\1', '')
         let keyword = substitute(tail, '^/[^/]*\(.*\)', '\1', '')
         call s:extractSnippetFor(fullpath, filetype, keyword)
@@ -422,6 +354,11 @@ function! NERDSnippetsFromDirectoryForFiletype(dir, filetype)
         let base = expand(a:dir)
         let fullpath = expand(i)
         let tail = strpart(fullpath, strlen(base))
+
+        if s:in_windows
+            let tail = substitute(tail, '\\', '/', 'g')
+        endif
+
         call s:extractSnippetFor(fullpath, a:filetype, tail)
     endfor
 endfunction
