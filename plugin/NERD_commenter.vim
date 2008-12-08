@@ -403,6 +403,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('#', '')
     elseif a:filetype ==? "html"
         call s:MapDelimitersWithAlternative('<!--','-->', '//', '')
+    elseif a:filetype ==? "htmlcheetah"
+        call s:MapDelimiters('##','')
     elseif a:filetype ==? "htmldjango"
         call s:MapDelimitersWithAlternative('<!--','-->', '{#', '#}')
     elseif a:filetype ==? "htmlos"
@@ -539,6 +541,8 @@ function s:SetUpForNewFiletype(filetype, forceReset)
         call s:MapDelimiters('(*','*)')
     elseif a:filetype ==? "monk"
         call s:MapDelimiters(';', '')
+    elseif a:filetype ==? "mp"
+        call s:MapDelimiters('%', '')
     elseif a:filetype ==? "mplayerconf"
         call s:MapDelimiters('#', '')
     elseif a:filetype ==? "mrxvtrc"
@@ -708,7 +712,7 @@ function s:SetUpForNewFiletype(filetype, forceReset)
     elseif a:filetype ==? "sas"
         call s:MapDelimiters('/*','*/')
     elseif a:filetype ==? "sass"
-        call s:MapDelimitersWithAlternative('//','', '/*', '')
+        call s:MapDelimitersWithAlternative('//','', '/*', '*/')
     elseif a:filetype ==? "sather"
         call s:MapDelimiters('--', '')
     elseif a:filetype ==? "scala"
