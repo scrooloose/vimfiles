@@ -11,7 +11,7 @@ Put this stuff in your ~/.vimrc
 <pre><code>
 source ~/.vim/vimrc
 
-let g:NERDTreeMapOpenSplit = 'i'⋅
+let g:NERDTreeMapOpenSplit = 'i'
 colorscheme vibrantink
 set nu
 set sts=2
