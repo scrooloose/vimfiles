@@ -1,13 +1,22 @@
-Usage: 
+h1. Usage
 
-mkdir Projects
-cd Projects
-git clone git://github.com/scrooloose/vimfiles.git
-cd
+In your home directory, run:
+<pre><code>
+git clone git://github.com/scrooloose/vimfiles.git .vim
 ln -s Projects/vimfiles .vim
-cat >.vimrc <<-EOT
+
+</code></pre>
+
+Put this stuff in your ~/.vimrc
+<pre><code>
 source ~/.vim/vimrc
 
-let g:NERDTreeMapOpenSplit = 'i' 
-colorscheme elflord
-EOT
+let g:NERDTreeMapOpenSplit = 'i'⋅
+colorscheme vibrantink
+set nu
+set sts=2
+set sw=2
+let g:fuzzy_ignore = "gems/*"
+set noswapfile
+
+</code></pre>
