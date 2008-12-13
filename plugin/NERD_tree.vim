@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '2.14.2'
+let s:NERD_tree_version = '2.14.3'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -129,7 +129,7 @@ call s:initVariable("g:NERDTreeMapUpdirKeepOpen", "U")
 
 "SECTION: Script level variable declaration{{{2
 let s:escape_chars =  " \\`\|\"#%&,?()\*^<>"
-let s:NERDTreeWinName = '_NERD_tree_'
+let s:NERDTreeBufName = '_NERD_tree_'
 
 let s:tree_wid = 2
 let s:tree_markup_reg = '^[ `|]*[\-+~]'
@@ -150,9 +150,29 @@ command! -n=1 -complete=customlist,s:completeBookmarks NERDTreeFromBookmark call
 " SECTION: Auto commands {{{1
 "============================================================
 "Save the cursor position whenever we close the nerd tree
-exec "autocmd BufWinLeave *". s:NERDTreeWinName ." call <SID>saveScreenState()"
+exec "autocmd BufWinLeave *". s:NERDTreeBufName ." call <SID>saveScreenState()"
 "cache bookmarks when vim loads
 autocmd VimEnter * call s:Bookmark.CacheBookmarks(0)
+
+
+augroup NERDTreeNetrwHijack
+    autocmd!
+    autocmd VimEnter * call s:removeNetrw()
+    au BufEnter * call s:checkForBrowse(expand("<amatch>"))
+
+augroup END
+
+function! s:removeNetrw()
+    autocmd! FileExplorer
+endfunction
+
+function! s:checkForBrowse(dir)
+    if !exists("b:NERDTreeProcessed") && a:dir != '' && isdirectory(a:dir)
+        let b:NERDTreeProcessed = 1
+        call s:initNerdTreeInPlace(a:dir)
+    endif
+endfunction
+
 
 "SECTION: Classes {{{1
 "============================================================
@@ -285,7 +305,7 @@ endfunction
 " searchFromAbsoluteRoot: specifies whether we should search from the current
 " tree root, or the highest cached node
 function! s:Bookmark.getNode(searchFromAbsoluteRoot)
-    let searchRoot = a:searchFromAbsoluteRoot ? s:TreeDirNode.AbsoluteTreeRoot() : t:NERDTreeRoot
+    let searchRoot = a:searchFromAbsoluteRoot ? s:TreeDirNode.AbsoluteTreeRoot() : b:NERDTreeRoot
     let targetNode = searchRoot.findNode(self.path)
     if empty(targetNode)
         throw "NERDTree.BookmarkedNodeNotFound no node was found for bookmark: " . self.name
@@ -458,7 +478,7 @@ endfunction
 function! s:TreeFileNode.copy(dest)
     call self.path.copy(a:dest)
     let newPath = s:Path.New(a:dest)
-    let parent = t:NERDTreeRoot.findNode(newPath.getParent())
+    let parent = b:NERDTreeRoot.findNode(newPath.getParent())
     if !empty(parent)
         call parent.refresh()
     endif
@@ -571,29 +591,30 @@ endfunction
 
 
 "FUNCTION: TreeFileNode.isRoot() {{{3
-"returns 1 if this node is t:NERDTreeRoot
+"returns 1 if this node is b:NERDTreeRoot
 function! s:TreeFileNode.isRoot()
-    if !s:treeExistsForTab()
-        throw "NERDTree.TreeFileNode.IsRoot exception: No tree exists for the current tab"
+    if !s:treeExistsForBuf()
+        throw "NERDTree.NoTreeError: No tree exists for the current buffer"
     endif
-    return self.equals(t:NERDTreeRoot)
+
+    return self.equals(b:NERDTreeRoot)
 endfunction
 
 "FUNCTION: TreeFileNode.makeRoot() {{{3
 "Make this node the root of the tree
 function! s:TreeFileNode.makeRoot()
     if self.path.isDirectory
-        let t:NERDTreeRoot = self
+        let b:NERDTreeRoot = self
     else
         call self.cacheParent()
-        let t:NERDTreeRoot = self.parent
+        let b:NERDTreeRoot = self.parent
     endif
 
-    call t:NERDTreeRoot.open()
+    call b:NERDTreeRoot.open()
 
     "change dir to the dir of the new root if instructed to
     if g:NERDTreeChDirMode == 2
-        exec "cd " . t:NERDTreeRoot.path.strForEditCmd()
+        exec "cd " . b:NERDTreeRoot.path.strForEditCmd()
     endif
 endfunction
 "FUNCTION: TreeFileNode.New(path) {{{3
@@ -625,7 +646,7 @@ function! s:TreeFileNode.rename(newName)
     call self.parent.removeChild(self)
 
     let parentPath = self.path.getPathTrunk()
-    let newParent = t:NERDTreeRoot.findNode(parentPath)
+    let newParent = b:NERDTreeRoot.findNode(parentPath)
 
     if newParent != {}
         call newParent.createChild(self.path, 1)
@@ -652,7 +673,7 @@ let s:TreeDirNode = copy(s:TreeFileNode)
 "FUNCTION: TreeDirNode.AbsoluteTreeRoot(){{{3
 "class method that returns the highest cached ancestor of the current root
 function! s:TreeDirNode.AbsoluteTreeRoot()
-    let currentNode = t:NERDTreeRoot
+    let currentNode = b:NERDTreeRoot
     while currentNode.parent != {}
         let currentNode = currentNode.parent
     endwhile
@@ -1342,7 +1363,7 @@ function! s:Path.ignore()
     let lastPathComponent = self.getLastPathComponent(0)
 
     "filter out the user specified paths to ignore
-    if t:NERDTreeIgnoreEnabled
+    if b:NERDTreeIgnoreEnabled
         for i in g:NERDTreeIgnore
             if lastPathComponent =~ i
                 return 1
@@ -1351,11 +1372,11 @@ function! s:Path.ignore()
     endif
 
     "dont show hidden files unless instructed to
-    if t:NERDTreeShowHidden == 0 && lastPathComponent =~ '^\.'
+    if b:NERDTreeShowHidden == 0 && lastPathComponent =~ '^\.'
         return 1
     endif
 
-    if t:NERDTreeShowFiles == 0 && self.isDirectory == 0
+    if b:NERDTreeShowFiles == 0 && self.isDirectory == 0
         return 1
     endif
 
@@ -1702,30 +1723,87 @@ function! s:initNerdTree(name)
         exec 'cd ' . path.strForCd()
     endif
 
-    let t:treeShowHelp = 0
-    let t:NERDTreeIgnoreEnabled = 1
-    let t:NERDTreeShowFiles = g:NERDTreeShowFiles
-    let t:NERDTreeShowHidden = g:NERDTreeShowHidden
-    let t:NERDTreeShowBookmarks = g:NERDTreeShowBookmarks
-
     if s:treeExistsForTab()
         if s:isTreeOpen()
             call s:closeTree()
         endif
-        unlet t:NERDTreeRoot
+        unlet b:NERDTreeRoot
     endif
 
-    let t:NERDTreeRoot = s:TreeDirNode.New(path)
-    call t:NERDTreeRoot.open()
+    let newRoot = s:TreeDirNode.New(path)
+    call newRoot.open()
 
     call s:createTreeWin()
+    let b:treeShowHelp = 0
+    let b:NERDTreeIgnoreEnabled = 1
+    let b:NERDTreeShowFiles = g:NERDTreeShowFiles
+    let b:NERDTreeShowHidden = g:NERDTreeShowHidden
+    let b:NERDTreeShowBookmarks = g:NERDTreeShowBookmarks
+    let b:NERDTreeRoot = newRoot
+
+    let b:NERDTreeType = "primary"
+
     call s:renderView()
-    call s:putCursorOnNode(t:NERDTreeRoot, 0, 0)
+    call s:putCursorOnNode(b:NERDTreeRoot, 0, 0)
+endfunction
+
+"FUNCTION: s:initNerdTreeInPlace(name) {{{2
+function! s:initNerdTreeInPlace(dir)
+    try
+        let path = s:Path.New(a:dir)
+    catch /NERDTree.Path.InvalidArguments/
+        call s:echo("Invalid directory name:" . a:name)
+        return
+    endtry
+    let b:NERDTreeRoot = s:TreeDirNode.New(path)
+    call b:NERDTreeRoot.open()
+
+    "throwaway buffer options
+    setlocal noswapfile
+    setlocal buftype=nofile
+    setlocal bufhidden=delete
+    setlocal nowrap
+    setlocal foldcolumn=0
+    setlocal nobuflisted
+    setlocal nospell
+    if g:NERDTreeShowLineNumbers
+        setlocal nu
+    else
+        setlocal nonu
+    endif
+
+    iabc <buffer>
+
+    if g:NERDTreeHighlightCursorline
+        setlocal cursorline
+    endif
+
+    let b:treeShowHelp = 0
+    let b:NERDTreeIgnoreEnabled = 1
+    let b:NERDTreeShowFiles = g:NERDTreeShowFiles
+    let b:NERDTreeShowHidden = g:NERDTreeShowHidden
+    let b:NERDTreeShowBookmarks = g:NERDTreeShowBookmarks
+
+    let b:NERDTreeType = "secondary"
+
+    call s:bindMappings()
+    setfiletype nerdtree
+    " syntax highlighting
+    if has("syntax") && exists("g:syntax_on") && !has("syntax_items")
+        call s:setupSyntaxHighlighting()
+    endif
+
+    call s:renderView()
+endfunction
+" Function: s:treeExistsForBuffer()   {{{2
+" Returns 1 if a nerd tree root exists in the current buffer
+function! s:treeExistsForBuf()
+    return exists("b:NERDTreeRoot")
 endfunction
 " Function: s:treeExistsForTab()   {{{2
 " Returns 1 if a nerd tree root exists in the current tab
 function! s:treeExistsForTab()
-    return exists("t:NERDTreeRoot")
+    return exists("t:NERDTreeBufName")
 endfunction
 " SECTION: Public Functions {{{1
 "============================================================
@@ -1821,8 +1899,10 @@ function! s:createTreeWin()
     let splitLocation = (g:NERDTreeWinPos == "top" || g:NERDTreeWinPos == "left") ? "topleft " : "botright "
     let splitMode = s:shouldSplitVertically() ? "vertical " : ""
     let splitSize = g:NERDTreeWinSize
-    let t:NERDTreeWinName = localtime() . s:NERDTreeWinName
-    let cmd = splitLocation . splitMode . splitSize . ' new ' . t:NERDTreeWinName
+    if !exists('t:NERDTreeBufName')
+        let t:NERDTreeBufName = localtime() . s:NERDTreeBufName
+    endif
+    let cmd = splitLocation . splitMode . splitSize . ' new ' . t:NERDTreeBufName
     silent! execute cmd
 
     setlocal winfixwidth
@@ -1830,7 +1910,7 @@ function! s:createTreeWin()
     "throwaway buffer options
     setlocal noswapfile
     setlocal buftype=nofile
-    setlocal bufhidden=delete
+    "setlocal bufhidden=delete
     setlocal nowrap
     setlocal foldcolumn=0
     setlocal nobuflisted
@@ -1935,7 +2015,7 @@ endfunction
 "prints out the quick help
 function! s:dumpHelp()
     let old_h = @h
-    if t:treeShowHelp == 1
+    if b:treeShowHelp == 1
         let @h=   "\" NERD tree (" . s:NERD_tree_version . ") quickhelp~\n"
         let @h=@h."\" ============================\n"
         let @h=@h."\" File node mappings~\n"
@@ -1993,10 +2073,10 @@ function! s:dumpHelp()
 
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Tree filtering mappings~\n"
-        let @h=@h."\" ". g:NERDTreeMapToggleHidden .": hidden files (" . (t:NERDTreeShowHidden ? "on" : "off") . ")\n"
-        let @h=@h."\" ". g:NERDTreeMapToggleFilters .": file filters (" . (t:NERDTreeIgnoreEnabled ? "on" : "off") . ")\n"
-        let @h=@h."\" ". g:NERDTreeMapToggleFiles .": files (" . (t:NERDTreeShowFiles ? "on" : "off") . ")\n"
-        let @h=@h."\" ". g:NERDTreeMapToggleBookmarks .": bookmarks (" . (t:NERDTreeShowBookmarks ? "on" : "off") . ")\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleHidden .": hidden files (" . (b:NERDTreeShowHidden ? "on" : "off") . ")\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleFilters .": file filters (" . (b:NERDTreeIgnoreEnabled ? "on" : "off") . ")\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleFiles .": files (" . (b:NERDTreeShowFiles ? "on" : "off") . ")\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleBookmarks .": bookmarks (" . (b:NERDTreeShowBookmarks ? "on" : "off") . ")\n"
 
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Other mappings~\n"
@@ -2059,7 +2139,7 @@ function! s:findNodeLineNumber(treenode)
     let totalLines = line("$")
 
     "the path components we have matched so far
-    let pathcomponents = [substitute(t:NERDTreeRoot.path.str(0), '/ *$', '', '')]
+    let pathcomponents = [substitute(b:NERDTreeRoot.path.str(0), '/ *$', '', '')]
     "the index of the component we are searching for
     let curPathComponent = 1
 
@@ -2137,7 +2217,7 @@ function! s:getPath(ln)
 
     "check to see if we have the root node
     if line =~ '^\/'
-        return t:NERDTreeRoot.path
+        return b:NERDTreeRoot.path
     endif
 
     " in case called from outside the tree
@@ -2146,7 +2226,7 @@ function! s:getPath(ln)
     endif
 
     if line == s:tree_up_dir_line
-        return t:NERDTreeRoot.path.getParent()
+        return b:NERDTreeRoot.path.getParent()
     endif
 
     let indent = s:indentLevelFor(line)
@@ -2183,7 +2263,7 @@ function! s:getPath(ln)
             endif
         endif
     endwhile
-    let curFile = t:NERDTreeRoot.path.drive . dir . curFile
+    let curFile = b:NERDTreeRoot.path.drive . dir . curFile
     let toReturn = s:Path.New(curFile)
     return toReturn
 endfunction
@@ -2223,7 +2303,7 @@ function! s:getSelectedNode()
         if path == {}
             return {}
         endif
-        return t:NERDTreeRoot.findNode(path)
+        return b:NERDTreeRoot.findNode(path)
     catch /^NERDTree/
         return {}
     endtry
@@ -2231,8 +2311,8 @@ endfunction
 "FUNCTION: s:getTreeWinNum() {{{2
 "gets the nerd tree window number for this tab
 function! s:getTreeWinNum()
-    if exists("t:NERDTreeWinName")
-        return bufwinnr(t:NERDTreeWinName)
+    if exists("t:NERDTreeBufName")
+        return bufwinnr(t:NERDTreeBufName)
     else
         return -1
     endif
@@ -2338,6 +2418,11 @@ endfunction
 "ARGS:
 "treenode: file node to open
 function! s:openFileNode(treenode)
+    if b:NERDTreeType == "secondary"
+        exec 'edit ' . a:treenode.path.strForEditCmd()
+        return
+    endif
+
     call s:putCursorInTreeWin()
 
     "if the file is already open in this tab then just stick the cursor in it
@@ -2388,8 +2473,6 @@ endfunction
 "ARGS:
 "treenode: file node to open
 function! s:openNodeSplit(treenode)
-    call s:putCursorInTreeWin()
-
     " Save the user's settings for splitbelow and splitright
     let savesplitbelow=&splitbelow
     let savesplitright=&splitright
@@ -2455,7 +2538,7 @@ function! s:openNodeSplit(treenode)
 
     "resize the tree window if no other window was open before
     if onlyOneWin
-        let size = exists("t:NERDTreeOldWindowSize") ? t:NERDTreeOldWindowSize : g:NERDTreeWinSize
+        let size = exists("b:NERDTreeOldWindowSize") ? b:NERDTreeOldWindowSize : g:NERDTreeWinSize
         exec(there)
         exec("silent ". splitMode ." resize ". size)
         wincmd p
@@ -2484,7 +2567,7 @@ endfunction
 "FUNCTION: s:putCursorOnBookmarkTable(){{{2
 "Places the cursor at the top of the bookmarks table
 function! s:putCursorOnBookmarkTable()
-    if !t:NERDTreeShowBookmarks
+    if !b:NERDTreeShowBookmarks
         throw "NERDTree.IllegalOperation exception: cant find bookmark table, bookmarks arent active"
     endif
 
@@ -2558,8 +2641,6 @@ endfunction
 "
 "Args:
 function! s:renderView()
-    execute s:getTreeWinNum() . "wincmd w"
-
     setlocal modifiable
 
     "remember the top line of the buffer and the current line so we can
@@ -2577,7 +2658,7 @@ function! s:renderView()
     call setline(line(".")+1, "")
     call cursor(line(".")+1, col("."))
 
-    if t:NERDTreeShowBookmarks
+    if b:NERDTreeShowBookmarks
         call s:renderBookmarks()
     endif
 
@@ -2586,11 +2667,11 @@ function! s:renderView()
     call cursor(line(".")+1, col("."))
 
     "draw the header line
-    call setline(line(".")+1, t:NERDTreeRoot.path.str(0))
+    call setline(line(".")+1, b:NERDTreeRoot.path.str(0))
     call cursor(line(".")+1, col("."))
 
     "draw the tree
-    call s:drawTree(t:NERDTreeRoot, 0, 0, [], t:NERDTreeRoot.getChildCount() == 1)
+    call s:drawTree(b:NERDTreeRoot, 0, 0, [], b:NERDTreeRoot.getChildCount() == 1)
 
     "delete the blank line at the top of the buffer
     silent 1,1delete _
@@ -2631,16 +2712,16 @@ endfunction
 "
 "Assumes the cursor is in the NERDTree window
 function! s:restoreScreenState()
-    if !exists("t:NERDTreeOldTopLine") || !exists("t:NERDTreeOldPos") || !exists("t:NERDTreeOldWindowSize")
+    if !exists("b:NERDTreeOldTopLine") || !exists("b:NERDTreeOldPos") || !exists("b:NERDTreeOldWindowSize")
         return
     endif
-    exec("silent ". (s:shouldSplitVertically() ? "vertical" : "") ." resize ".t:NERDTreeOldWindowSize)
+    exec("silent ". (s:shouldSplitVertically() ? "vertical" : "") ." resize ".b:NERDTreeOldWindowSize)
 
     let old_scrolloff=&scrolloff
     let &scrolloff=0
-    call cursor(t:NERDTreeOldTopLine, 0)
+    call cursor(b:NERDTreeOldTopLine, 0)
     normal! zt
-    call setpos(".", t:NERDTreeOldPos)
+    call setpos(".", b:NERDTreeOldPos)
     let &scrolloff=old_scrolloff
 endfunction
 
@@ -2651,9 +2732,9 @@ function! s:saveScreenState()
     let win = winnr()
     try
         call s:putCursorInTreeWin()
-        let t:NERDTreeOldPos = getpos(".")
-        let t:NERDTreeOldTopLine = line("w0")
-        let t:NERDTreeOldWindowSize = s:shouldSplitVertically() ? winwidth("") : winheight("")
+        let b:NERDTreeOldPos = getpos(".")
+        let b:NERDTreeOldTopLine = line("w0")
+        let b:NERDTreeOldWindowSize = s:shouldSplitVertically() ? winwidth("") : winheight("")
         exec win . "wincmd w"
     catch /NERDTree.view.InvalidOperation/
     endtry
@@ -2803,8 +2884,6 @@ function! s:toggle(dir)
     if s:treeExistsForTab()
         if !s:isTreeOpen()
             call s:createTreeWin()
-            call s:renderView()
-
             call s:restoreScreenState()
         else
             call s:closeTree()
@@ -2985,7 +3064,7 @@ function! s:chRoot()
 
     call treenode.makeRoot()
     call s:renderView()
-    call s:putCursorOnNode(t:NERDTreeRoot, 0, 0)
+    call s:putCursorOnNode(b:NERDTreeRoot, 0, 0)
 endfunction
 
 " FUNCTION: s:clearBookmarks(bookmarks) {{{2
@@ -3153,7 +3232,7 @@ endfunction
 " FUNCTION: s:displayHelp() {{{2
 " toggles the help display
 function! s:displayHelp()
-    let t:treeShowHelp = t:treeShowHelp ? 0 : 1
+    let b:treeShowHelp = b:treeShowHelp ? 0 : 1
     call s:renderView()
     call s:centerView()
 endfunction
@@ -3215,7 +3294,7 @@ function! s:insertNewNode()
 
     try
         let newPath = s:Path.Create(newNodeName)
-        let parentNode = t:NERDTreeRoot.findNode(newPath.getPathTrunk())
+        let parentNode = b:NERDTreeRoot.findNode(newPath.getPathTrunk())
 
         let newTreeNode = s:TreeFileNode.New(newPath)
         if parentNode.isOpen || !empty(parentNode.children)
@@ -3259,7 +3338,7 @@ endfunction
 " FUNCTION: s:jumpToRoot() {{{2
 " moves the cursor to the root node
 function! s:jumpToRoot()
-    call s:putCursorOnNode(t:NERDTreeRoot, 1, 0)
+    call s:putCursorOnNode(b:NERDTreeRoot, 1, 0)
     call s:centerView()
 endfunction
 
@@ -3378,12 +3457,13 @@ endfunction
 
 "FUNCTION: s:previewNode() {{{2
 function! s:previewNode(openNewWin)
+    let currentBuf = bufnr(".")
     if a:openNewWin
         call s:openEntrySplit(1)
     else
         call s:activateNode(1)
     end
-    call s:putCursorInTreeWin()
+    exec bufwinnr(currentBuf) . "wincmd w"
 endfunction
 
 " FUNCTION: s:revealBookmark(name) {{{2
@@ -3401,7 +3481,7 @@ endfunction
 " will be reloaded.
 function! s:refreshRoot()
     call s:echo("Refreshing the root node. This could take a while...")
-    call t:NERDTreeRoot.refresh()
+    call b:NERDTreeRoot.refresh()
     call s:renderView()
     redraw
     call s:echo("Refreshing the root node. This could take a while... DONE")
@@ -3501,7 +3581,7 @@ endfunction
 " FUNCTION: s:toggleIgnoreFilter() {{{2
 " toggles the use of the NERDTreeIgnore option
 function! s:toggleIgnoreFilter()
-    let t:NERDTreeIgnoreEnabled = !t:NERDTreeIgnoreEnabled
+    let b:NERDTreeIgnoreEnabled = !b:NERDTreeIgnoreEnabled
     call s:renderViewSavingPosition()
     call s:centerView()
 endfunction
@@ -3509,8 +3589,8 @@ endfunction
 " FUNCTION: s:toggleShowBookmarks() {{{2
 " toggles the display of bookmarks
 function! s:toggleShowBookmarks()
-    let t:NERDTreeShowBookmarks = !t:NERDTreeShowBookmarks
-    if t:NERDTreeShowBookmarks
+    let b:NERDTreeShowBookmarks = !b:NERDTreeShowBookmarks
+    if b:NERDTreeShowBookmarks
         call s:renderView()
         call s:putCursorOnBookmarkTable()
     else
@@ -3521,7 +3601,7 @@ endfunction
 " FUNCTION: s:toggleShowFiles() {{{2
 " toggles the display of hidden files
 function! s:toggleShowFiles()
-    let t:NERDTreeShowFiles = !t:NERDTreeShowFiles
+    let b:NERDTreeShowFiles = !b:NERDTreeShowFiles
     call s:renderViewSavingPosition()
     call s:centerView()
 endfunction
@@ -3529,7 +3609,7 @@ endfunction
 " FUNCTION: s:toggleShowHidden() {{{2
 " toggles the display of hidden files
 function! s:toggleShowHidden()
-    let t:NERDTreeShowHidden = !t:NERDTreeShowHidden
+    let b:NERDTreeShowHidden = !b:NERDTreeShowHidden
     call s:renderViewSavingPosition()
     call s:centerView()
 endfunction
@@ -3541,24 +3621,24 @@ endfunction
 "keepState: 1 if the current root should be left open when the tree is
 "re-rendered
 function! s:upDir(keepState)
-    let cwd = t:NERDTreeRoot.path.str(0)
+    let cwd = b:NERDTreeRoot.path.str(0)
     if cwd == "/" || cwd =~ '^[^/]..$'
         call s:echo("already at top dir")
     else
         if !a:keepState
-            call t:NERDTreeRoot.close()
+            call b:NERDTreeRoot.close()
         endif
 
-        let oldRoot = t:NERDTreeRoot
+        let oldRoot = b:NERDTreeRoot
 
-        if empty(t:NERDTreeRoot.parent)
-            let path = t:NERDTreeRoot.path.getPathTrunk()
+        if empty(b:NERDTreeRoot.parent)
+            let path = b:NERDTreeRoot.path.getPathTrunk()
             let newRoot = s:TreeDirNode.New(path)
             call newRoot.open()
-            call newRoot.transplantChild(t:NERDTreeRoot)
-            let t:NERDTreeRoot = newRoot
+            call newRoot.transplantChild(b:NERDTreeRoot)
+            let b:NERDTreeRoot = newRoot
         else
-            let t:NERDTreeRoot = t:NERDTreeRoot.parent
+            let b:NERDTreeRoot = b:NERDTreeRoot.parent
 
         endif
 
