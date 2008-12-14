@@ -8,7 +8,7 @@
                 \___//___//_/ |_|/ .__// .__//_/   \___//_\_\  ~
                                 /_/   /_/                      ~
                                                   For Vim version 7.0 or newer
-                                                      Last changed 28 Oct 2008
+                                                      Last changed 14 Dec 2008
 
                                By Matt Wozniski
                                 mjw@drexel.edu
@@ -85,6 +85,15 @@ If that does not work and no package with GUI support is available, you will
 need to compile Vim yourself and ensure that GUI support is included.  If this
 is inconvenient for you, make sure that the Vim maintainer for your
 distribution knows it.
+                                                           *:CSApproxSnapshot*
+NOTE: As of CSApprox version 1.5, there is another alternative.  CSApprox now
+      provides a command, :CSApproxSnapshot, that can be used from inside gvim
+      or a terminal vim that is built with +gui.  It allows you to write out a
+      colorscheme file representing the current colors that will work in gvim,
+      88 color vim, or 256 color vim.  The syntax is: >
+          :CSApproxSnapshot[!] /path/to/new/colorscheme
+<       For example: >
+          :CSApproxSnapshot ~/.vim/colors/foobar.vim
 
 b) Properly configured terminal                            *csapprox-terminal*
 
@@ -179,13 +188,80 @@ g:CSApprox_approximator_function            *g:CSApprox_approximator_function*
     references.
 
 g:CSApprox_redirfallback                            *g:CSApprox_redirfallback*
-    As of Vim 7.2.018, there is a bug in the Vim function synIDattr() that
-    stops it from correctly reporting information for the 'guisp' attribute.
-    CSApprox includes a workaround for this problem, as well as a test that
-    ought to disable this workaround once synIDattr() is working properly.
+    Until Vim 7.2.052, there was a bug in the Vim function synIDattr() that
+    made it impossible to determine syntax information about the |guisp|
+    attribute.  CSApprox includes a workaround for this problem, as well as a
+    test that ought to disable this workaround if synIDattr() works properly.
     If this test should happen to give improper results somehow, the user can
     force the behavior with this variable.  When set to 1, the workaround will
-    always be used, and when set to 0, synIDattr() is blindly used.
+    always be used, and when set to 0, synIDattr() is blindly used.  Needless
+    to say, if this automatic detection should ever fail, the author would
+    like to be notified!
+
+                          *g:CSApprox_hook_pre* *g:CSApprox_hook_{scheme}_pre*
+                        *g:CSApprox_hook_post* *g:CSApprox_hook_{scheme}_post*
+g:CSApprox_hook_pre
+g:CSApprox_hook_post
+g:CSApprox_hook_{scheme}_pre
+g:CSApprox_hook_{scheme}_post                                 *csapprox-hooks*
+    These variables provide a method for adjusting tweaking the approximation
+    algorithm, either for all schemes, or on a per scheme basis.  Each of
+    these variables may be set to either a String containing a command to be
+    :executed, or a List of such Strings.  The _pre hooks are executed before
+    any approximations have been done.  In order to affect the approximation
+    at this stage, you would need to change the gui colors for a group; the
+    cterm colors will then be approximated from those gui colors.  Example:
+>
+      let g:CSApprox_hook_pre = 'hi Comment guibg=#ffddff'
+<
+    The advantage to tweaking the colors at this stage is that CSApprox will
+    handle approximating the given gui colors to the proper cterm colors,
+    regardless of the number of colors the terminal supports.  The
+    disadvantage is that certain things aren't possible, including clearing
+    the background or foreground color for a group, selecting a precise cterm
+    color to be used, and overriding the mappings made by g:CSApprox_attr_map.
+    Another notable disadvantage is that overriding things at this level will
+    actually affect the gui colors, in case the :gui is used to start gvim
+    from the running vim instance.
+
+    To overcome these disadvantages, the _post hooks are provided.  These
+    hooks will be executed only after all approximations have been completed.
+    At this stage, in order to have changes appear the cterm* colors must be
+    modified.  For example:
+                                                       *csapprox-transparency*
+>
+      let g:CSApprox_hook_post = ['hi Normal  ctermbg=NONE',
+                                \ 'hi NonText ctermbg=NONE' ]
+<
+    Setting g:CSApprox_hook_post as shown above will clear the background of
+    the Normal and NonText groups, forcing the terminal's default background
+    color to be used instead, including any pseudotransparency done by that
+    terminal emulator.  As noted, though, the _post functions do not allow
+    CSApprox to approximate the colors.  This may be desired, but if this is
+    an inconvenience the function named by g:CSApprox_approximator_function
+    can still be called manually.  For example:
+>
+      let g:CSApprox_hook_post = 'exe "hi Comment ctermbg="'
+                      \ . '. g:CSApprox_approximator_function(0xA0,0x50,0x35)'
+<
+    The _{scheme}_ versions are exactly like their counterparts, except that
+    they will only be executed if the value of g:colors_name matches the
+    scheme name embedded in the variable name.  They will be executed after
+    the corresponding hook without _{scheme}_, which provides a way to
+    override a less specific hook with a more specific one.  For example, to
+    clear the Normal and NonText groups, but only for the colorscheme
+    "desert", one could do the following:
+>
+      let g:CSApprox_hook_desert_post = ['hi Normal  ctermbg=NONE',
+                                       \ 'hi NonText ctermbg=NONE' ]
+<
+    NOTE: Any characters that would stop the string stored in g:colors_name
+          from being a valid variable name will be removed before the
+          _{scheme}_ hook is searched.  Basically, this means that first all
+          characters that are neither alphanumeric nor underscore will be
+          removed, then any leading digits will be removed.  So, for a
+          colorscheme named "123 foo_bar-baz456.vim", the hook searched for
+          will be, eg, g:CSApprox_hook_foo_barbaz456_post
 
 ==============================================================================
 4. Rationale/Design                                          *csapprox-design*
@@ -216,6 +292,8 @@ GUI support is required.
   colors, so querying for them fails.  This leaves me completely unable to
   tell what the colorscheme was trying to do.  See |csapprox-+gui| for some
   potential work arounds if your distribution doesn't provide a Vim with +gui.
+
+  NOTE: As of CSApprox 1.5, a reasonable workaround is |:CSApproxSnapshot|
 
 User intervention is sometimes required for information about the terminal.
 
@@ -249,6 +327,10 @@ It's slow.
   For me, it takes Vim's startup time from 0.15 seconds to 0.35 seconds.  This
   is probably still acceptable, but it is definitely worth trying to cut down
   on this time in future versions.
+
+  NOTE: As of CSApprox 1.5, |:CSApproxSnapshot| can be used to eliminate the
+        overhead of CSApprox, since the approximations only need to be done
+        when the colorscheme is created, rather than every time it's used.
 
 ==============================================================================
 6. Appendix - Terminals and Palettes                  *csapprox-terminal-list*
@@ -321,7 +403,8 @@ GNU Screen (screen):
     256 color support.  Internally, uses the xterm palette, but this is only
     relevant when running screen inside a terminal with fewer than 256 colors,
     in which case screen will attempt to map between its own 256 color cube
-    and the colors supported by the real terminal to the best of its ability.
+    and the colors supported by the real terminal to the best of its ability,
+    in much the same way as CSApprox maps between GUI and terminal colors.
 
                                                       *csapprox-terminals-bad*
 -------------------------------- Bad Terminals -------------------------------
@@ -347,6 +430,18 @@ kterm (as of version 6.2.0)
 
 ==============================================================================
 7. Changelog                                              *csapprox-changelog*
+
+ 2.00   14 Dec 2008   Add a hooks system, allowing users to specify a command
+                      to run, either before or after the approximation
+                      algorithm is run, for all schemes or one specific one.
+
+                      Also rewrite :CSApproxSnapshot to be more maintainable
+                      and less of a hack, and fix several bugs that it
+                      contained.
+
+ 1.50   19 Nov 2008   Add CSApproxSnapshot command, as an alternative solution
+                      when the user has gvim or a vim with gui support, but
+                      sometimes needs to use a vim without gui support.
 
  1.10   28 Oct 2008   Enable running on systems with no rgb.txt (Penn Su)
                       Begin distributing a copy of rgb.txt with CSApprox
