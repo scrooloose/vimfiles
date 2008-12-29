@@ -31,7 +31,7 @@ CONTENTS                                                   *NERDTree-contents*
     3.Options.................................|NERDTreeOptions|
         3.1 Option summary....................|NERDTreeOptionSummary|
         3.2 Option details....................|NERDTreeOptionDetails|
-    4.Public functions........................|NERDTreePublicFunctions|
+    4.Hacking the NERD tree...................|NERDTreeHacking|
     5.TODO list...............................|NERDTreeTodo|
     6.The Author..............................|NERDTreeAuthor|
     7.Changelog...............................|NERDTreeChangelog|
@@ -65,7 +65,7 @@ The following features and functionality are provided by the NERD tree:
         * ...
     * Directories and files can be bookmarked.
     * Most NERD tree navigation can also be done with the mouse
-    * Dynamic customisation of tree content
+    * Filtering of tree content (can be toggled at runtime)
         * custom file filters to prevent e.g. vim backup files being displayed
         * optional displaying of hidden files (. files)
         * files can be "turned off" so that only directories are displayed
@@ -81,9 +81,13 @@ The following features and functionality are provided by the NERD tree:
           session, the directory nodes will be opened/closed as you left them
     * The script remembers the cursor position and window position in the NERD
       tree so you can toggle it off (or just close the tree window) and then
-      reopen it (with NERDTreeToggle) the NERD tree window will appear EXACTLY
+      reopen it (with NERDTreeToggle) the NERD tree window will appear exactly
       as you left it
-    * You can have a separate NERD tree for each tab
+    * You can have a separate NERD tree for each tab, share trees across tabs,
+      or a mix of both.
+    * By default the script overrides the default file browser (netw), so if
+      you :edit a directory a (slighly modified) NERD tree will appear in the
+      current window
 
 ==============================================================================
 2. Functionality provided                              *NERDTreeFunctionality*
@@ -109,7 +113,15 @@ The following features and functionality are provided by the NERD tree:
     again.  If no NERD tree exists for this tab then this command acts the
     same as the |:NERDTree| command.
 
-:NERDTreeClose
+:NERDTreeMirror                                              *:NERDTreeMirror*
+    Shares an existing NERD tree, from another tab, in the current tab.
+    Changes made to one tree are reflected in both as they are actually the
+    same buffer.
+
+    If only one other NERD tree exists, that tree is automatically mirrored. If
+    more than one exists, the script will ask which tree to mirror.
+
+:NERDTreeClose                                                *:NERDTreeClose*
     Close the NERD tree in this tab.
 
 ------------------------------------------------------------------------------
@@ -190,16 +202,16 @@ o.......Open files, directories and bookmarks....................|NERDTree-o|
 go......Open selected file, but leave cursor in the NERDTree.....|NERDTree-go|
 t.......Open selected node/bookmark in a new tab.................|NERDTree-t|
 T.......Same as 't' but keep the focus on the current tab........|NERDTree-T|
-<tab>...Open selected file in a split window.....................|NERDTree-tab|
-g<tab>..Same as <tab>, but leave the cursor on the NERDTree......|NERDTree-gtab|
+i.......Open selected file in a split window.....................|NERDTree-i|
+gi......Same as i, but leave the cursor on the NERDTree..........|NERDTree-i|
 !.......Execute the current file.................................|NERDTree-!|
 O.......Recursively open the selected directory..................|NERDTree-O|
 x.......Close the current nodes parent...........................|NERDTree-x|
 X.......Recursively close all children of the current node.......|NERDTree-X|
-e.......Open a netrw for the current dir.........................|NERDTree-e|
+e.......Edit the current dif.....................................|NERDTree-e|
 
 double-click.......same as the |NERDTree-o| map.
-middle-click.......same as |NERDTree-tab| for files, same as
+middle-click.......same as |NERDTree-i| for files, same as
                    |NERDTree-e| for dirs.
 
 D.......Delete the current bookmark .............................|NERDTree-D|
@@ -219,7 +231,7 @@ R.......Recursively refresh the current root.....................|NERDTree-R|
 m.......Display the filesystem menu..............................|NERDTree-m|
 cd......Change the CWD to the dir of the selected node...........|NERDTree-cd|
 
-H.......Toggle whether hidden files displayed....................|NERDTree-H|
+I.......Toggle whether hidden files displayed....................|NERDTree-I|
 f.......Toggle whether the file filters are used.................|NERDTree-f|
 F.......Toggle whether files are displayed.......................|NERDTree-F|
 B.......Toggle whether the bookmark table is displayed...........|NERDTree-B|
@@ -278,8 +290,8 @@ Applies to: files and directories.
 The same as |NERDTree-t| except that the focus is kept in the current tab.
 
 ------------------------------------------------------------------------------
-                                                                *NERDTree-tab*
-Default key: <tab>
+                                                                  *NERDTree-i*
+Default key: i
 Map option: NERDTreeMapOpenSplit
 Applies to: files.
 
@@ -287,15 +299,15 @@ Opens the selected file in a new split window and puts the cursor in the new
 window.
 
 ------------------------------------------------------------------------------
-                                                               *NERDTree-gtab*
-Default key: g<tab>
+                                                                 *NERDTree-gi*
+Default key: gi
 Map option: None
 Applies to: files.
 
-The same as |NERDTree-tab| except that the cursor is not moved.
+The same as |NERDTree-i| except that the cursor is not moved.
 
 The key combo for this mapping is always "g" + NERDTreeMapOpenSplit (see
-|NERDTree-tab|).
+|NERDTree-i|).
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-!*
@@ -342,7 +354,9 @@ Default key: e
 Map option: NERDTreeMapOpenExpl
 Applies to: files and directories.
 
-Opens a netrw on the selected directory, or the selected file's directory.
+|:edit|s the selected directory, or the selected file's directory. This could
+result in a NERD tree or a netrw being opened, depending on
+|'NERDTreeHijackNetrw'|.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-D*
@@ -463,13 +477,12 @@ Applies to: files and directories.
 Display the filesystem menu. See |NERDTreeFilesysMenu| for details.
 
 ------------------------------------------------------------------------------
-                                                                  *NERDTree-H*
-Default key: H
+                                                                  *NERDTree-I*
+Default key: I
 Map option: NERDTreeMapToggleHidden
 Applies to: no restrictions.
 
-Toggles whether hidden files are displayed. Hidden files are any
-file/directory that starts with a "."
+Toggles whether hidden files (i.e. "dot files") are displayed.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-f*
@@ -579,6 +592,9 @@ NERD tree. These options should be set in your vimrc.
 
 |'NERDTreeHighlightCursorline'| Tell the NERD tree whether to highlight the
                                 current cursor line.
+
+|'NERDTreeHijackNetrw'|         Tell the NERD tree whether to replace the netrw
+                                autocommands for exploring local directories.
 
 |'NERDTreeIgnore'|              Tells the NERD tree which files to ignore.
 
@@ -706,6 +722,22 @@ If set to 1, the current cursor line in the NERD tree buffer will be
 highlighted. This is done using the |cursorline| option.
 
 ------------------------------------------------------------------------------
+                                                       *'NERDTreeHijackNetrw'*
+Values: 0 or 1.
+Default: 1.
+
+If set to 1, doing a >
+    :edit <some directory>
+<
+will open up a "secondary" NERD tree instead of a netrw in the target window.
+
+Secondary NERD trees behaves slighly different from a regular trees in the
+following respects:
+    1. 'o' will open the selected file in the same window as the tree,
+       replacing it.
+    2. you can have as many secondary tree as you want in the same tab.
+
+------------------------------------------------------------------------------
                                                             *'NERDTreeIgnore'*
 Values: a list of regular expressions.
 Default: ['\~$'].
@@ -760,7 +792,7 @@ Values: 0 or 1.
 Default: 0
 
 If set to 1, the NERD tree window will close after opening a file with the
-|NERDTree-o| or |NERDTree-tab| mappings.
+|NERDTree-o| or |NERDTree-i| mappings.
 
 ------------------------------------------------------------------------------
                                                      *'NERDTreeShowBookmarks'*
@@ -790,7 +822,7 @@ Values: 0 or 1.
 Default: 0.
 
 This option tells vim whether to display hidden files by default. This option
-can be dynamically toggled, per tree, with the |NERDTree-H| mapping.  Use one
+can be dynamically toggled, per tree, with the |NERDTree-I| mapping.  Use one
 of the follow lines to set this option: >
     let NERDTreeShowHidden=0
     let NERDTreeShowHidden=1
@@ -842,14 +874,11 @@ Other examples: >
 
 ------------------------------------------------------------------------------
                                                             *'NERDTreeWinPos'*
-Values: "left", "right", "top" or "bottom"
+Values: "left" or "right"
 Default: "left".
 
 This option is used to determine where NERD tree window is placed on the
 screen.
-
-"top" or "bottom", will cause a horizontal split to be created for the tree,
-while "left" and "right" will cause a vertical split.
 
 This option is makes it possible to use two different explorer type
 plugins simultaneously. For example, you could have the taglist plugin on the
@@ -863,8 +892,9 @@ Default: 31.
 This option is used to change the size of the NERD tree when it is loaded.
 
 ==============================================================================
-                                                     *NERDTreePublicFunctions*
-5. Public functions      ~
+4. Hacking the NERD tree                                     *NERDTreeHacking*
+
+Public functions ~
 
 The script provides 2 public functions for your hacking pleasure. Their
 signatures are: >
@@ -879,8 +909,26 @@ style OO. To see the functions that each class provides you can read look at
 the code.
 
 Use the node objects to manipulate the structure of the tree. Use the path
-objects to access the data the tree represents and to make changes to the
-filesystem.
+objects to access the files/directories the tree nodes represent.
+
+The NERD tree filetype ~
+
+NERD tree buffers have a filetype of "nerdtree". You can use this to hack the
+NERD tree via autocommands (on |FileType|) or via an ftplugin.
+
+For example, putting this code in ~/.vim/ftplugin/nerdtree.vim would override
+the o mapping, making it open the selected node in a new gvim instance. >
+
+    nnoremap <silent> <buffer> o :call <sid>openInNewVimInstance()<cr>
+    function! s:openInNewVimInstance()
+        let p = NERDTreeGetCurrentPath()
+        if p != {}
+            silent exec "!gvim " . p.strForOS(1) . "&"
+        endif
+    endfunction
+<
+This way you can add new mappings or :commands or override any existing
+mapping.
 
 ==============================================================================
 5. TODO list                                                    *NERDTreeTodo*
@@ -900,6 +948,15 @@ fridge for later ;)
 
 ==============================================================================
 7. Changelog                                               *NERDTreeChangelog*
+
+3.0.0
+    - hijack netrw so that doing an :edit <directory>  will put a NERD tree in
+      the window rather than a netrw browser. See :help 'NERDTreeHijackNetrw'
+    - allow sharing of trees across tabs, see :help :NERDTreeMirror
+    - remove "top" and "bottom" as valid settings for NERDTreeWinPos
+    - change the '<tab>' mapping to 'i'
+    - change the 'H' mapping to 'I'
+    - lots of refactoring
 
 2.14.3
     Thanks to tpope for the following:
