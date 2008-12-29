@@ -11,12 +11,9 @@ Put this stuff in your ~/.vimrc
 <pre><code>
 source ~/.vim/vimrc
 
-let g:NERDTreeMapOpenSplit = 'i'
 colorscheme vibrantink
 set nu
 set sts=2
 set sw=2
 let g:fuzzy_ignore = "gems/*"
-set noswapfile
-
 </code></pre>
