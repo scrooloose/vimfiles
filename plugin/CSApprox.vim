@@ -1,7 +1,7 @@
-" CSApprox:    Make gvim-only colorschemes work transparently in terminal vim
+" CSApprox:    Make gvim-only colorschemes work terminal vim
 " Maintainer:  Matthew Wozniski (mjw@drexel.edu)
-" Date:        Sun, 14 Dec 2008 06:12:55 -0500
-" Version:     2.00
+" Date:        Wed, 21 Jan 2009 19:21:31 -0500
+" Version:     3.00
 " History:     :help csapprox-changelog
 
 " Whenever you change colorschemes using the :colorscheme command, this script
@@ -82,13 +82,13 @@ function! s:ApproximatePerComponent(r,g,b)
   if &t_Co == 88
     let colors = s:urxvt_colors
     let type = 'urxvt'
-  elseif ((&term ==# 'xterm' || &term =~# '^screen')
-       \   && exists('g:CSApprox_konsole'))
+  elseif ((&term ==# 'xterm' || &term =~# '^screen' || &term==# 'builtin_gui')
+       \   && exists('g:CSApprox_konsole') && g:CSApprox_konsole)
        \ || &term =~? '^konsole'
     let colors = s:konsole_colors
     let type = 'konsole'
-  elseif ((&term ==# 'xterm' || &term =~# '^screen')
-       \   && exists('g:CSApprox_eterm'))
+  elseif ((&term ==# 'xterm' || &term =~# '^screen' || &term==# 'builtin_gui')
+       \   && exists('g:CSApprox_eterm') && g:CSApprox_eterm)
        \ || &term =~? '^eterm'
     let colors = s:eterm_colors
     let type = 'eterm'
@@ -670,7 +670,7 @@ endfunction
 " highlights (unless the colorscheme was already high-color).
 function! s:CSApproxImpl()
   " Return if not running in an 88/256 color terminal
-  if &t_Co != 256 && &t_Co != 88 && !has('gui_running')
+  if &t_Co != 256 && &t_Co != 88
     if &verbose && !has('gui_running')
       echomsg "CSApprox skipped; terminal only has" &t_Co "colors, not 88/256"
       echomsg "Try checking :help csapprox-terminal for workarounds"
@@ -688,19 +688,23 @@ function! s:CSApproxImpl()
   " sure that no groups are set to a value above 256, unless the color they're
   " set to can be set internally by vim (gotten by scraping
   " color_numbers_{88,256} in syntax.c:do_highlight)
-  for hlid in hinums
-    let val = highlights[hlid]
-    if   (    val.cterm.bg > 15
-         \ && index(s:presets_{&t_Co}, str2nr(val.cterm.bg)) < 0)
-    \ || (    val.cterm.fg > 15
-         \ && index(s:presets_{&t_Co}, str2nr(val.cterm.fg)) < 0)
-      " The value is set above 15, and wasn't set by vim.
-      if &verbose >= 2
-        echomsg 'CSApprox: Exiting - high color found for' val.name
+  "
+  " XXX: s:inhibit_hicolor_test allows this test to be skipped for snapshots
+  if !exists("s:inhibit_hicolor_test") || !s:inhibit_hicolor_test
+    for hlid in hinums
+      let val = highlights[hlid]
+      if   (    val.cterm.bg > 15
+            \ && index(s:presets_{&t_Co}, str2nr(val.cterm.bg)) < 0)
+            \ || (    val.cterm.fg > 15
+            \ && index(s:presets_{&t_Co}, str2nr(val.cterm.fg)) < 0)
+        " The value is set above 15, and wasn't set by vim.
+        if &verbose >= 2
+          echomsg 'CSApprox: Exiting - high color found for' val.name
+        endif
+        return
       endif
-      return
-    endif
-  endfor
+    endfor
+  endif
 
   call s:FixupGuiInfo(highlights)
   call s:FixupCtermInfo(highlights)
@@ -747,6 +751,9 @@ function! s:CSApproxSnapshot(file, overwrite)
   endif
 
   let save_t_Co = &t_Co
+  let s:inhibit_hicolor_test = 1
+  let save_CSApprox_konsole = g:CSApprox_konsole
+  let save_CSApprox_eterm = g:CSApprox_eterm
 
   try
     let lines = []
@@ -758,17 +765,48 @@ function! s:CSApproxSnapshot(file, overwrite)
     let lines += [ '    syntax reset' ]
     let lines += [ 'endif' ]
     let lines += [ '' ]
-    let lines += [ 'let g:colors_name = ' . string(fnamemodify(file, ':t:r')) ]
+    let lines += [ 'if v:version < 700' ]
+    let lines += [ '    let g:colors_name = ' . string(fnamemodify(file, ':t:r')) ]
+    let lines += [ '    command! -nargs=+ CSAHi exe "hi" substitute(substitute(<q-args>, "undercurl", "underline", "g"), "guisp\\S\\+", "", "g")' ]
+    let lines += [ 'else' ]
+    let lines += [ '    let g:colors_name = ' . string(fnamemodify(file, ':t:r')) ]
+    let lines += [ '    command! -nargs=+ CSAHi exe "hi" <q-args>' ]
+    let lines += [ 'endif' ]
     let lines += [ '' ]
 
     let lines += [ 'if 0' ]
-    for &t_Co in [ 256, 88 ]
+    for round in [ 'konsole', 'eterm', 'xterm', 'urxvt' ]
+      sil! unlet g:CSApprox_eterm
+      sil! unlet g:CSApprox_konsole
+
+      if round == 'konsole'
+        let g:CSApprox_konsole = 1
+      elseif round == 'eterm'
+        let g:CSApprox_eterm = 1
+      endif
+
+      if round == 'urxvt'
+        set t_Co=88
+      else
+        set t_Co=256
+      endif
+
       let highlights = s:Highlights()
       call s:FixupGuiInfo(highlights)
-      let lines += [ 'elseif has("gui_running") || &t_Co == ' . &t_Co ]
+
+      if round == 'konsole' || round == 'eterm'
+        let lines += [ 'elseif has("gui_running") || (&t_Co == ' . &t_Co
+                   \ . ' && (&term ==# "xterm" || &term =~# "^screen")'
+                   \ . ' && exists("g:CSApprox_' . round . '")'
+                   \ . ' && g:CSApprox_' . round . ')'
+                   \ . ' || &term =~? "^' . round . '"' ]
+      else
+        let lines += [ 'elseif has("gui_running") || &t_Co == ' . &t_Co ]
+      endif
+
       for hlnum in sort(keys(highlights), "s:SortNormalFirst")
         let hl = highlights[hlnum]
-        let line = '    highlight ' . hl.name
+        let line = '    CSAHi ' . hl.name
         for type in [ 'term', 'cterm', 'gui' ]
           let attrs = [ 'reverse', 'bold', 'italic', 'underline', 'undercurl' ]
           call filter(attrs, 'hl[type][v:val] == 1')
@@ -785,9 +823,16 @@ function! s:CSApproxSnapshot(file, overwrite)
       endfor
     endfor
     let lines += [ 'endif' ]
+    let lines += [ '' ]
+    let lines += [ 'if 1' ]
+    let lines += [ '    delcommand CSAHi' ]
+    let lines += [ 'endif' ]
     call writefile(lines, file)
   finally
     let &t_Co = save_t_Co
+    unlet s:inhibit_hicolor_test
+    let g:CSApprox_konsole = save_CSApprox_konsole
+    let g:CSApprox_eterm = save_CSApprox_eterm
   endtry
 endfunction
 
