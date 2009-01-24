@@ -61,10 +61,9 @@ using the same global functions anyway.
 ------------------------------------------------------------------------------
 Snippet indentation                         *nerdsnippets-snippet-indentation*
 
-Snippets are stored as sequences of keypresses, therefore, snippets do not
-contain any indentation. They are indented on-the-fly when you insert them
-into a file. They are indented according to your indent settings at the time
-of use.
+Snippets are stored as sequences of keypresses and therefore do not contain
+any indentation. Indentation is done on-the-fly as you insert them into a
+file. They are indented according to your indent settings at the time of use.
 
 File based snippets should still be defined with indentation (for
 readability), but know that it is removed when they are processed.
@@ -177,50 +176,52 @@ NERDSnippetsReset()
 File based snippets                         *nerdsnippets-file-based-snippets*
 
 You can specify snippets using files - one file per snippet. The following two
-functions are used for this:
+functions are used to read and process the snippets into vim. Call them from
+somewhere like ~/.vim/after/plugin/snippet_setup.vim or using an |autocommand|
+on |VimEnter|.
 
         *NERDSnippetsFromDirectory()* *NERDSnippetsFromDirectoryForFiletype()*
-NERDSnippetsFromDirectory(dir)
-    Extracts snippets from the given directory. The snippet filetype, keyword,
-    and possibly name, are all inferred from the path of the .snippet files
-    relative to a:dir.
+These two functions are used to extract snippets from a directory tree. Both
+functions recursively look for .snippet files and assume a certain directory
+structure from which the snippets filetype, keyword and possibly name are
+inferred.
 
-    This assumes a precise file naming scheme:
+NERDSnippetsFromDirectory(dir)
+    Extracts snippets from the given directory.
+
+    Assumed file/directory naming scheme:
 
     For single snippets >
         a:dir/<filetype>/<keyword>.snippet
 <
     eg >
-        a:dir/html/href.snippet
+        ~/.vim/snippets/html/href.snippet
 <
     For multiple snippets bound to a single keyword >
         a:dir/<filetype>/<keyword>/<snippet-name>.snippet
 <
     eg >
-        a:dir/html/table/simple-table.snippet
-        a:dir/html/table/table-with-class.snippet
+        ~/.vim/snippets/html/table/simple-table.snippet
+        ~/.vim/snippets/html/table/table-with-class.snippet
 <
 
 NERDSnippetsFromDirectoryForFiletype(dir, filetype)
     Extracts snippets from the given directory for the given filetype.
 
-    The snippet keywords (and possibly names) are interred from the path of
-    the .snippet files relative to a:dir
-
-    This assumes a precise file naming scheme:
+    Assumed file/directory naming scheme:
 
     For single snippets >
         a:dir/<keyword>.snippet
 <
     eg >
-        a:dir/href.snippet
+        ~/.vim/snippets/html/href.snippet
 <
     For multiple snippets bound to a single keyword >
         a:dir/<keyword>/<snippet-name>.snippet
 <
     eg >
-        a:dir/table/simple-table.snippet
-        a:dir/table/table-with-class.snippet
+        ~/.vim/snippets/html/table/simple-table.snippet
+        ~/.vim/snippets/html/table/table-with-class.snippet
 <
     The main purpose of this function is to allow users to manually associate
     a collection of snippets with a filetype. For example, you probably want
@@ -230,7 +231,10 @@ NERDSnippetsFromDirectoryForFiletype(dir, filetype)
 
         NERDSnippetsFromDirectoryForFiletype('~/.vim/snippets/html', 'xhtml')
 <
-
+Note: for the purposes of these two functions, global snippets are treated as
+though their filetype is _. Eg. >
+    ~/.vim/snippets/_/aGlobalSnippet.snippet
+<
 ==============================================================================
 Options                                                 *nerdsnippets-options*
 
