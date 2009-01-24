@@ -141,7 +141,10 @@ actually edit a file from a Rails application.
 			db:migrate in a migration, or your current test).
 			In tests (and specs), giving a line argument runs only
 			the test method (or example) at that line.  Use :.Rake
-			to run the test method at the cursor position.
+			to run the test method at the cursor position.  Use
+			:.Rake inside a self.up or self.down method in a
+			migration to run the db:migrate:up or db:migrate:down
+			task for that particular migration.
 
 						*rails-:Rake!*
 :[range]Rake! {targets}	Called with a bang, :Rake will use an alternate
@@ -165,7 +168,10 @@ actually edit a file from a Rails application.
 			|:help| rails.
 
 						*rails-:Redit*
-:Redit {file}		Edit {file}, relative to the application root.
+:Redit {file}		Edit {file}, relative to the application root.  Append
+			:line or #method to jump within the file, as in
+			:Redit app/controllers/users_controller.rb:12 or
+			:Redit app/models/user.rb#activate .
 
 						*rails-:Rlog*
 :Rlog [{logfile}]	Split window and open {logfile} ($RAILS_ENV or
@@ -337,7 +343,9 @@ can override the mapping from model related files to controller related files
 Each of the following commands has variants for splitting, vertical splitting
 and opening in a new tab.  For :Rmodel, those variants would be :RSmodel,
 :RVmodel, and :RTmodel.  There is also :REmodel which is a synonym for :Rmodel
-(future versions might allow customization of the behavior of :Rmodel).
+(future versions might allow customization of the behavior of :Rmodel).  They
+also allow for jumping to methods or line numbers using the same syntax as
+|:Redit|.
 
 
 Model Navigation Commands ~
@@ -361,11 +369,9 @@ name will be singularized and used.  To override this, use a command like: >
 :Rmigration [{pattern}]	If {pattern} is a number, find the migration for that
 			particular set of digits, zero-padding if necessary.
 			Otherwise, find the newest migration containing the
-			given pattern.  The pattern defaults to the current
-			model name, pluralized.  So when editing the Post
-			model, :Rmigration with no arguments might find
-			create_posts.rb, or add_date_to_posts.rb.  Give a
-			numeric argument of 0 to edit db/schema.rb.
+			given pattern.  Omitting the pattern selects the
+			latest migration.  Give a numeric argument of 0 to edit
+			db/schema.rb.
 
 						*rails-:Robserver*
 :Robserver [{name}]	Find the observer with a name like
@@ -443,6 +449,8 @@ The following commands are not clearly associated with models or controllers.
 :Rplugin					|rails-:Rplugin|
 :Rlib						|rails-:Rlib|
 :Rtask						|rails-:Rtask|
+:Renvironment                                   |rails-:Renvironment|
+:Rinitializer                                   |rails-:Rinitializer|
 :Rintegrationtest				|rails-:Rintegrationtest|
 :Rspec						|rails-:Rspec|
 
@@ -472,6 +480,14 @@ The following commands are not clearly associated with models or controllers.
 			tasks for that plugin can be specified as well.  If no
 			argument is given, either the current plugin's
 			Rakefile or the application Rakefile will be edited.
+
+						*rails-:Renvironment*
+:Renvironment [{name}]  Edit the config/environments file specified.  With no
+			argument, defaults to editing config/environment.rb.
+
+						*rails-:Rinitializer*
+:Rinitializer [{name}]  Edit the config/initializers file specified.  With no
+			argument, defaults to editing config/routes.rb.
 
 						*rails-:Rintegrationtest*
 :Rintegrationtest [{name}]
@@ -662,19 +678,6 @@ place) are also covered in this section.
 			current Rails application.  If it is not found, create
 			a new project, with appropriate directories (app,
 			etc., but not vendor).
-
-						*rails-:Rproject!*
-:Rproject! [{file}]	Same as :Rproject, only delete existing project if it
-			exists and recreate it.  The logic to delete the old
-			project is convoluted and possibly erroneous; report
-			any problems to the |rails-plugin-author|.  A handy
-			mapping might look something like: >
-		autocmd User Rails map <buffer> <F6> :Rproject!|silent w<CR>
-<			As a bonus, this command organizes views into separate
-			directories for easier navigation.  The downside of
-			this is that you will have to regenerate your project
-			each time you add another view directory (which is why
-			this command recreates your project each time!).
 
 						*rails-:Rdbext* *rails-dbext*
 :Rdbext [{environment}] This command is only provided when the |dbext| plugin
@@ -958,9 +961,9 @@ sourced in the |sandbox| for security reasons.
 			called directly, from an autocommand, or from
 			config/rails.vim.
 
-Options may be set set in one of four scopes, which my be indicated by an
+Options may be set in one of four scopes, which may be indicated by an
 optional prefix.  These scopes determine how broadly an option will apply.
-Generally, the default scope is sufficient
+Generally, the default scope is sufficient.
 
 Scope	Description ~
 a:	All files in one Rails application
