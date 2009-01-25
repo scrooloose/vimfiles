@@ -1,4 +1,4 @@
-*NERDSnippets.txt*  Snippets for vim.
+*NERD_snippets.txt*  Snippets for vim.
 *NERDSnippets*
 
 
