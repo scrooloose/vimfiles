@@ -17,37 +17,19 @@ set hlsearch    "hilight searches by default
 set nowrap      "dont wrap lines
 set linebreak   "wrap lines at convenient points
 
-"Add the variable with the name a:varName to the statusline. Highlight it as
-"'error' unless its value is in a:goodValues (a comma separated string)
-function! AddStatuslineFlag(varName, goodValues)
-  set statusline+=%#error#
-  exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',1)}"
-  set statusline+=%*
-  exec "set statusline+=%{RenderStlFlag(".a:varName.",'".a:goodValues."',0)}"
-endfunction
-
-"returns a:value or ''
-"
-"a:goodValues is a comma separated string of values that shouldn't be
-"highlighted with the error group
-"
-"a:error indicates whether the string that is returned will be highlighted as
-"'error'
-"
-function! RenderStlFlag(value, goodValues, error)
-  let goodValues = split(a:goodValues, ',', 1)
-  let good = index(goodValues, a:value) != -1
-  if (a:error && !good) || (!a:error && good)
-    return '[' . a:value . ']'
-  else
-    return ''
-  endif
-endfunction
-
 "statusline setup
 set statusline=%f       "tail of the filename
-call AddStatuslineFlag('&ff', 'unix,')    "fileformat
-call AddStatuslineFlag('&fenc', 'utf-8,') "file encoding
+
+"display a warning if fileformat isnt unix
+set statusline+=%#warningmsg#
+set statusline+=%{&ff!='unix'?'['.&ff.']':''}
+set statusline+=%*
+
+"display a warning if file encoding isnt utf-8
+set statusline+=%#warningmsg#
+set statusline+=%{&fenc!='utf-8'?'['.&fenc.']':''}
+set statusline+=%*
+
 set statusline+=%h      "help file flag
 set statusline+=%y      "filetype
 set statusline+=%r      "read only flag
