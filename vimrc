@@ -211,25 +211,3 @@ function! s:HighlightExcessColumns(width)
         echomsg "HighlightExcessColumns: set a &textwidth, or pass one in"
     endif
 endfunction
-
-"simple template system
-command! -complete=customlist,<SID>AvailableTemplates -n=1
-            \ Template :call <SID>InsertTemplate('<args>')
-
-function! <SID>InsertTemplate(name)
-    "read in the template
-    execute 'read ~/.vim/templates/' . &filetype . '/' . a:name
-
-    "if the cursor was previously on a blank line, delete it
-    if getline(line(".")-1) =~ '^\s*$'
-        exec line(".")-1 . 'd'
-    endif
-endfunction
-
-function! <SID>AvailableTemplates(lead, cmdline, cursorpos)
-    let templateDir = expand('~/.vim/templates/' . &filetype . '/')
-    let files = split(globpath(templateDir, a:lead . '*'), '\n')
-
-    "chop off the templateDir from each file
-    return map(files, 'strpart(v:val,strlen(templateDir))')
-endfunction
