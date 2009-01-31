@@ -1,7 +1,7 @@
 " CSApprox:    Make gvim-only colorschemes work terminal vim
 " Maintainer:  Matthew Wozniski (mjw@drexel.edu)
-" Date:        Wed, 21 Jan 2009 19:21:31 -0500
-" Version:     3.00
+" Date:        Sat, 31 Jan 2009 04:14:27 -0500
+" Version:     3.05
 " History:     :help csapprox-changelog
 
 " Whenever you change colorschemes using the :colorscheme command, this script
@@ -752,8 +752,24 @@ function! s:CSApproxSnapshot(file, overwrite)
 
   let save_t_Co = &t_Co
   let s:inhibit_hicolor_test = 1
-  let save_CSApprox_konsole = g:CSApprox_konsole
-  let save_CSApprox_eterm = g:CSApprox_eterm
+  if exists("g:CSApprox_konsole")
+    let save_CSApprox_konsole = g:CSApprox_konsole
+  endif
+  if exists("g:CSApprox_eterm")
+    let save_CSApprox_eterm = g:CSApprox_eterm
+  endif
+
+  " Needed just like in CSApprox()
+  if exists("g:colors_name")
+    let colors_name = g:colors_name
+    unlet g:colors_name
+  endif
+
+  " Needed just like in CSApprox()
+  if exists("g:syntax_cmd")
+    let syntax_cmd = g:syntax_cmd
+  endif
+  let g:syntax_cmd = "PLEASE DON'T CHANGE ANY COLORS!!!"
 
   try
     let lines = []
@@ -831,8 +847,21 @@ function! s:CSApproxSnapshot(file, overwrite)
   finally
     let &t_Co = save_t_Co
     unlet s:inhibit_hicolor_test
-    let g:CSApprox_konsole = save_CSApprox_konsole
-    let g:CSApprox_eterm = save_CSApprox_eterm
+    if exists("save_CSApprox_konsole")
+      let g:CSApprox_konsole = save_CSApprox_konsole
+    endif
+    if exists("save_CSApprox_eterm")
+      let g:CSApprox_eterm = save_CSApprox_eterm
+    endif
+
+    if exists("colors_name")
+      let g:colors_name = colors_name
+    endif
+
+    unlet g:syntax_cmd
+    if exists("syntax_cmd")
+      let g:syntax_cmd = syntax_cmd
+    endif
   endtry
 endfunction
 
