@@ -27,7 +27,7 @@ set statusline+=%*
 
 "display a warning if file encoding isnt utf-8
 set statusline+=%#warningmsg#
-set statusline+=%{&fenc!='utf-8'?'['.&fenc.']':''}
+set statusline+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
 set statusline+=%*
 
 set statusline+=%h      "help file flag
