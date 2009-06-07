@@ -167,6 +167,13 @@ noremap Q gq
 "make Y consistent with C and D
 nnoremap Y y$
 
+"snipmate setup
+source ~/.vim/snippets/support_functions.vim
+autocmd vimenter * call ExtractSnips("~/.vim/snippets/ruby-rails", "ruby")
+autocmd vimenter * call ExtractSnips("~/.vim/snippets/html", "eruby")
+autocmd vimenter * call ExtractSnips("~/.vim/snippets/html", "xhtml")
+autocmd vimenter * call ExtractSnips("~/.vim/snippets/html", "php")
+
 "visual search mappings
 function! s:VSetSearch()
     let temp = @@
