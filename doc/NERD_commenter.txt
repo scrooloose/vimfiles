@@ -38,7 +38,7 @@ CONTENTS                                               *NERDCommenterContents*
     5. Issues with the script.................|NERDComIssues|
         5.1 Delimiter detection heuristics....|NERDComHeuristics|
         5.2 Nesting issues....................|NERDComNesting|
-    6.The author..............................|NERDComAuthor|
+    6.About..     ............................|NERDComAbout|
     7.Changelog...............................|NERDComChangelog|
     8.Credits.................................|NERDComCredits|
     9.License.................................|NERDComLicense|
@@ -436,8 +436,6 @@ then the script would do a sexy comment on the last visual selection.
 |'NERDRPlace'|                        Specifies what to use as the right
                                       delimiter placeholder when nesting
                                       comments.
-|'NERDShutUp'|                        Stops "Unknown filetype" output from the
-                                      script
 |'NERDSpaceDelims'|                   Specifies whether to add extra spaces
                                       around delimiters when commenting, and
                                       whether to remove them when
@@ -660,15 +658,6 @@ This option is used to specify whether place-holder delimiters should be used
 when creating a nested comment.
 
 ------------------------------------------------------------------------------
-                                                                  *'NERDShutUp'*
-Values: 0 or 1.
-Default 1.
-
-This option is used to prevent the script from echoing "Unknown filetype"
-messages.  Stick this line in your vimrc: >
-    let NERDShutUp=1
-<
-------------------------------------------------------------------------------
                                                              *'NERDSpaceDelims'*
 Values: 0 or 1.
 Default 0.
@@ -785,7 +774,7 @@ will become: >
 for simplicity)
 
 ==============================================================================
-6. The author                                                  *NERDComAuthor*
+6. About                                                        *NERDComAbout*
 
 The author of the NERD commenter is Martyzillatron --- the half robot, half
 dinosaur bastard son of Megatron and Godzilla. He enjoys destroying
@@ -795,15 +784,28 @@ Drop him a line at martin_grenfell at msn.com. He would love to hear from you.
 its a lonely life being the worlds premier terror machine. How would you feel
 if your face looked like a toaster and a t-rex put together? :(
 
+The latest stable versions can be found at
+    http://www.vim.org/scripts/script.php?script_id=1218
+
+The latest dev versions are on github
+    http://github.com/scrooloose/nerdcommenter
+
 ==============================================================================
 8. Changelog                                                *NERDComChangelog*
 
-2.2.x
+2.2.2
+    - remove the NERDShutup option and the message is suppresses, this makes
+      the plugin silently rely on &commentstring for unknown filetypes.
     - add support for dhcpd, limits, ntp, resolv, rgb, sysctl, udevconf and
       udevrules. Thanks to Thilo Six.
     - match filetypes case insensitively
     - add support for mp (metapost), thanks to Andrey Skvortsov.
     - add support for htmlcheetah, thanks to Simon Hengel.
+    - add support for javacc, thanks to Matt Tolton.
+    - make <%# %> the default delims for eruby, thanks to tpope.
+    - add support for javascript.jquery, thanks to Ivan Devat.
+    - add support for cucumber and pdf. Fix sass and railslog delims,
+      thanks to tpope
 
 2.2.1
     - add support for newlisp and clojure, thanks to Matthew Lee Hinman.
@@ -848,141 +850,54 @@ if your face looked like a toaster and a t-rex put together? :(
 ==============================================================================
 8. Credits                                                    *NERDComCredits*
 
-Thanks and respect to the following people:
+Thanks to the follow people for suggestions and patches:
 
-Thanks to Nick Brettell for his many ideas and criticisms. A bloody good
-bastard.
-:normal :.-2s/good//
+Nick Brettell
+Matthew Hawkins
+Mathieu Clabaut
+Greg Searle
+Nguyen
+Litchi
+Jorge Scandaliaris
+Shufeng Zheng
+Martin Stubenschrott
+Markus Erlmann
+Brent Rice
+Richard Willis
+Igor Prischepoff
+Harry
+David Bourgeois
+Eike Von Seggern
+Torsten Blix
+Alexander Bosecke
+Stefano Zacchiroli
+Norick Chen
+Joseph Barker
+Gary Church
+Tim Carey-Smith
+Markus Klinik
+Anders
+Seth Mason
+James Hales
+Heptite
+Cheng Fang
+Yongwei Wu
+David Miani
+Jeremy Hinegardner
+Marco
+Ingo Karkat
+Zhang Shuhan
+tpope
+Ben Schmidt
+David Fishburn
+Erik Falor
+JaGoTerr
+Elias Pipping
+mntnoe
+Mark S.
 
-Thanks to Matthew Hawkins for his awesome refactoring!
 
-Thanks to the authors of the vimspell whose documentation
-installation function I stole :)
-
-Thanks to Greg Searle for the idea of using place-holders for nested comments.
-
-Thanks to Nguyen for the suggestions and pointing the h file highlighting bug!
-Also, thanks for the idea of doing sexy comments as well as his suggestions
-relating to it :P
-Thanks again to Nguyen for complaining about the NERD_comments menu mapping
-(<Alt>-c) interfering with another mapping of his... and thus the
-NERD_dont_create_menu_shortcut option was born :P
-(it was then replaced with NERD_menu_mode in version 1.67 :)
-
-Cheers to Litchi for the idea of having a mapping that appends a comment to
-the current line :)
-
-Thanks to jorge scandaliaris and Shufeng Zheng for telling me about some
-problems with commenting in visual mode. Thanks again to Jorge for his
-continued suggestions on this matter :)
-
-Thanks to Martin Stubenschrott for pointing out a bug with the <C-c> mapping
-:) Ive gotta stop breaking this mapping!
-
-Thanks to Markus Erlmann for pointing out a conflict that this script was
-having with the taglist plugin.
-
-Thanks to Brent Rice for alerting me about, and helping me track down, a bug
-in the script when the "ignorecase" option in vim was set.
-
-Thanks to Richard Willis for telling me about how line continuation was
-causing problems on cygwin. Also, thanks pointing out a bug in the help file
-and for suggesting // comments for c (its about time SOMEONE did :P). May ANSI
-have mercy on your soul :)
-
-Thanks to Igor Prischepoff for suggesting that i implement "toggle comments".
-Also, thanks for his suggested improvements about toggle comments after i
-implemented them.
-
-Thanks to harry for telling me that i broke the <leader>cn mapping in 1.53 :),
-and thanks again for telling me about a bug that occurred when editing a file
-in a new tab.
-
-Thanks to Martin (Krischikim?) for his patch that fixed a bug with the doc
-install function and added support for ada comments with spaces as well as
-making a couple of other small changes.
-
-Thanks to David Bourgeois for pointing out a bug with when commenting c files
-:)... [a few days later] ok i completely  misunderstood what David was talking
-about and ended up fixing a completely different bug to what he was talking
-about :P
-
-Thanks to David Bourgeois for pointing out a bug when changing buffers.
-
-Cheers to Eike Von Seggern for sending me a patch to fix a bug in 1.60 that
-was causing spaces to be added to the end of lines with single-part
-delimiters. It's nice when people do my work for me :D
-
-Thanks to Torsten Blix for telling me about a couple of bugs when uncommenting
-sexy comments. Sexy comments dont look so sexy when they are only half removed
-:P
-
-Thanks to Alexander "boesi" Bosecke for pointing out a bug that was stopping
-the NERD_space_delim_filetype_regexp option from working with left aligned
-toggle comments. And for pointing out a bug when initialising VB comments.
-
-Thanks to Stefano Zacchiroli for suggesting the idea of "Minimal comments".
-And for suggested improvements to minimal comments.
-
-Thanks to Norick Chen for emailing in a patch that fixed the asp delimiters.
-In 1.65
-
-Thanks to Joseph Barker for the sugesting that the menu be an optional
-feature.
-
-Thanks to Gary Church and Tim Carey-Smith for complaining about the
-keymappings and causing me to introduce the NERD_mapleader option :)
-
-Thanks to Markus Klinik for emailing me about a bug for sexy comments where
-spaces were being eaten.
-
-Thanks to Anders for emailing me a patch to help get rid of all the visual
-bells and screen scrolling.
-
-Thanks to Anders and Markus Klinik for emailing me about the screen scrolling
-issues and finally getting me off my ass about them :P
-
-Thanks to Seth Mason for sending me a patch to fix some pathing issues for the
-help doc installation.
-
-Cheers to James Hales for the patch that made the comment maps work better with
-counts, and made the script reset comment delims for a buffer when its
-filetype changes.
-
-Cheers to heptite on #vim for helping me track down some tab-space conversion
-bugs.
-
-Cheers to Cheng Fang for the bug reports :D
-
-Cheers to Yongwei Wu for a bug report about the passwd filetype.
-
-Thanks to David Miani for reporting a space-removal bug when using the
-NERDSpaceDelims option.
-
-Thanks to Jeremy Hinegardner for emailing me about a bug with aligned
-comments and the NERDSpaceDelims option.
-
-Thanks to marco for suggesting NERDDefaultNesting be set by default.
-
-Thanks to Ingo Karkat for the bug reports and the bugfix patch.
-
-Thanks to Zhang Shuhan for sending me a report about spaces not being removed
-properly in some circumstances. Also, thanks for emailing me a bunch of bug
-reports about sexy/toggle comments and for testing my fixes.
-
-Thanks to tpope for the english lesson.
-
-Thanks to Ben Schmidt, David Fishburn, and Erik Falor for emailing me about an
-incompatibility with vim7.2. Thanks also to JaGoTerr for posting the issue.
-
-Thanks to Elias Pipping for sending me a bug report about haskell commenting.
-
-Thanks to mntnoe for pointing out incorrect delimiters for haskell.
-
-Thanks to Mark S. for pointing out a bug in the doc.
-
-Not to forget! Thanks to the following people for sending me new filetypes to
-support :D
+Thanks to the following people for sending me new filetypes to support:
 
 The hackers                         The filetypes~
 Sam R                               verilog
@@ -1066,6 +981,9 @@ Thilo Six                           dhcpd, limits, ntp, resolv, rgb, sysctl,
                                     udevconf, udevrules
 Andrey Skvortsov                    mp
 Simon Hengel                        htmlcheetah
+Matt Tolton                         javacc
+Ivan Devat                          javascript.jquery
+tpope                               cucumber,pdf
 ==============================================================================
 9. License                                                    *NERDComLicense*
 

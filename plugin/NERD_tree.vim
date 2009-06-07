@@ -2,7 +2,7 @@
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 12 Jan, 2009
+" Last Change: 27 Jan, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '3.0.1'
+let s:NERD_tree_version = '3.1.0'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -796,12 +796,12 @@ function! s:TreeFileNode.open()
         call s:exec(winnr . "wincmd w")
 
     else
-        if !s:isWindowUsable(winnr("#")) && s:firstNormalWindow() ==# -1
+        if !s:isWindowUsable(winnr("#")) && s:firstUsableWindow() ==# -1
             call self.openSplit()
         else
             try
                 if !s:isWindowUsable(winnr("#"))
-                    call s:exec(s:firstNormalWindow() . "wincmd w")
+                    call s:exec(s:firstUsableWindow() . "wincmd w")
                 else
                     call s:exec('wincmd p')
                 endif
@@ -1516,7 +1516,7 @@ function! s:Path.Create(fullpath)
         throw "NERDTree.CreatePathError: Directory Exists: '" . a:fullpath . "'"
     endif
 
-    try
+    "try
 
         "if it ends with a slash, assume its a dir create it
         if a:fullpath =~ '\(\\\|\/\)$'
@@ -1529,9 +1529,9 @@ function! s:Path.Create(fullpath)
         else
             call writefile([], a:fullpath)
         endif
-    catch
-        throw "NERDTree.CreatePathError: Could not create path: '" . a:fullpath . "'"
-    endtry
+    "catch
+        "throw "NERDTree.CreatePathError: Could not create path: '" . a:fullpath . "'"
+    "endtry
 
     return s:Path.New(a:fullpath)
 endfunction
@@ -2355,12 +2355,13 @@ function! s:createTreeWin()
     "create the nerd tree window
     let splitLocation = g:NERDTreeWinPos ==# "left" ? "topleft " : "botright "
     let splitSize = g:NERDTreeWinSize
-    silent! exec splitLocation . 'vertical ' . splitSize . ' new'
 
     if !exists('t:NERDTreeBufName')
         let t:NERDTreeBufName = s:nextBufferName()
+        silent! exec splitLocation . 'vertical ' . splitSize . ' new'
         silent! exec "edit " . t:NERDTreeBufName
     else
+        silent! exec splitLocation . 'vertical ' . splitSize . ' split'
         silent! exec "buffer " . t:NERDTreeBufName
     endif
 
@@ -2404,6 +2405,7 @@ function! s:dumpHelp()
         let @h=@h."\" ============================\n"
         let @h=@h."\" File node mappings~\n"
         let @h=@h."\" ". (g:NERDTreeMouseMode ==# 3 ? "single" : "double") ."-click,\n"
+        let @h=@h."\" <CR>,\n"
         if b:NERDTreeType ==# "primary"
             let @h=@h."\" ". g:NERDTreeMapActivateNode .": open in prev window\n"
         else
@@ -2516,14 +2518,15 @@ function! s:echoError(msg)
     call s:echo(a:msg)
     echohl normal
 endfunction
-"FUNCTION: s:firstNormalWindow(){{{2
+"FUNCTION: s:firstUsableWindow(){{{2
 "find the window number of the first normal window
-function! s:firstNormalWindow()
+function! s:firstUsableWindow()
     let i = 1
     while i <= winnr("$")
         let bnum = winbufnr(i)
         if bnum != -1 && getbufvar(bnum, '&buftype') ==# ''
                     \ && !getwinvar(i, '&previewwindow')
+                    \ && (!getbufvar(bnum, '&modified') || &hidden)
             return i
         endif
 
@@ -2630,8 +2633,8 @@ function! s:isTreeOpen()
     return s:getTreeWinNum() != -1
 endfunction
 "FUNCTION: s:isWindowUsable(winnumber) {{{2
-"Returns 1 if opening a file from the tree in the given window requires it to
-"be split
+"Returns 0 if opening a file from the tree in the given window requires it to
+"be split, 1 otherwise
 "
 "Args:
 "winnumber: the number of the window in question
@@ -3042,7 +3045,8 @@ function! s:activateNode(forceKeepWindowOpen)
                 call bookmark.toRoot()
             else
                 if bookmark.validate()
-                    call (s:TreeFileNode.New(bookmark.path)).open()
+                    let n = s:TreeFileNode.New(bookmark.path)
+                    call n.open()
                 endif
             endif
         endif
@@ -3058,6 +3062,7 @@ function! s:bindMappings()
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapActivateNode . " :call <SID>activateNode(0)<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenSplit ." :call <SID>openEntrySplit(0,0)<cr>"
+    exec "nnoremap <silent> <buffer> <cr> :call <SID>activateNode(0)<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapPreview ." :call <SID>previewNode(0)<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapPreviewSplit ." :call <SID>previewNode(1)<cr>"
