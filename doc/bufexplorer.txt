@@ -1,7 +1,7 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 02 Dec 2007
+*bufexplorer.txt*              Buffer Explorer       Last Change: 19 Nov 2008
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.1.6
+                                Version 7.2.2
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
@@ -36,8 +36,11 @@ To install:
 USAGE                                                      *bufexplorer-usage*
 
 To start exploring in the current window, use: >
-
  \be   OR  :BufExplorer
+To start exploring in a newly split horizontal window, use: >
+ \bs  or  :HSBufExplorer
+To start exploring in a newly split vertical window, use: >
+ \bv  or  :VSBufExplorer
 
 If you would like to use something other than '\', you may simply change the
 leader (see |mapleader|).
@@ -136,6 +139,14 @@ To control what field the buffers are sorted by, use: >
   let g:bufExplorerSortBy='number'     " Sort by the buffer's number.
 The default is to sort by mru.
 
+                                                      *g:bufExplorerSplitBelow*
+To control where the new split window will be placed above or below the
+current window, use: >
+  let g:bufExplorerSplitBelow=1        " Split new window below current.
+  let g:bufExplorerSplitBelow=0        " Split new window above current.
+The default is to use what ever is set by the global &splitbelow
+variable.
+
                                                 *g:bufExplorerSplitOutPathName*
 To control whether to split out the path and file name or not, use: >
   let g:bufExplorerSplitOutPathName=1  " Split the path and file name.
@@ -143,9 +154,37 @@ To control whether to split out the path and file name or not, use: >
                                        " name.
 The default is to split the path and file name.
 
+                                                      *g:bufExplorerSplitRight*
+To control where the new vsplit window will be placed to the left or right of
+current window, use: >
+  let g:bufExplorerSplitRight=0        " Split left.
+  let g:bufExplorerSplitRight=1        " Split right.
+The default is to use the global &splitright.
+
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
+7.2.2  - Fix:
+         * Thanks to David L. Dight for spotting and fixing an issue when
+           using ctrl^. bufexplorer would incorrectly handle the previous
+           buffer so that when ctrl^ was pressed the incorrect file was opened.
+7.2.1  - Fix:
+         * Thanks to Dimitar for spotting and fixing a feature that was
+           inadvertently left out of the previous version. The feature was
+           when bufexplorer was used together with WinManager, you could use
+           the tab key to open a buffer in a split window.
+7.2.0  - Enhancements:
+         * For all those missing the \bs and \bv commands, these have now
+           returned. Thanks to Phil O'Connell for asking for the return of
+           these missing features and helping test out this version.
+         Fixes:
+         * Fixed problem with the bufExplorerFindActive code not working
+           correctly.
+         * Fixed an incompatibility between bufexplorer and netrw that caused
+           buffers to be incorrectly removed from the MRU list.
+7.1.7  - Fixes:
+         * TaCahiroy fixed several issues related to opening a buffer in a
+           tab.
 7.1.6  - Fixes:
          * Removed ff=unix from modeline in bufexplorer.txt. Found by Bill
            McCarthy.
@@ -388,7 +427,6 @@ TODO                                                         *bufexplorer-todo*
 
 - The issuing of a ':bd' command does not always remove the buffer number from
   the MRU list.
-- Look into adding '\bs' (buffer split) command back into the code.
 
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
