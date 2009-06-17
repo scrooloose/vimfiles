@@ -7,13 +7,7 @@ ln -s Projects/vimfiles .vim
 
 </code></pre>
 
-Put this stuff in your ~/.vimrc
+Put this in your ~/.vimrc along with your personal hacks:
 <pre><code>
 source ~/.vim/vimrc
-
-colorscheme vibrantink
-set nu
-set sts=2
-set sw=2
-let g:fuzzy_ignore = "gems/*"
 </code></pre>
