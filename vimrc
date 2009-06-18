@@ -228,15 +228,14 @@ function! SetCursorPosition()
     end
 endfunction
 
-"define :HighlightExcessColumns command to highlight the offending parts of
-"lines that are "too long". where "too long" is defined by &textwidth or an
-"arg passed to the command
-command! -nargs=? HighlightExcessColumns call s:HighlightExcessColumns('<args>')
-function! s:HighlightExcessColumns(width)
-    let targetWidth = a:width != '' ? a:width : &textwidth
+"define :HighlightLongLines command to highlight the offending parts of
+"lines that are longer than the specified length (defaulting to 80)
+command! -nargs=? HighlightLongLines call s:HighlightLongLines('<args>')
+function! s:HighlightLongLines(width)
+    let targetWidth = a:width != '' ? a:width : 79
     if targetWidth > 0
-        exec 'match Todo /\%>' . (targetWidth+1) . 'v/'
+        exec 'match Todo /\%>' . (targetWidth) . 'v/'
     else
-        echomsg "HighlightExcessColumns: set a &textwidth, or pass one in"
+        echomsg "Usage: HighlightLongLines [natural number]"
     endif
 endfunction
