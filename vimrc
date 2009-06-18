@@ -42,6 +42,8 @@ set statusline+=%*
 
 set statusline+=%{StatuslineTrailingSpaceWarning()}
 
+set statusline+=%{StatuslineLongLineWarning()}
+
 "display a warning if &paste is set
 set statusline+=%#error#
 set statusline+=%{&paste?'[paste]':''}
@@ -101,6 +103,35 @@ function! StatuslineTabWarning()
         endif
     endif
     return b:statusline_tab_warning
+endfunction
+
+"recalculate the long line warning when idle and after saving
+autocmd cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
+
+"return '' if no line is longer than 80 chars
+"return '[$:xxx]' if there are lines longer than 80, where 'xxx' is the length
+"of the longest line
+function! StatuslineLongLineWarning()
+    if !exists("b:statusline_long_line_warning")
+
+        let longest = -1
+        let current = 1
+        while current < line("$")
+            "substitute tabs for 8 spaces
+            let len = strlen(substitute(getline(current), '\t', '        ','g'))
+            if len > longest
+                let longest = len
+            endif
+            let current += 1
+        endwhile
+
+        if longest > 80
+            let b:statusline_long_line_warning = "[$:" . longest . "]"
+        else
+            let b:statusline_long_line_warning = ""
+        endif
+    endif
+    return b:statusline_long_line_warning
 endfunction
 
 "indent settings
