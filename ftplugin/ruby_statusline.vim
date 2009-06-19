@@ -1,4 +1,4 @@
-if exists("b:did_ruby_statusline_ftplugin")
+if exists("b:did_ruby_statusline_ftplugin") || &filetype !~ '\<ruby\>'
     finish
 endif
 let b:did_ruby_statusline_ftplugin = 1
