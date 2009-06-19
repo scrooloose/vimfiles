@@ -8,22 +8,22 @@ if !executable("ruby")
     finish
 endif
 
-let &l:statusline = substitute(&statusline, '\(%=\)', '%#warningmsg#%{StatuslineRubySyntaxCheck()}%*\1', '')
+let &l:statusline = substitute(&statusline, '\(%=\)', '%#warningmsg#%{StatuslineRubySyntaxWarning()}%*\1', '')
 
 "recalculate after saving
-autocmd bufwritepost * unlet! b:statusline_ruby_syntax_check
+autocmd bufwritepost * unlet! b:statusline_ruby_syntax_warning
 
-function! StatuslineRubySyntaxCheck()
-    if !exists("b:statusline_ruby_syntax_check")
-        let b:statusline_ruby_syntax_check = ''
+function! StatuslineRubySyntaxWarning()
+    if !exists("b:statusline_ruby_syntax_warning")
+        let b:statusline_ruby_syntax_warning = ''
         if filereadable(expand("%"))
             let output = system("ruby -c " . expand("%"))
             if v:shell_error != 0
-                let b:statusline_ruby_syntax_check = '[syntax:'. s:ExtractErrorLine(output) . ']'
+                let b:statusline_ruby_syntax_warning = '[syntax:'. s:ExtractErrorLine(output) . ']'
             endif
         endif
     endif
-    return b:statusline_ruby_syntax_check
+    return b:statusline_ruby_syntax_warning
 endfunction
 
 function! s:ExtractErrorLine(error_msg)
