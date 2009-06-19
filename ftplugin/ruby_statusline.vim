@@ -3,6 +3,11 @@ if exists("b:did_ruby_statusline_ftplugin") || &filetype !~ '\<ruby\>'
 endif
 let b:did_ruby_statusline_ftplugin = 1
 
+"bail if the user doesnt have ruby installed
+if !executable("ruby")
+    finish
+endif
+
 let &l:statusline = substitute(&statusline, '\(%=\)', '%#warningmsg#%{StatuslineRubySyntaxCheck()}%*\1', '')
 
 "recalculate after saving
