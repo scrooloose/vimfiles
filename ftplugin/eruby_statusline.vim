@@ -31,5 +31,5 @@ function! s:ExtractErrorLine(error_msg)
 endfunction
 
 function! s:CheckSyntax(filename)
-    return system('cat '. a:filename . ' | ruby -e "require \"erb\"; puts ERB.new(ARGF.read).src" | ruby -c')
+    return system('cat '. a:filename . ' | ruby -e "require \"erb\"; puts ERB.new(ARGF.read, nil, \"-\").src" | ruby -c')
 endfunction
