@@ -10,11 +10,12 @@ autocmd bufwritepost * unlet! b:statusline_ruby_syntax_check
 
 function! StatuslineRubySyntaxCheck()
     if !exists("b:statusline_ruby_syntax_check")
-        call system("ruby -c " . expand("%"))
-        if v:shell_error != 0
-            let b:statusline_ruby_syntax_check = '[invalid-syntax]'
-        else
-            let b:statusline_ruby_syntax_check = ''
+        let b:statusline_ruby_syntax_check = ''
+        if executable("ruby")
+            call system("ruby -c " . expand("%"))
+            if v:shell_error != 0
+                let b:statusline_ruby_syntax_check = '[invalid-syntax]'
+            endif
         endif
     endif
     return b:statusline_ruby_syntax_check
