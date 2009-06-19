@@ -3,8 +3,8 @@ if exists("b:did_eruby_statusline_ftplugin") || &filetype !~ '\<eruby\>'
 endif
 let b:did_eruby_statusline_ftplugin = 1
 
-"bail if the user doesnt have ruby installed
-if !executable("ruby")
+"bail if the user doesnt have ruby or cat installed
+if !executable("ruby") || !executable("cat")
     finish
 endif
 
