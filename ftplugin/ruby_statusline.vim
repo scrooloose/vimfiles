@@ -16,12 +16,16 @@ autocmd bufwritepost * unlet! b:statusline_ruby_syntax_check
 function! StatuslineRubySyntaxCheck()
     if !exists("b:statusline_ruby_syntax_check")
         let b:statusline_ruby_syntax_check = ''
-        if filereadable(expand("%")) && executable("ruby")
-            call system("ruby -c " . expand("%"))
+        if filereadable(expand("%"))
+            let output = system("ruby -c " . expand("%"))
             if v:shell_error != 0
-                let b:statusline_ruby_syntax_check = '[syntax]'
+                let b:statusline_ruby_syntax_check = '[syntax:'. s:ExtractErrorLine(output) . ']'
             endif
         endif
     endif
     return b:statusline_ruby_syntax_check
+endfunction
+
+function! s:ExtractErrorLine(error_msg)
+    return substitute(a:error_msg, '.\{-}:\(\d*\): syntax error,.*', '\1', '')
 endfunction
