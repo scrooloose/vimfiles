@@ -24,28 +24,28 @@ endif
 
 "inject the syntax warning into the statusline
 let &l:statusline = substitute(&statusline, '\(%=\)',
-            \ '%#warningmsg#%{StatuslineSassSyntaxWarning()}%*\1', '')
+            \ '%#warningmsg#%{StatuslineHamlSyntaxWarning()}%*\1', '')
 
 "recalculate after saving
-autocmd bufwritepost * unlet! b:statusline_html_syntax_warning
+autocmd bufwritepost * unlet! b:statusline_haml_syntax_warning
 
 "run the buffer through haml -c
 "
 "return '' if no syntax errors detected
 "return '[syntax:xxx]' if errors are detected, where xxx is the line num of
 "the first error
-function! StatuslineSassSyntaxWarning()
-    if !exists("b:statusline_html_syntax_warning")
-        let b:statusline_html_syntax_warning = ''
+function! StatuslineHamlSyntaxWarning()
+    if !exists("b:statusline_haml_syntax_warning")
+        let b:statusline_haml_syntax_warning = ''
         if filereadable(expand("%"))
             let output = system("haml -c " . expand("%"))
             if v:shell_error != 0
-                let b:statusline_html_syntax_warning =
+                let b:statusline_haml_syntax_warning =
                             \ '[syntax:'. s:ExtractErrorLine(output) . ']'
             endif
         endif
     endif
-    return b:statusline_html_syntax_warning
+    return b:statusline_haml_syntax_warning
 endfunction
 
 "extract the line num of the first syntax error for the given output
