@@ -1,7 +1,7 @@
-if exists("b:did_eruby_statusline_ftplugin") || &filetype !~ '\<eruby\>'
+if exists("b:did_eruby_stl_syntax_warning_ftplugin") || &filetype !~ '\<eruby\>'
     finish
 endif
-let b:did_eruby_statusline_ftplugin = 1
+let b:did_eruby_stl_syntax_warning_ftplugin = 1
 
 "bail if the user doesnt have ruby or cat installed
 if !executable("ruby") || !executable("cat")

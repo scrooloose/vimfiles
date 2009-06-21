@@ -1,7 +1,7 @@
-if exists("b:did_ruby_statusline_ftplugin") || &filetype !~ '\<ruby\>'
+if exists("b:did_ruby_stl_syntax_warning_ftplugin") || &filetype !~ '\<ruby\>'
     finish
 endif
-let b:did_ruby_statusline_ftplugin = 1
+let b:did_ruby_stl_syntax_warning_ftplugin = 1
 
 "bail if the user doesnt have ruby installed
 if !executable("ruby")
