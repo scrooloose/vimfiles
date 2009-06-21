@@ -1,3 +1,16 @@
+" ============================================================================
+" File:        eruby_stl_syntax_warning.vim
+" Description: filtype plugin for eruby to add a syntax check flag to the
+"              statusline
+" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+" Last Change: 21 Jun, 2009
+" License:     This program is free software. It comes without any warranty,
+"              to the extent permitted by applicable law. You can redistribute
+"              it and/or modify it under the terms of the Do What The Fuck You
+"              Want To Public License, Version 2, as published by Sam Hocevar.
+"              See http://sam.zoy.org/wtfpl/COPYING for more details.
+"
+" ============================================================================
 if exists("b:did_eruby_stl_syntax_warning_ftplugin") || &filetype !~ '\<eruby\>'
     finish
 endif
