@@ -3,7 +3,7 @@
 " Description: filtype plugin for ruby to add a syntax check flag to the
 "              statusline
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 21 Jun, 2009
+" Last Change: 22 Jun, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -50,5 +50,5 @@ endfunction
 "extract the line num of the first syntax error for the given output
 "from 'ruby -c'
 function! s:ExtractErrorLine(error_msg)
-    return substitute(a:error_msg, '.\{-}:\(\d*\): syntax error,.*', '\1', '')
+    return substitute(a:error_msg, '.\{-}:\(\d*\): .*', '\1', '')
 endfunction
