@@ -1,9 +1,8 @@
 " ============================================================================
-" File:        ruby_stl_syntax_warning.vim
-" Description: filtype plugin for ruby to add a syntax check flag to the
-"              statusline
+" File:        ruby_syntax_checking.vim
+" Description: Filetype plugin for ruby that provides syntax checking hacks
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 22 Jun, 2009
+" Last Change: 23 Jun, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -11,10 +10,10 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-if exists("b:did_ruby_stl_syntax_warning_ftplugin") || &filetype !~ '\<ruby\>'
+if exists("b:did_ruby_syntax_checking_ftplugin") || &filetype !~ '\<ruby\>'
     finish
 endif
-let b:did_ruby_stl_syntax_warning_ftplugin = 1
+let b:did_ruby_syntax_checking_ftplugin = 1
 
 "bail if the user doesnt have ruby installed
 if !executable("ruby")
@@ -52,3 +51,19 @@ endfunction
 function! s:ExtractErrorLine(error_msg)
     return substitute(a:error_msg, '.\{-}:\(\d*\): .*', '\1', '')
 endfunction
+
+"if syntax errors are found in the current buffer, show them in the quickfix
+"window
+function! s:ShowSyntaxErrors()
+    let old_makeprg = &l:makeprg
+    setl makeprg=ruby\ -c\ %
+    silent make
+    redraw!
+    let &l:makeprg = old_makeprg
+
+    if !empty(getqflist())
+        copen
+    endif
+endfunction
+
+command! -nargs=0 -buffer SyntaxErrors call s:ShowSyntaxErrors()
