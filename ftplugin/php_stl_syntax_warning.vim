@@ -48,7 +48,7 @@ function! StatuslinePhpSyntaxWarning()
 endfunction
 
 "extract the line num of the first syntax error for the given output
-"from 'php -c'
+"from 'php -l'
 function! s:ExtractErrorLine(error_msg)
     return substitute(a:error_msg, '\_.\{-}on line \(\d*\)\_.*', '\1', '')
 endfunction
