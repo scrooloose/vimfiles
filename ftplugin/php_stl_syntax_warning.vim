@@ -1,5 +1,5 @@
 " ============================================================================
-" File:        php_syntax_checking.vim
+" File:        php_stl_syntax_warning.vim
 " Description: filtype plugin for php to add a syntax check flag to the
 "              statusline
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
