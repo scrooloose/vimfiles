@@ -26,7 +26,7 @@ let &l:statusline = substitute(&statusline, '\(%=\)',
             \ '%#warningmsg#%{StatuslineERubySyntaxWarning()}%*\1', '')
 
 "recalculate after saving
-autocmd bufwritepost * unlet! b:statusline_eruby_syntax_warning
+autocmd bufwritepost <buffer> unlet! b:statusline_eruby_syntax_warning
 
 "run the erb sections of the buffer though ruby -c
 "

@@ -27,7 +27,7 @@ let &l:statusline = substitute(&statusline, '\(%=\)',
             \ '%#warningmsg#%{StatuslineSassSyntaxWarning()}%*\1', '')
 
 "recalculate after saving
-autocmd bufwritepost * unlet! b:statusline_sass_syntax_warning
+autocmd bufwritepost <buffer> unlet! b:statusline_sass_syntax_warning
 
 "run the buffer through sass -c
 "

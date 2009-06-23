@@ -25,7 +25,7 @@ let &l:statusline = substitute(&statusline, '\(%=\)',
             \ '%#warningmsg#%{StatuslinePhpSyntaxWarning()}%*\1', '')
 
 "recalculate after saving
-autocmd bufwritepost * unlet! b:statusline_php_syntax_warning
+autocmd bufwritepost <buffer> unlet! b:statusline_php_syntax_warning
 
 "run the buffer through php -l
 "
