@@ -1,7 +1,6 @@
 " ============================================================================
-" File:        php_stl_syntax_warning.vim
-" Description: filtype plugin for php to add a syntax check flag to the
-"              statusline
+" File:        php_syntax_checking.vim
+" Description: Filtype plugin for php to provide syntax checking hacks
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
 " Last Change: 23 Jun, 2009
 " License:     This program is free software. It comes without any warranty,
@@ -11,10 +10,10 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-if exists("b:did_php_stl_syntax_warning_ftplugin")
+if exists("b:did_php_syntax_checking_ftplugin")
     finish
 endif
-let b:did_php_stl_syntax_warning_ftplugin = 1
+let b:did_php_syntax_checking_ftplugin = 1
 
 "bail if the user doesnt have php installed
 if !executable("php")
@@ -52,3 +51,25 @@ endfunction
 function! s:ExtractErrorLine(error_msg)
     return substitute(a:error_msg, '\_.\{-}on line \(\d*\)\_.*', '\1', '')
 endfunction
+
+"if syntax errors are found in the current buffer, show them in the quickfix
+"window
+function! s:ShowSyntaxErrors()
+    let old_errorformat = &l:errorformat
+    setl errorformat=Parse\ error:\ syntax\ error\\,\ %m\ in\ %f\ on\ line\ %l,%-G%.%#
+
+    let old_makeprg = &l:makeprg
+    setl makeprg=php\ -l\ %
+
+    silent make
+    redraw!
+
+    let &l:makeprg = old_makeprg
+    let &l:errorformat = old_errorformat
+
+    if !empty(getqflist())
+        copen
+    endif
+endfunction
+
+command! -nargs=0 -buffer SyntaxErrors call s:ShowSyntaxErrors()
