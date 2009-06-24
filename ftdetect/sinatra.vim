@@ -1,9 +1,9 @@
-autocmd BufNewFile,BufRead * call s:CheckForSinatraApp()
+autocmd BufNewFile,BufRead *rb call s:CheckForSinatraApp()
 
 function! s:CheckForSinatraApp()
-  if &filetype !~ '\(^sinatra$\|\.sinatra$\|^sinatra\.\|\.sinatra\.\)'
-    if search(' < Sinatra::Base', 'nwc')
-      set filetype+=.sinatra
+    if &filetype !~ '\(^sinatra$\|\.sinatra$\|^sinatra\.\|\.sinatra\.\)'
+        if search('Sinatra::Base\|require\s*[''"]sinatra[''"]', 'nwc') != 0
+            let &filetype = &filetype . ".sinatra"
+        endif
     endif
-  endif
 endfunction
