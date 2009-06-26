@@ -115,18 +115,20 @@ function! StatuslineLongLineWarning()
     if !exists("b:statusline_long_line_warning")
 
         let longest = -1
+        let number_of_long_lines = 0
         let current = 1
         while current < line("$")
             "substitute tabs for 8 spaces
             let len = strlen(substitute(getline(current), '\t', '        ','g'))
             if len > longest
                 let longest = len
+                let number_of_long_lines += 1
             endif
             let current += 1
         endwhile
 
         if longest > 80
-            let b:statusline_long_line_warning = "[$:" . longest . "]"
+            let b:statusline_long_line_warning = "[$:" . longest . ",". number_of_long_lines ."]"
         else
             let b:statusline_long_line_warning = ""
         endif
