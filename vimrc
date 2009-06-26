@@ -108,27 +108,35 @@ endfunction
 "recalculate the long line warning when idle and after saving
 autocmd cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
 
-"return '' if no line is longer than 80 chars
-"return '[$:xxx]' if there are lines longer than 80, where 'xxx' is the length
-"of the longest line
+"return a warning for "long lines" where "long" is either &textwidth or 80 (if
+"no &textwidth is set)
+"
+"return '' if no long lines
+"return '[$:x,y]' if there are long lines, where 'x' is the length
+"of the longest line and 'y' is the number of long lines
 function! StatuslineLongLineWarning()
     if !exists("b:statusline_long_line_warning")
+        let threshold = (&tw ? &tw : 80)
+        let spaces = repeat(" ", 8)
 
         let longest = -1
         let number_of_long_lines = 0
-        let current = 1
-        while current < line("$")
-            "substitute tabs for 8 spaces
-            let len = strlen(substitute(getline(current), '\t', '        ','g'))
+
+        let i = 1
+        while i <= line("$")
+            let len = strlen(substitute(getline(i), '\t', spaces, 'g'))
             if len > longest
                 let longest = len
+            endif
+            if len > threshold
                 let number_of_long_lines += 1
             endif
-            let current += 1
+            let i += 1
         endwhile
 
-        if longest > 80
-            let b:statusline_long_line_warning = "[$:" . longest . ",". number_of_long_lines ."]"
+        if longest > threshold
+            let b:statusline_long_line_warning = "[$:" . longest . "," .
+                        \ number_of_long_lines . "]"
         else
             let b:statusline_long_line_warning = ""
         endif
