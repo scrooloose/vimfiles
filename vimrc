@@ -112,36 +112,55 @@ autocmd cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
 "no &textwidth is set)
 "
 "return '' if no long lines
-"return '[$:x,y]' if there are long lines, where 'x' is the length
-"of the longest line and 'y' is the number of long lines
+"return '[#x,my,$z] if multiple long lines are found, were x is the number of
+"long lines, y is the median length of the long lines and z is the length of
+"the longest line
+"return '[$x]' if one long line is found, where x is the length of the line
 function! StatuslineLongLineWarning()
     if !exists("b:statusline_long_line_warning")
         let threshold = (&tw ? &tw : 80)
         let spaces = repeat(" ", 8)
 
-        let longest = -1
-        let number_of_long_lines = 0
+        let long_line_lens = []
 
         let i = 1
         while i <= line("$")
             let len = strlen(substitute(getline(i), '\t', spaces, 'g'))
-            if len > longest
-                let longest = len
-            endif
             if len > threshold
-                let number_of_long_lines += 1
+                call add(long_line_lens, len)
             endif
             let i += 1
         endwhile
 
-        if longest > threshold
-            let b:statusline_long_line_warning = "[$:" . longest . "," .
-                        \ number_of_long_lines . "]"
+        if len(long_line_lens) > 0
+            let b:statusline_long_line_warning = "["
+
+            if len(long_line_lens) > 1
+                let b:statusline_long_line_warning .=
+                            \ '#' . len(long_line_lens) . "," .
+                            \ 'm' . s:Median(long_line_lens) . ","
+            endif
+
+            let b:statusline_long_line_warning .= '$' .
+                        \ max(long_line_lens) . "]"
         else
             let b:statusline_long_line_warning = ""
         endif
     endif
     return b:statusline_long_line_warning
+endfunction
+
+"find the median of the given array of numbers
+function! s:Median(nums)
+    let nums = sort(a:nums)
+    let l = len(nums)
+
+    if l % 2 == 1
+        let i = (l-1) / 2
+        return nums[i]
+    else
+        return (nums[l/2] + nums[(l/2)-1]) / 2
+    endif
 endfunction
 
 "indent settings
