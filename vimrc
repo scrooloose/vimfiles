@@ -119,7 +119,7 @@ autocmd cursorhold,bufwritepost * unlet! b:statusline_long_line_warning
 function! StatuslineLongLineWarning()
     if !exists("b:statusline_long_line_warning")
         let threshold = (&tw ? &tw : 80)
-        let spaces = repeat(" ", 8)
+        let spaces = repeat(" ", &ts)
 
         let long_line_lens = []
 
