@@ -8,10 +8,7 @@ if !executable("php")
     finish
 endif
 "run the buffer through php -l
-"
-"return '' if no syntax errors detected
-"return '[syntax:xxx]' if errors are detected, where xxx is the line num of
-"the first error
+"return the line num of the first error, or 0 if no errors
 function! CheckSyntax_php()
     let output = system("php -l " . expand("%"))
     if v:shell_error != 0

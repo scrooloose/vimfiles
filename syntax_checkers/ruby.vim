@@ -9,7 +9,7 @@ if !executable("ruby")
 endif
 
 "run the buffer through ruby -c and return the line number of the first syntax
-"error
+"error, or 0 if no errors
 function! CheckSyntax_ruby()
     let output = system("ruby -c " . expand("%"))
     if v:shell_error != 0
