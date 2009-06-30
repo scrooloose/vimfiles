@@ -122,12 +122,17 @@ function! StatuslineSyntaxWarning()
     if !exists("b:statusline_syntax_warning")
         let b:statusline_syntax_warning =  ''
 
-        if exists("*CheckSyntax_" . &ft) && filereadable(expand("%"))
-            let first_err_line = CheckSyntax_{&ft}()
-            if first_err_line != 0
-                let b:statusline_syntax_warning =  '[syntax:' . first_err_line . ']'
+        "if &ft is e.g. ruby.sinatra then syntax check both filetypes
+        for ft in split(&ft, '\.')
+
+            if exists("*CheckSyntax_" . ft) && filereadable(expand("%"))
+                let first_err_line = CheckSyntax_{ft}()
+                if first_err_line != 0
+                    let b:statusline_syntax_warning =  '[syntax:' . first_err_line . ']'
+                    break
+                endif
             endif
-        endif
+        endfor
     endif
     return b:statusline_syntax_warning
 endfunction
