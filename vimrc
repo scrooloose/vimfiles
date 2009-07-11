@@ -45,7 +45,7 @@ set statusline+=%{StatuslineTrailingSpaceWarning()}
 set statusline+=%{StatuslineLongLineWarning()}
 
 set statusline+=%#warningmsg#
-set statusline+=%{StatuslineSyntaxWarning()}
+set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
 "display a warning if &paste is set
@@ -108,35 +108,6 @@ function! StatuslineTabWarning()
     endif
     return b:statusline_tab_warning
 endfunction
-
-"load all the syntax checkers
-runtime! syntax_checkers/*.vim
-
-"recalculate the syntax warning when saving and changing filetype
-autocmd bufwritepost,filetype * unlet! b:statusline_syntax_warning
-
-"return [syntax:X] if syntax errors are detected in the buffer, where X is the
-"line number of the first error.
-"return '' if no errors or if no syntax checker exists for the current filetype
-function! StatuslineSyntaxWarning()
-    if !exists("b:statusline_syntax_warning")
-        let b:statusline_syntax_warning =  ''
-
-        "if &ft is e.g. ruby.sinatra then syntax check both filetypes
-        for ft in split(&ft, '\.')
-
-            if exists("*CheckSyntax_" . ft) && filereadable(expand("%"))
-                let first_err_line = CheckSyntax_{ft}()
-                if first_err_line != 0
-                    let b:statusline_syntax_warning =  '[syntax:' . first_err_line . ']'
-                    break
-                endif
-            endif
-        endfor
-    endif
-    return b:statusline_syntax_warning
-endfunction
-
 
 "recalculate the long line warning when idle and after saving
 autocmd cursorhold,bufwritepost * unlet! b:statusline_long_line_warning

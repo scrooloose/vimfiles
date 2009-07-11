@@ -1,3 +1,14 @@
+"============================================================================
+"File:        ruby.vim
+"Description: Syntax checking plugin for syntastic.vim
+"Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+"License:     This program is free software. It comes without any warranty,
+"             to the extent permitted by applicable law. You can redistribute
+"             it and/or modify it under the terms of the Do What The Fuck You
+"             Want To Public License, Version 2, as published by Sam Hocevar.
+"             See http://sam.zoy.org/wtfpl/COPYING for more details.
+"
+"============================================================================
 if exists("loaded_ruby_syntax_checker")
     finish
 endif
@@ -8,17 +19,9 @@ if !executable("ruby")
     finish
 endif
 
-"run the buffer through ruby -c and return the line number of the first syntax
-"error, or 0 if no errors
-function! CheckSyntax_ruby()
-    let output = system("ruby -c " . expand("%"))
-    if v:shell_error != 0
-        return s:extract_error_line(output)
-    endif
-endfunction
-
-"extract the line num of the first syntax error for the given output
-"from 'ruby -c'
-function! s:extract_error_line(error_msg)
-    return substitute(a:error_msg, '.\{-}:\(\d*\): .*', '\1', '')
+function! SyntaxCheckers_ruby_GetQFList()
+    set makeprg=ruby\ -c\ %
+    set errorformat=%-GSyntax\ OK,%E%f:%l:\ syntax\ error\\,\ %m,%Z%p^,%W%f:%l:\ warning:\ %m,%Z%p^,%-C%.%#
+    silent make!
+    return getqflist()
 endfunction

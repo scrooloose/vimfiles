@@ -1,3 +1,14 @@
+"============================================================================
+"File:        eruby.vim
+"Description: Syntax checking plugin for syntastic.vim
+"Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+"License:     This program is free software. It comes without any warranty,
+"             to the extent permitted by applicable law. You can redistribute
+"             it and/or modify it under the terms of the Do What The Fuck You
+"             Want To Public License, Version 2, as published by Sam Hocevar.
+"             See http://sam.zoy.org/wtfpl/COPYING for more details.
+"
+"============================================================================
 if exists("loaded_eruby_syntax_checker")
     finish
 endif
@@ -8,22 +19,16 @@ if !executable("ruby") || !executable("cat")
     finish
 endif
 
-"run the erb sections of the buffer though ruby -c and return the line num of
-"the first error, or 0 if no errors
-function! CheckSyntax_eruby()
-    let output = s:CheckSyntax(expand("%"))
-    if v:shell_error != 0
-        return s:ExtractErrorLine(output)
-    endif
-endfunction
+function! SyntaxCheckers_eruby_GetQFList()
+    let &makeprg='cat '. expand("%") . ' \| ruby -e "require \"erb\"; puts ERB.new(ARGF.read, nil, \"-\").src" \| ruby -c'
+    set errorformat=%-GSyntax\ OK,%E-:%l:\ syntax\ error\\,\ %m,%Z%p^,%W-:%l:\ warning:\ %m,%Z%p^,%-C%.%#
+    silent make!
 
-"extract the line num of the first syntax error for the given output
-"from 'ruby -c'
-function! s:ExtractErrorLine(error_msg)
-    return substitute(a:error_msg, '.\{-}:\(\d*\): syntax error,.*', '\1', '')
-endfunction
+    "the file name isnt in the output so stick in the buf num manually
+    let qflist = getqflist()
+    for i in qflist
+        let i['bufnr'] = bufnr("")
+    endfor
 
-"run the erb sections of the given file through ruby -c and return the result
-function! s:CheckSyntax(filename)
-    return system('cat '. a:filename . ' | ruby -e "require \"erb\"; puts ERB.new(ARGF.read, nil, \"-\").src" | ruby -c')
+    return qflist
 endfunction
