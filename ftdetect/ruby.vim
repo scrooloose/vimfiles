@@ -10,5 +10,8 @@ au BufNewFile,BufRead [rR]akefile,*.rake		set filetype=ruby
 " Rantfile
 au BufNewFile,BufRead [rR]antfile,*.rant		set filetype=ruby
 
+" Rackup
+au BufNewFile,BufRead *.ru				set filetype=ruby.rackup
+
 " eRuby
 au BufNewFile,BufRead *.erb,*.rhtml			set filetype=eruby
