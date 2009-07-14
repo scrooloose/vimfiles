@@ -109,8 +109,7 @@ function! s:UpdateErrors()
     call s:CacheErrors()
 
     if g:syntastic_enable_signs
-        call s:ClearSigns()
-        call s:SignErrors()
+        call s:RefreshSigns()
     endif
 
     if g:syntastic_auto_loc_list
@@ -164,7 +163,8 @@ endfunction
 
 
 "use >> to display syntax errors in the sign column
-sign define SyntaxError text=>> texthl=error
+sign define SyntasticError text=>> texthl=error
+sign define SyntasticWarning text=>> texthl=warningmsg
 
 "start counting sign ids at 5000, start here to hopefully avoid conflicting
 "with any other code that places signs (not sure if this precaution is
@@ -172,24 +172,28 @@ sign define SyntaxError text=>> texthl=error
 let s:first_sign_id = 5000
 let s:next_sign_id = s:first_sign_id
 
-"place SyntaxError signs by all syntax errs in the buffer
+"place signs by all syntax errs in the buffer
 function s:SignErrors()
     if s:BufHasErrors()
         for i in b:syntastic_loclist
-            exec "sign place ". s:next_sign_id ." line=". i['lnum'] ." name=SyntaxError file=". expand("%:p")
+            let sign_type = 'SyntasticError'
+            if i['type'] == 'W'
+                let sign_type = 'SyntasticWarning'
+            endif
+
+            exec "sign place ". s:next_sign_id ." line=". i['lnum'] ." name=". sign_type ." file=". expand("%:p")
             call add(s:BufSignIds(), s:next_sign_id)
             let s:next_sign_id += 1
         endfor
     endif
 endfunction
 
-"remove all SyntaxError signs in the buffer
-function! s:ClearSigns()
-    for i in s:BufSignIds()
+"remove the signs with the given ids from this buffer
+function! s:RemoveSigns(ids)
+    for i in a:ids
         exec "sign unplace " . i
+        call remove(s:BufSignIds(), index(s:BufSignIds(), i))
     endfor
-    let b:syntastic_sign_ids = []
-    let s:next_sign_id = s:first_sign_id
 endfunction
 
 "get all the ids of the SyntaxError signs in the buffer
@@ -198,6 +202,14 @@ function! s:BufSignIds()
         let b:syntastic_sign_ids = []
     endif
     return b:syntastic_sign_ids
+endfunction
+
+"update the error signs
+function! s:RefreshSigns()
+    let old_signs = copy(s:BufSignIds())
+    call s:SignErrors()
+    call s:RemoveSigns(old_signs)
+    let s:first_sign_id = s:next_sign_id
 endfunction
 
 "display the cached errors for this buf in the location list
