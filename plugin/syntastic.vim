@@ -83,6 +83,11 @@
 "    let g:syntastic_enable_signs=1
 "
 "
+"Use this option tell the script to automatically open the location list (i.e.
+"the error window) when a buffer has errors
+"    let g:syntastic_auto_loc_list=1
+"
+"
 "============================================================================
 
 if exists("g:loaded_syntastic_plugin")
@@ -135,23 +140,7 @@ function! s:CacheErrors()
 
     for ft in split(&ft, '\.')
         if exists("*SyntaxCheckers_". ft ."_GetLocList") && filereadable(expand("%"))
-            let oldlocixlist = getloclist(0)
-            let old_makeprg = &makeprg
-            let old_shellpipe = &shellpipe
-            let old_errorformat = &errorformat
-
-            if !s:running_windows
-                "this is a hack to stop the screen needing to be ':redraw'n when
-                "when :lmake is run. Otherwise the screen flickers annoyingly
-                let &shellpipe='&>'
-            endif
-
             let b:syntastic_loclist = extend(b:syntastic_loclist, SyntaxCheckers_{ft}_GetLocList())
-
-            call setloclist(0, oldlocixlist)
-            let &makeprg = old_makeprg
-            let &errorformat = old_errorformat
-            let &shellpipe=old_shellpipe
         endif
     endfor
 endfunction
@@ -164,7 +153,7 @@ endfunction
 
 "use >> to display syntax errors in the sign column
 sign define SyntasticError text=>> texthl=error
-sign define SyntasticWarning text=>> texthl=warningmsg
+sign define SyntasticWarning text=>> texthl=todo
 
 "start counting sign ids at 5000, start here to hopefully avoid conflicting
 "with any other code that places signs (not sure if this precaution is
@@ -238,6 +227,47 @@ function! SyntasticStatuslineFlag()
     else
         return ''
     endif
+endfunction
+
+"A wrapper for the :lmake command. Sets up the make environment according to
+"the options given, runs make, resets the environment, returns the location
+"list
+"
+"a:options can contain the following keys:
+"    'makeprg'
+"    'errorformat'
+"
+"The corresponding options are set for the duration of the function call. They
+"are set with :let, so dont escape spaces.
+function! SyntasticMake(options)
+    let oldloclist = getloclist(0)
+    let old_makeprg = &makeprg
+    let old_shellpipe = &shellpipe
+    let old_errorformat = &errorformat
+
+    if !s:running_windows
+        "this is a hack to stop the screen needing to be ':redraw'n when
+        "when :lmake is run. Otherwise the screen flickers annoyingly
+        let &shellpipe='&>'
+    endif
+
+    if has_key(a:options, 'makeprg')
+        let &makeprg = a:options['makeprg']
+    endif
+
+    if has_key(a:options, 'errorformat')
+        let &errorformat = a:options['errorformat']
+    endif
+
+    silent lmake!
+    let errors = getloclist(0)
+
+    call setloclist(0, oldloclist)
+    let &makeprg = old_makeprg
+    let &errorformat = old_errorformat
+    let &shellpipe=old_shellpipe
+
+    return errors
 endfunction
 
 " vim: set et sts=4 sw=4:
