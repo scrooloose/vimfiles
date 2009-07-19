@@ -2,7 +2,7 @@
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 27 Jan, 2009
+" Last Change: 7 Jun, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '3.1.0'
+let s:NERD_tree_version = '3.1.1'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -104,7 +104,7 @@ call s:initVariable("g:NERDTreeMapCloseChildren", "X")
 call s:initVariable("g:NERDTreeMapCloseDir", "x")
 call s:initVariable("g:NERDTreeMapDeleteBookmark", "D")
 call s:initVariable("g:NERDTreeMapExecute", "!")
-call s:initVariable("g:NERDTreeMapFilesystemMenu", "m")
+call s:initVariable("g:NERDTreeMapMenu", "m")
 call s:initVariable("g:NERDTreeMapHelp", "?")
 call s:initVariable("g:NERDTreeMapJumpFirstChild", "K")
 call s:initVariable("g:NERDTreeMapJumpLastChild", "J")
@@ -139,11 +139,6 @@ let s:tree_wid = 2
 let s:tree_markup_reg = '^[ `|]*[\-+~]'
 let s:tree_up_dir_line = '.. (up a dir)'
 
-let s:os_slash = '/'
-if s:running_windows
-    let s:os_slash = '\'
-endif
-
 "the number to add to the nerd tree buffer name to make the buf name unique
 let s:next_buffer_number = 1
 
@@ -154,7 +149,7 @@ command! -n=? -complete=dir -bar NERDTree :call s:initNerdTree('<args>')
 command! -n=? -complete=dir -bar NERDTreeToggle :call s:toggle('<args>')
 command! -n=0 -bar NERDTreeClose :call s:closeTreeIfOpen()
 command! -n=1 -complete=customlist,s:completeBookmarks -bar NERDTreeFromBookmark call s:initNerdTree('<args>')
-command! -n=0 -complete=customlist,s:completeNERDTreeMirrors -bar NERDTreeMirror call s:initNerdTreeMirror()
+command! -n=0 -bar NERDTreeMirror call s:initNerdTreeMirror()
 " SECTION: Auto commands {{{1
 "============================================================
 augroup NERDTree
@@ -176,6 +171,17 @@ endif
 "CLASS: Bookmark {{{2
 "============================================================
 let s:Bookmark = {}
+" FUNCTION: Bookmark.activate() {{{3
+function! s:Bookmark.activate()
+    if self.path.isDirectory
+        call self.toRoot()
+    else
+        if self.validate()
+            let n = s:TreeFileNode.New(self.path)
+            call n.open()
+        endif
+    endif
+endfunction
 " FUNCTION: Bookmark.AddBookmark(name, path) {{{3
 " Class method to add a new bookmark to the list, if a previous bookmark exists
 " with the same name, just update the path for that bookmark
@@ -420,12 +426,69 @@ function! s:Bookmark.Write()
     endfor
     call writefile(bookmarkStrings, g:NERDTreeBookmarksFile)
 endfunction
+"CLASS: MenuCallback {{{2
+"============================================================
+let s:MenuCallback = {}
+
+"FUNCTION: MenuCallback.All() {{{3
+function! s:MenuCallback.All()
+    if !exists("s:menuCallbacks")
+        let s:menuCallbacks = []
+    endif
+    return s:menuCallbacks
+endfunction
+
+"FUNCTION: MenuCallback.Create(text, shortcut, callback) {{{3
+function! s:MenuCallback.Create(text, shortcut, callback)
+    let newCallback = {}
+    let newCallback = copy(self)
+    let newCallback.text = a:text
+    let newCallback.shortcut = a:shortcut
+    let newCallback.callback = a:callback
+    call add(s:MenuCallback.All(), newCallback)
+endfunction
+
+"FUNCTION: MenuCallback.ShowMenu() {{{3
+function! s:MenuCallback.ShowMenu()
+    let curNode = s:TreeFileNode.GetSelected()
+    if curNode ==# {}
+        call s:echo("Put the cursor on a node first" )
+        return
+    endif
+
+    let prompt = "NERDTree Menu\n" .
+       \ "==========================================================\n"
+
+    for i in s:MenuCallback.All()
+        let prompt .= i.text . "\n"
+    endfor
+
+    echo prompt
+
+    let choice = nr2char(getchar())
+
+    for i in s:MenuCallback.All()
+        if choice ==# i.shortcut
+            exec "call " . i.callback . "()"
+            return
+        endif
+    endfor
+endfunction
+
+
 "CLASS: TreeFileNode {{{2
 "This class is the parent of the TreeDirNode class and constitures the
 "'Component' part of the composite design pattern between the treenode
 "classes.
 "============================================================
 let s:TreeFileNode = {}
+"FUNCTION: TreeFileNode.activate(forceKeepWinOpen) {{{3
+function! s:TreeFileNode.activate(forceKeepWinOpen)
+    call self.open()
+    if !a:forceKeepWinOpen
+        call s:closeTreeIfQuitOnOpen()
+    end
+endfunction
 "FUNCTION: TreeFileNode.bookmark(name) {{{3
 "bookmark this node with a:name
 function! s:TreeFileNode.bookmark(name)
@@ -974,6 +1037,13 @@ function! s:TreeDirNode.AbsoluteTreeRoot()
     endwhile
     return currentNode
 endfunction
+"FUNCTION: TreeDirNode.activate(forceKeepWinOpen) {{{3
+unlet s:TreeDirNode.activate
+function! s:TreeDirNode.activate(forceKeepWinOpen)
+    call self.toggleOpen()
+    call s:renderView()
+    call self.putCursorHere(0, 0)
+endfunction
 "FUNCTION: TreeDirNode.addChild(treenode, inOrder) {{{3
 "Adds the given treenode to the list of children for this node
 "
@@ -1186,7 +1256,7 @@ function! s:TreeDirNode._initChildren(silent)
         "filter out the .. and . directories
         "Note: we must match .. AND ../ cos sometimes the globpath returns
         "../ for path with strange chars (eg $)
-        if i !~ '\.\.\/\?$' && i !~ '\.\/\?$'
+        if i !~ '\/\.\.\/\?$' && i !~ '\/\.\/\?$'
 
             "put the next file in a new node and attach it
             try
@@ -1303,7 +1373,10 @@ function! s:TreeDirNode.refresh()
         let filesStr = globpath(dir.strForGlob(), '*') . "\n" . globpath(dir.strForGlob(), '.*')
         let files = split(filesStr, "\n")
         for i in files
-            if i !~ '\.\.$' && i !~ '\.$'
+            "filter out the .. and . directories
+            "Note: we must match .. AND ../ cos sometimes the globpath returns
+            "../ for path with strange chars (eg $)
+            if i !~ '\/\.\.\/\?$' && i !~ '\/\.\/\?$'
 
                 try
                     "create a new path and see if it exists in this nodes children
@@ -1407,7 +1480,7 @@ function! s:Path.AbsolutePathFor(str)
 
     let toReturn = a:str
     if prependCWD
-        let toReturn = getcwd() . s:os_slash . a:str
+        let toReturn = getcwd() . s:Path.Slash() . a:str
     endif
 
     return toReturn
@@ -1516,7 +1589,7 @@ function! s:Path.Create(fullpath)
         throw "NERDTree.CreatePathError: Directory Exists: '" . a:fullpath . "'"
     endif
 
-    "try
+    try
 
         "if it ends with a slash, assume its a dir create it
         if a:fullpath =~ '\(\\\|\/\)$'
@@ -1529,9 +1602,9 @@ function! s:Path.Create(fullpath)
         else
             call writefile([], a:fullpath)
         endif
-    "catch
-        "throw "NERDTree.CreatePathError: Could not create path: '" . a:fullpath . "'"
-    "endtry
+    catch
+        throw "NERDTree.CreatePathError: Could not create path: '" . a:fullpath . "'"
+    endtry
 
     return s:Path.New(a:fullpath)
 endfunction
@@ -1753,6 +1826,12 @@ function! s:Path.New(path)
     return newPath
 endfunction
 
+"FUNCTION: Path.Slash() {{{3
+"return the slash to use for the current OS
+function! s:Path.Slash()
+    return s:running_windows ? '\' : '/'
+endfunction
+
 "FUNCTION: Path.readInfoFromDisk(fullpath) {{{3
 "
 "
@@ -1903,7 +1982,7 @@ function! s:Path.strForEditCmd()
         let cwd = tolower(getcwd())
     endif
 
-    let cwd = cwd . s:os_slash
+    let cwd = cwd . s:Path.Slash()
 
     "return a relative path if we can
     if stridx(p, cwd) ==# 0
@@ -1919,14 +1998,14 @@ function! s:Path.strForEditCmd()
 endfunction
 "FUNCTION: Path.strForGlob() {{{3
 function! s:Path.strForGlob()
-    let lead = s:os_slash
+    let lead = s:Path.Slash()
 
     "if we are running windows then slap a drive letter on the front
     if s:running_windows
         let lead = self.drive . '\'
     endif
 
-    let toReturn = lead . join(self.pathSegments, s:os_slash)
+    let toReturn = lead . join(self.pathSegments, s:Path.Slash())
 
     if !s:running_windows
         let toReturn = escape(toReturn, s:escape_chars)
@@ -1943,14 +2022,14 @@ endfunction
 "esc: if 1 then all the tricky chars in the returned string will be
 " escaped. If we are running windows then the str is double quoted instead.
 function! s:Path.strForOS(esc)
-    let lead = s:os_slash
+    let lead = s:Path.Slash()
 
     "if we are running windows then slap a drive letter on the front
     if s:running_windows
         let lead = self.drive . '\'
     endif
 
-    let toReturn = lead . join(self.pathSegments, s:os_slash)
+    let toReturn = lead . join(self.pathSegments, s:Path.Slash())
 
     if a:esc
         if s:running_windows
@@ -2057,7 +2136,7 @@ function! s:initNerdTree(name)
 
         "hack to get an absolute path if a relative path is given
         if dir =~ '^\.'
-            let dir = getcwd() . s:os_slash . dir
+            let dir = getcwd() . s:Path.Slash() . dir
         endif
         let dir = resolve(dir)
 
@@ -2262,8 +2341,14 @@ function! s:unique(list)
   endfor
   return uniqlist
 endfunction
-" SECTION: Public Functions {{{1
+" SECTION: Public API {{{1
 "============================================================
+let g:NERDTreePath = s:Path
+let g:NERDTreeDirNode = s:TreeDirNode
+let g:NERDTreeFileNode = s:TreeFileNode
+let g:NERDTreeBookmark = s:Bookmark
+
+
 "Returns the node that the cursor is currently on.
 "
 "If the cursor is not in the NERDTree window, it is temporarily put there.
@@ -2301,6 +2386,14 @@ function! NERDTreeGetCurrentPath()
     else
         return {}
     endif
+endfunction
+
+function! NERDTreeAddMenuItem(text, shortcut, callback)
+    call s:MenuCallback.Create(a:text, a:shortcut, a:callback)
+endfunction
+
+function! NERDTreeRender()
+    call s:renderView()
 endfunction
 
 " SECTION: View Functions {{{1
@@ -2344,7 +2437,7 @@ endfunction
 "FUNCTION: s:closeTreeIfQuitOnOpen() {{{2
 "Closes the NERD tree window if the close on open option is set
 function! s:closeTreeIfQuitOnOpen()
-    if g:NERDTreeQuitOnOpen
+    if g:NERDTreeQuitOnOpen && s:isTreeOpen()
         call s:closeTree()
     endif
 endfunction
@@ -2460,7 +2553,7 @@ function! s:dumpHelp()
         let @h=@h."\"    but leave old root open\n"
         let @h=@h."\" ". g:NERDTreeMapRefresh .": refresh cursor dir\n"
         let @h=@h."\" ". g:NERDTreeMapRefreshRoot .": refresh current root\n"
-        let @h=@h."\" ". g:NERDTreeMapFilesystemMenu .": Show filesystem menu\n"
+        let @h=@h."\" ". g:NERDTreeMapMenu .": Show filesystem menu\n"
         let @h=@h."\" ". g:NERDTreeMapChdir .":change the CWD to the\n"
         let @h=@h."\"    selected dir\n"
 
@@ -3028,27 +3121,11 @@ function! s:activateNode(forceKeepWindowOpen)
 
     let treenode = s:TreeFileNode.GetSelected()
     if treenode != {}
-        if treenode.path.isDirectory
-            call treenode.toggleOpen()
-            call s:renderView()
-            call treenode.putCursorHere(0, 0)
-        else
-            call treenode.open()
-            if !a:forceKeepWindowOpen
-                call s:closeTreeIfQuitOnOpen()
-            end
-        endif
+        call treenode.activate(a:forceKeepWindowOpen)
     else
         let bookmark = s:getSelectedBookmark()
         if !empty(bookmark)
-            if bookmark.path.isDirectory
-                call bookmark.toRoot()
-            else
-                if bookmark.validate()
-                    let n = s:TreeFileNode.New(bookmark.path)
-                    call n.open()
-                endif
-            endif
+            call bookmark.activate()
         endif
     endif
 endfunction
@@ -3094,7 +3171,7 @@ function! s:bindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapCloseDir ." :call <SID>closeCurrentDir()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapCloseChildren ." :call <SID>closeChildren()<cr>"
 
-    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapFilesystemMenu ." :call <SID>showFileSystemMenu()<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapMenu ." :call <SID>showMenu()<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpParent ." :call <SID>jumpToParent()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapJumpNextSibling ." :call <SID>jumpToSibling(1)<cr>"
@@ -3251,45 +3328,6 @@ function! s:closeTreeWindow()
         endif
     endif
 endfunction
-" FUNCTION: s:copyNode() {{{2
-function! s:copyNode()
-    let currentNode = s:TreeFileNode.GetSelected()
-    if currentNode ==# {}
-        call s:echo("Put the cursor on a file node first")
-        return
-    endif
-
-    let newNodePath = input("Copy the current node\n" .
-                          \ "==========================================================\n" .
-                          \ "Enter the new path to copy the node to:                   \n" .
-                          \ "", currentNode.path.str(0))
-
-    if newNodePath != ""
-        "strip trailing slash
-        let newNodePath = substitute(newNodePath, '\/$', '', '')
-
-        let confirmed = 1
-        if currentNode.path.copyingWillOverwrite(newNodePath)
-            call s:echo("\nWarning: copying may overwrite files! Continue? (yN)")
-            let choice = nr2char(getchar())
-            let confirmed = choice ==# 'y'
-        endif
-
-        if confirmed
-            try
-                let newNode = currentNode.copy(newNodePath)
-                call s:renderView()
-                call newNode.putCursorHere(0, 0)
-            catch /^NERDTree/
-                call s:echoWarning("Could not copy node")
-            endtry
-        endif
-    else
-        call s:echo("Copy aborted.")
-    endif
-    redraw
-endfunction
-
 " FUNCTION: s:deleteBookmark() {{{2
 " if the cursor is on a bookmark, prompt to delete
 function! s:deleteBookmark()
@@ -3308,57 +3346,6 @@ function! s:deleteBookmark()
             redraw
         catch /^NERDTree/
             call s:echoWarning("Could not remove bookmark")
-        endtry
-    else
-        call s:echo("delete aborted" )
-    endif
-
-endfunction
-
-" FUNCTION: s:deleteNode() {{{2
-" if the current node is a file, pops up a dialog giving the user the option
-" to delete it
-function! s:deleteNode()
-    let currentNode = s:TreeFileNode.GetSelected()
-    if currentNode ==# {}
-        call s:echo("Put the cursor on a file node first")
-        return
-    endif
-
-    let confirmed = 0
-
-    if currentNode.path.isDirectory
-        let choice =input("Delete the current node\n" .
-                         \ "==========================================================\n" .
-                         \ "STOP! To delete this entire directory, type 'yes'\n" .
-                         \ "" . currentNode.path.strForOS(0) . ": ")
-        let confirmed = choice ==# 'yes'
-    else
-        echo "Delete the current node\n" .
-           \ "==========================================================\n".
-           \ "Are you sure you wish to delete the node:\n" .
-           \ "" . currentNode.path.strForOS(0) . " (yN):"
-        let choice = nr2char(getchar())
-        let confirmed = choice ==# 'y'
-    endif
-
-
-    if confirmed
-        try
-            call currentNode.delete()
-            call s:renderView()
-
-            "if the node is open in a buffer, ask the user if they want to
-            "close that buffer
-            let bufnum = bufnr(currentNode.path.str(0))
-            if buflisted(bufnum)
-                let prompt = "\nNode deleted.\n\nThe file is open in buffer ". bufnum . (bufwinnr(bufnum) ==# -1 ? " (hidden)" : "") .". Delete this buffer? (yN)"
-                call s:promptToDelBuffer(bufnum, prompt)
-            endif
-
-            redraw
-        catch /^NERDTree/
-            call s:echoWarning("Could not remove node")
         endtry
     else
         call s:echo("delete aborted" )
@@ -3409,40 +3396,6 @@ function! s:handleMiddleMouse()
     endif
 endfunction
 
-
-" FUNCTION: s:insertNewNode() {{{2
-" Adds a new node to the filesystem and then into the tree
-function! s:insertNewNode()
-    let curDirNode = s:TreeDirNode.GetSelected()
-    if curDirNode ==# {}
-        call s:echo("Put the cursor on a node first" )
-        return
-    endif
-
-    let newNodeName = input("Add a childnode\n".
-                          \ "==========================================================\n".
-                          \ "Enter the dir/file name to be created. Dirs end with a '/'\n" .
-                          \ "", curDirNode.path.strForGlob() . s:os_slash)
-
-    if newNodeName ==# ''
-        call s:echo("Node Creation Aborted.")
-        return
-    endif
-
-    try
-        let newPath = s:Path.Create(newNodeName)
-        let parentNode = b:NERDTreeRoot.findNode(newPath.getPathTrunk())
-
-        let newTreeNode = s:TreeFileNode.New(newPath)
-        if parentNode.isOpen || !empty(parentNode.children)
-            call parentNode.addChild(newTreeNode, 1)
-            call s:renderView()
-            call newTreeNode.putCursorHere(1, 0)
-        endif
-    catch /^NERDTree/
-        call s:echoWarning("Node Not Created.")
-    endtry
-endfunction
 
 " FUNCTION: s:jumpToFirstChild() {{{2
 " wrapper for the jump to child method
@@ -3646,80 +3599,9 @@ function! s:refreshCurrent()
     redraw
     call s:echo("Refreshing node. This could take a while... DONE")
 endfunction
-" FUNCTION: s:renameCurrent() {{{2
-" allows the user to rename the current node
-function! s:renameCurrent()
-    let curNode = s:TreeFileNode.GetSelected()
-    if curNode ==# {}
-        call s:echo("Put the cursor on a node first" )
-        return
-    endif
-
-    let newNodePath = input("Rename the current node\n" .
-                          \ "==========================================================\n" .
-                          \ "Enter the new path for the node:                          \n" .
-                          \ "", curNode.path.strForOS(0))
-
-    if newNodePath ==# ''
-        call s:echo("Node Renaming Aborted.")
-        return
-    endif
-
-    try
-        let bufnum = bufnr(curNode.path.str(0))
-
-        call curNode.rename(newNodePath)
-        call s:renderView()
-
-        "if the node is open in a buffer, ask the user if they want to
-        "close that buffer
-        if bufnum != -1
-            let prompt = "\nNode renamed.\n\nThe old file is open in buffer ". bufnum . (bufwinnr(bufnum) ==# -1 ? " (hidden)" : "") .". Delete this buffer? (yN)"
-            call s:promptToDelBuffer(bufnum, prompt)
-        endif
-
-        call curNode.putCursorHere(1, 0)
-
-        redraw
-    catch /^NERDTree/
-        call s:echoWarning("Node Not Renamed.")
-    endtry
-endfunction
-
-" FUNCTION: s:showFileSystemMenu() {{{2
-function! s:showFileSystemMenu()
-    let curNode = s:TreeFileNode.GetSelected()
-    if curNode ==# {}
-        call s:echo("Put the cursor on a node first" )
-        return
-    endif
-
-
-    let prompt = "NERDTree Filesystem Menu\n" .
-       \ "==========================================================\n".
-       \ "Select the desired operation:                             \n" .
-       \ " (a)dd a childnode\n".
-       \ " (m)ove the current node\n".
-       \ " (d)elete the current node\n"
-    if s:Path.CopyingSupported()
-        let prompt = prompt . " (c)opy the current node\n\n"
-    else
-        let prompt = prompt . " \n"
-    endif
-
-    echo prompt
-
-    let choice = nr2char(getchar())
-
-    if choice ==? "a"
-        call s:insertNewNode()
-    elseif choice ==? "m"
-        call s:renameCurrent()
-    elseif choice ==? "d"
-        call s:deleteNode()
-    elseif choice ==? "c" && s:Path.CopyingSupported()
-        call s:copyNode()
-    endif
+" FUNCTION: s:showMenu() {{{2
+function! s:showMenu()
+    call s:MenuCallback.ShowMenu()
 endfunction
 
 " FUNCTION: s:toggleIgnoreFilter() {{{2
