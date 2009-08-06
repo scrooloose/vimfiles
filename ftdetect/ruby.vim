@@ -7,6 +7,9 @@ au BufNewFile,BufRead *.builder,*.rxml,*.rjs		set filetype=ruby
 " Rakefile
 au BufNewFile,BufRead [rR]akefile,*.rake		set filetype=ruby
 
+" Gemfile
+au BufNewFile,BufRead Gemfile				set filetype=ruby
+
 " Rantfile
 au BufNewFile,BufRead [rR]antfile,*.rant		set filetype=ruby
 
