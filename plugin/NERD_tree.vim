@@ -128,6 +128,7 @@ call s:initVariable("g:NERDTreeMapToggleBookmarks", "B")
 call s:initVariable("g:NERDTreeMapToggleFiles", "F")
 call s:initVariable("g:NERDTreeMapToggleFilters", "f")
 call s:initVariable("g:NERDTreeMapToggleHidden", "I")
+call s:initVariable("g:NERDTreeMapToggleZoom", "A")
 call s:initVariable("g:NERDTreeMapUpdir", "u")
 call s:initVariable("g:NERDTreeMapUpdirKeepOpen", "U")
 
@@ -157,6 +158,9 @@ augroup NERDTree
     exec "autocmd BufWinLeave *". s:NERDTreeBufName ." call <SID>saveScreenState()"
     "cache bookmarks when vim loads
     autocmd VimEnter * call s:Bookmark.CacheBookmarks(0)
+
+    "load all nerdtree plugins after vim starts
+    autocmd VimEnter * runtime! nerdtree_plugin/*.vim
 augroup END
 
 if g:NERDTreeHijackNetrw
@@ -426,6 +430,152 @@ function! s:Bookmark.Write()
     endfor
     call writefile(bookmarkStrings, g:NERDTreeBookmarksFile)
 endfunction
+"CLASS: KeyMap {{{2
+"============================================================
+let s:KeyMap = {}
+"FUNCTION: KeyMap.All() {{{3
+function! s:KeyMap.All()
+    if !exists("s:keyMaps")
+        let s:keyMaps = []
+    endif
+    return s:keyMaps
+endfunction
+
+"FUNCTION: KeyMap.BindAll() {{{3
+function! s:KeyMap.BindAll()
+    for i in s:KeyMap.All()
+        call i.bind()
+    endfor
+endfunction
+
+"FUNCTION: KeyMap.bind() {{{3
+function! s:KeyMap.bind()
+    exec "nnoremap <silent> <buffer> ". self.key ." :call ". self.callback ."()<cr>"
+endfunction
+
+"FUNCTION: KeyMap.Create(options) {{{3
+function! s:KeyMap.Create(options)
+    let newKeyMap = {}
+    let newKeyMap = copy(self)
+    let newKeyMap.key = a:options['key']
+    let newKeyMap.quickhelpText = a:options['quickhelpText']
+    let newKeyMap.callback = a:options['callback']
+    call add(s:KeyMap.All(), newKeyMap)
+endfunction
+"CLASS: MenuController {{{2
+"============================================================
+let s:MenuController = {}
+"FUNCTION: MenuController.New(menuItems) {{{3
+function! s:MenuController.New(menuItems)
+    let newMenuController =  copy(self)
+    let newMenuController.menuItems = a:menuItems
+    return newMenuController
+endfunction
+
+"FUNCTION: MenuController.showMenu() {{{3
+function! s:MenuController.showMenu()
+    let curNode = s:TreeFileNode.GetSelected()
+    if curNode ==# {}
+        call s:echo("Put the cursor on a node first" )
+        return
+    endif
+
+    call self._saveOptions()
+    let self.selection = 0
+
+    let key = ''
+    while key != "\r"
+        let prompt = ''
+        let prompt .= "NERDTree Menu. Use j/k/enter and the shortcuts indicated\n"
+        let prompt .= "==========================================================\n"
+
+        for i in range(0, len(self.menuItems)-1)
+            if self.selection == i
+                let prompt .= "> "
+            else
+                let prompt .= "  "
+            endif
+
+            let prompt .= self.menuItems[i].text . "\n"
+        endfor
+
+        if has("gui_running")
+            redraw!
+        else
+            redraw
+        endif
+
+        echo prompt
+
+        let key = nr2char(getchar())
+        if self._handleKeypress(key) == -1
+            call self._restoreOptions()
+            return
+        endif
+    endwhile
+
+    call self._restoreOptions()
+
+    let chosen = self.menuItems[self.selection]
+    call chosen.execute()
+
+endfunction
+
+"FUNCTION: MenuController._handleKeypress(key) {{{3
+function! s:MenuController._handleKeypress(key)
+    if a:key == 'j'
+        if self.selection < len(self.menuItems)-1
+            let self.selection += 1
+        else
+            let self.selection = 0
+        endif
+    elseif a:key == 'k'
+        if self.selection > 0
+            let self.selection -= 1
+        else
+            let self.selection = len(self.menuItems)-1
+        endif
+    elseif a:key == nr2char(27) "escape
+        return -1
+    else
+        let index = self._nextIndexFor(a:key)
+        if index != -1
+            let self.selection = index
+        endif
+    endif
+endfunction
+
+"FUNCTION: MenuController._nextIndexFor(shortcut) {{{3
+function! s:MenuController._nextIndexFor(shortcut)
+    for i in range(self.selection+1, len(self.menuItems)-1)
+        if self.menuItems[i].shortcut == a:shortcut
+            return i
+        endif
+    endfor
+
+    for i in range(0, self.selection)
+        if self.menuItems[i].shortcut == a:shortcut
+            return i
+        endif
+    endfor
+
+    return -1
+endfunction
+
+"FUNCTION: MenuController._saveOptions() {{{3
+function! s:MenuController._saveOptions()
+    let self._oldLazyredraw = &lazyredraw
+    let self._oldCmdheight = &cmdheight
+    set lazyredraw
+    let &cmdheight = len(self.menuItems) + 2 + has("gui_running")
+endfunction
+
+"FUNCTION: MenuController._restoreOptions() {{{3
+function! s:MenuController._restoreOptions()
+    let &cmdheight = self._oldCmdheight
+    let &lazyredraw = self._oldLazyredraw
+endfunction
+
 "CLASS: MenuItem {{{2
 "============================================================
 let s:MenuItem = {}
@@ -448,37 +598,49 @@ function! s:MenuItem.AllEnabled()
     return toReturn
 endfunction
 
-"FUNCTION: MenuItem.FindByShortcut(shortcut) {{{3
-function! s:MenuItem.FindByShortcut(shortcut)
-    for i in s:MenuItem.All()
-        if i.shortcut ==# a:shortcut
-            return i
-        endif
-    endfor
-    return {}
-endfunction
-
 "FUNCTION: MenuItem.Create(options) {{{3
 function! s:MenuItem.Create(options)
-    let newMenuItem = {}
     let newMenuItem = copy(self)
-
-    let shortcut = a:options['shortcut']
-    let callback = a:options['callback']
-
 
     let newMenuItem.text = a:options['text']
     let newMenuItem.shortcut = a:options['shortcut']
     let newMenuItem.callback = a:options['callback']
+    let newMenuItem.children = []
+
+    let newMenuItem.isActiveCallback = -1
     if has_key(a:options, 'isActiveCallback')
         let newMenuItem.isActiveCallback = a:options['isActiveCallback']
     endif
+
+    if has_key(a:options, 'parent')
+        call add(a:options['parent'].children, newMenuItem)
+    else
+        call add(s:MenuItem.All(), newMenuItem)
+    endif
+
+    return newMenuItem
+endfunction
+
+"FUNCTION: MenuItem.CreateSeparator(options) {{{3
+function! s:MenuItem.CreateSeparator(options)
+    let newMenuItem = copy(self)
+    let newMenuItem.text = "--------------------"
+
+    let newMenuItem.shortcut = -1
+    let newMenuItem.callback = -1
+    let newMenuItem.children = []
+
+    let newMenuItem.isActiveCallback = -1
+    if has_key(a:options, 'isActiveCallback')
+        let newMenuItem.isActiveCallback = a:options['isActiveCallback']
+    endif
+
     call add(s:MenuItem.All(), newMenuItem)
 endfunction
 
 "FUNCTION: MenuItem.enabled() {{{3
 function! s:MenuItem.enabled()
-    if has_key(self, "isActiveCallback")
+    if self.isActiveCallback != -1
         return {self.isActiveCallback}()
     endif
     return 1
@@ -486,32 +648,14 @@ endfunction
 
 "FUNCTION: MenuItem.execute() {{{3
 function! s:MenuItem.execute()
-    call {self.callback}()
-endfunction
-
-"FUNCTION: MenuItem.ShowMenu() {{{3
-function! s:MenuItem.ShowMenu()
-    let curNode = s:TreeFileNode.GetSelected()
-    if curNode ==# {}
-        call s:echo("Put the cursor on a node first" )
-        return
+    if len(self.children)
+        let mc = s:MenuController.New(self.children)
+        call mc.showMenu()
+    else
+        if self.callback != -1
+            call {self.callback}()
+        endif
     endif
-
-    let prompt = "NERDTree Menu\n" .
-       \ "==========================================================\n"
-
-    for i in s:MenuItem.AllEnabled()
-        let prompt .= i.text . "\n"
-    endfor
-
-    echo prompt
-
-    let menuItem = s:MenuItem.FindByShortcut(nr2char(getchar()))
-    if !empty(menuItem) && menuItem.enabled()
-        redraw
-        call menuItem.execute()
-    endif
-
 endfunction
 
 "CLASS: TreeFileNode {{{2
@@ -1041,7 +1185,7 @@ function! s:TreeFileNode.rename(newName)
     call self.path.rename(newName)
     call self.parent.removeChild(self)
 
-    let parentPath = self.path.getPathTrunk()
+    let parentPath = self.path.getParent()
     let newParent = b:NERDTreeRoot.findNode(parentPath)
 
     if newParent != {}
@@ -1560,7 +1704,7 @@ endfunction
 function! s:Path.changeToDir()
     let dir = self.strForCd()
     if self.isDirectory ==# 0
-        let dir = self.getPathTrunk().strForCd()
+        let dir = self.getParent().strForCd()
     endif
 
     try
@@ -1704,13 +1848,7 @@ endfunction
 function! s:Path.delete()
     if self.isDirectory
 
-        let cmd = ""
-        if s:running_windows
-            "if we are runnnig windows then put quotes around the pathstring
-            let cmd = g:NERDTreeRemoveDirCmd . self.strForOS(1)
-        else
-            let cmd = g:NERDTreeRemoveDirCmd . self.strForOS(1)
-        endif
+        let cmd = g:NERDTreeRemoveDirCmd . self.strForOS(1)
         let success = system(cmd)
 
         if v:shell_error != 0
@@ -1785,12 +1923,6 @@ function! s:Path.getLastPathComponent(dirSlash)
         let toReturn = toReturn . '/'
     endif
     return toReturn
-endfunction
-
-"FUNCTION: Path.getPathTrunk() {{{3
-"Gets the path without the last segment on the end.
-function! s:Path.getPathTrunk()
-    return s:Path.New(self.strTrunk())
 endfunction
 
 "FUNCTION: Path.getSortOrderIndex() {{{3
@@ -1969,22 +2101,9 @@ function! s:Path.str(esc)
     return toReturn
 endfunction
 
-"FUNCTION: Path.strAbs() {{{3
-"
-"Returns a string representing this path with all the symlinks resolved
-"
-"Return:
-"string
-function! s:Path.strAbs()
-    return resolve(self.str(1))
-endfunction
-
 "FUNCTION: Path.strForCd() {{{3
 "
 " returns a string that can be used with :cd
-"
-"Return:
-"a string that can be used in the view to represent this path
 function! s:Path.strForCd()
     if s:running_windows
         return self.strForOS(0)
@@ -1996,9 +2115,6 @@ endfunction
 "
 "Returns a string that specifies how the path should be represented as a
 "string
-"
-"Return:
-"a string that can be used in the view to represent this path
 function! s:Path.strDisplay()
     if self.cachedDisplayString ==# ""
         call self.cacheDisplayString()
@@ -2275,7 +2391,7 @@ function! s:initNerdTreeInPlace(dir)
     call s:bindMappings()
     setfiletype nerdtree
     " syntax highlighting
-    if has("syntax") && exists("g:syntax_on") && !has("syntax_items")
+    if has("syntax") && exists("g:syntax_on")
         call s:setupSyntaxHighlighting()
     endif
 
@@ -2386,48 +2502,17 @@ let g:NERDTreeDirNode = s:TreeDirNode
 let g:NERDTreeFileNode = s:TreeFileNode
 let g:NERDTreeBookmark = s:Bookmark
 
-
-"Returns the node that the cursor is currently on.
-"
-"If the cursor is not in the NERDTree window, it is temporarily put there.
-"
-"If no NERD tree window exists for the current tab, a NERDTree.NoTreeForTab
-"exception is thrown.
-"
-"If the cursor is not on a node then an empty dictionary {} is returned.
-function! NERDTreeGetCurrentNode()
-    if !s:treeExistsForTab() || !s:isTreeOpen()
-        throw "NERDTree.NoTreeForTabError: there is no NERD tree open for the current tab"
-    endif
-
-    let winnr = winnr()
-    if winnr != s:getTreeWinNum()
-        call s:putCursorInTreeWin()
-    endif
-
-    let treenode = s:TreeFileNode.GetSelected()
-
-    if winnr != winnr()
-        call s:exec('wincmd w')
-    endif
-
-    return treenode
-endfunction
-
-"Returns the path object for the current node.
-"
-"Subject to the same conditions as NERDTreeGetCurrentNode
-function! NERDTreeGetCurrentPath()
-    let node = NERDTreeGetCurrentNode()
-    if node != {}
-        return node.path
-    else
-        return {}
-    endif
-endfunction
-
 function! NERDTreeAddMenuItem(options)
-    call s:MenuItem.Create(a:options)
+    return s:MenuItem.Create(a:options)
+endfunction
+
+function! NERDTreeAddMenuSeparator(...)
+    let opts = a:0 ? a:1 : {}
+    return s:MenuItem.CreateSeparator(opts)
+endfunction
+
+function! NERDTreeAddKeyMap(options)
+    call s:KeyMap.Create(a:options)
 endfunction
 
 function! NERDTreeRender()
@@ -2522,7 +2607,7 @@ function! s:createTreeWin()
     call s:bindMappings()
     setfiletype nerdtree
     " syntax highlighting
-    if has("syntax") && exists("g:syntax_on") && !has("syntax_items")
+    if has("syntax") && exists("g:syntax_on")
         call s:setupSyntaxHighlighting()
     endif
 endfunction
@@ -2602,9 +2687,20 @@ function! s:dumpHelp()
         let @h=@h."\" ". g:NERDTreeMapToggleFiles .": files (" . (b:NERDTreeShowFiles ? "on" : "off") . ")\n"
         let @h=@h."\" ". g:NERDTreeMapToggleBookmarks .": bookmarks (" . (b:NERDTreeShowBookmarks ? "on" : "off") . ")\n"
 
+        "add quickhelp entries for each custom key map
+        if len(s:KeyMap.All())
+            let @h=@h."\"\n\" ----------------------------\n"
+            let @h=@h."\" Custom mappings~\n"
+            for i in s:KeyMap.All()
+                let @h=@h."\" ". i.key .": ". i.quickhelpText ."\n"
+            endfor
+        endif
+
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Other mappings~\n"
         let @h=@h."\" ". g:NERDTreeMapQuit .": Close the NERDTree window\n"
+        let @h=@h."\" ". g:NERDTreeMapToggleZoom .": Zoom (maximize-minimize)\n"
+        let @h=@h."\"    the NERDTree window\n"
         let @h=@h."\" ". g:NERDTreeMapHelp .": toggle help\n"
         let @h=@h."\"\n\" ----------------------------\n"
         let @h=@h."\" Bookmark commands~\n"
@@ -3201,6 +3297,7 @@ function! s:bindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapRefresh ." :call <SID>refreshCurrent()<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapHelp ." :call <SID>displayHelp()<cr>"
+    exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleZoom ." :call <SID>toggleZoom()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleHidden ." :call <SID>toggleShowHidden()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleFilters ." :call <SID>toggleIgnoreFilter()<cr>"
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapToggleFiles ." :call <SID>toggleShowFiles()<cr>"
@@ -3224,6 +3321,9 @@ function! s:bindMappings()
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapOpenExpl ." :call <SID>openExplorer()<cr>"
 
     exec "nnoremap <silent> <buffer> ". g:NERDTreeMapDeleteBookmark ." :call <SID>deleteBookmark()<cr>"
+
+    "bind all the user custom maps
+    call s:KeyMap.BindAll()
 
     command! -buffer -nargs=1 Bookmark :call <SID>bookmarkNode('<args>')
     command! -buffer -complete=customlist,s:completeBookmarks -nargs=1 RevealBookmark :call <SID>revealBookmark('<args>')
@@ -3639,7 +3739,8 @@ function! s:refreshCurrent()
 endfunction
 " FUNCTION: s:showMenu() {{{2
 function! s:showMenu()
-    call s:MenuItem.ShowMenu()
+    let mc = s:MenuController.New(s:MenuItem.AllEnabled())
+    call mc.showMenu()
 endfunction
 
 " FUNCTION: s:toggleIgnoreFilter() {{{2
@@ -3678,6 +3779,19 @@ function! s:toggleShowHidden()
     call s:centerView()
 endfunction
 
+" FUNCTION: s:toggleZoom() {{2
+" zoom (maximize/minimize) the NERDTree window
+function! s:toggleZoom()
+    if exists("b:NERDTreeZoomed") && b:NERDTreeZoomed
+        let size = exists("b:NERDTreeOldWindowSize") ? b:NERDTreeOldWindowSize : g:NERDTreeWinSize
+        exec "silent vertical resize ". size
+        let b:NERDTreeZoomed = 0
+    else
+        exec "vertical resize"
+        let b:NERDTreeZoomed = 1
+    endif
+endfunction
+
 "FUNCTION: s:upDir(keepState) {{{2
 "moves the tree up a level
 "
@@ -3696,7 +3810,7 @@ function! s:upDir(keepState)
         let oldRoot = b:NERDTreeRoot
 
         if empty(b:NERDTreeRoot.parent)
-            let path = b:NERDTreeRoot.path.getPathTrunk()
+            let path = b:NERDTreeRoot.path.getParent()
             let newRoot = s:TreeDirNode.New(path)
             call newRoot.open()
             call newRoot.transplantChild(b:NERDTreeRoot)

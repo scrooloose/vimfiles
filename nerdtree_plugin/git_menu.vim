@@ -21,11 +21,37 @@ if exists("g:loaded_nerdtree_git_menu")
 endif
 let g:loaded_nerdtree_git_menu = 1
 
+"call NERDTreeAddMenuItem({
+            "\ 'text': '(g)it menu',
+            "\ 'shortcut': 'g',
+            "\ 'isActiveCallback': 'NERDTreeGitMenuEnabled',
+            "\ 'callback': 'NERDTreeGitMenu' })
+
+call NERDTreeAddMenuSeparator({'isActiveCallback': 'NERDTreeGitMenuEnabled'})
+
 call NERDTreeAddMenuItem({
-            \ 'text': '(g)it menu',
-            \ 'shortcut': 'g',
+            \ 'text': 'git (a)dd',
+            \ 'shortcut': 'a',
             \ 'isActiveCallback': 'NERDTreeGitMenuEnabled',
-            \ 'callback': 'NERDTreeGitMenu' })
+            \ 'callback': 'NERDTreeGitAdd' })
+
+call NERDTreeAddMenuItem({
+            \ 'text': 'git (c)heckout',
+            \ 'shortcut': 'c',
+            \ 'isActiveCallback': 'NERDTreeGitMenuEnabled',
+            \ 'callback': 'NERDTreeGitCheckout' })
+
+call NERDTreeAddMenuItem({
+            \ 'text': 'git (m)v',
+            \ 'shortcut': 'm',
+            \ 'isActiveCallback': 'NERDTreeGitMenuEnabled',
+            \ 'callback': 'NERDTreeGitMove' })
+
+call NERDTreeAddMenuItem({
+            \ 'text': 'git (r)m',
+            \ 'shortcut': 'r',
+            \ 'isActiveCallback': 'NERDTreeGitMenuEnabled',
+            \ 'callback': 'NERDTreeGitRemove' })
 
 function! NERDTreeGitMenuEnabled()
     return isdirectory(s:GitRepoPath())
