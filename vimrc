@@ -231,6 +231,9 @@ noremap Q gq
 "make Y consistent with C and D
 nnoremap Y y$
 
+"mark syntax errors with :signs
+let g:syntastic_enable_signs=1
+
 "snipmate setup
 source ~/.vim/snippets/support_functions.vim
 autocmd vimenter * call s:SetupSnippets()
