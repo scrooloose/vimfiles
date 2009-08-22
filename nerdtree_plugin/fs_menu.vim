@@ -1,5 +1,5 @@
 " ============================================================================
-" File:        nerdtree_fs_menu.vim
+" File:        fs_menu.vim
 " Description: plugin for the NERD Tree that provides a file system menu
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
 " Last Change: 17 July, 2009
@@ -82,11 +82,6 @@ endfunction
 "FUNCTION: NERDTreeMoveNode(){{{1
 function! NERDTreeMoveNode()
     let curNode = g:NERDTreeFileNode.GetSelected()
-    if curNode ==# {}
-        call s:echo("Put the cursor on a node first" )
-        return
-    endif
-
     let newNodePath = input("Rename the current node\n" .
                           \ "==========================================================\n" .
                           \ "Enter the new path for the node:                          \n" .
@@ -121,11 +116,6 @@ endfunction
 " FUNCTION: NERDTreeDeleteNode() {{{1
 function! NERDTreeDeleteNode()
     let currentNode = g:NERDTreeFileNode.GetSelected()
-    if currentNode ==# {}
-        call s:echo("Put the cursor on a node first")
-        return
-    endif
-
     let confirmed = 0
 
     if currentNode.path.isDirectory
@@ -170,11 +160,6 @@ endfunction
 " FUNCTION: NERDTreeCopyNode() {{{1
 function! NERDTreeCopyNode()
     let currentNode = g:NERDTreeFileNode.GetSelected()
-    if currentNode ==# {}
-        call s:echo("Put the cursor on a file node first")
-        return
-    endif
-
     let newNodePath = input("Copy the current node\n" .
                           \ "==========================================================\n" .
                           \ "Enter the new path to copy the node to:                   \n" .
