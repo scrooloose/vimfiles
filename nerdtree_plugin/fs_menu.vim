@@ -2,7 +2,7 @@
 " File:        fs_menu.vim
 " Description: plugin for the NERD Tree that provides a file system menu
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 17 July, 2009
+" Last Change: 6 Sep, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -57,7 +57,7 @@ function! NERDTreeAddNode()
     let newNodeName = input("Add a childnode\n".
                           \ "==========================================================\n".
                           \ "Enter the dir/file name to be created. Dirs end with a '/'\n" .
-                          \ "", curDirNode.path.strForGlob() . g:NERDTreePath.Slash())
+                          \ "", curDirNode.path.str({'format': 'Glob'}) . g:NERDTreePath.Slash())
 
     if newNodeName ==# ''
         call s:echo("Node Creation Aborted.")
@@ -85,7 +85,7 @@ function! NERDTreeMoveNode()
     let newNodePath = input("Rename the current node\n" .
                           \ "==========================================================\n" .
                           \ "Enter the new path for the node:                          \n" .
-                          \ "", curNode.path.strForOS(0))
+                          \ "", curNode.path.str()
 
     if newNodePath ==# ''
         call s:echo("Node Renaming Aborted.")
@@ -93,7 +93,7 @@ function! NERDTreeMoveNode()
     endif
 
     try
-        let bufnum = bufnr(curNode.path.str(0))
+        let bufnum = bufnr(curNode.path.str())
 
         call curNode.rename(newNodePath)
         call NERDTreeRender()
@@ -122,13 +122,13 @@ function! NERDTreeDeleteNode()
         let choice =input("Delete the current node\n" .
                          \ "==========================================================\n" .
                          \ "STOP! To delete this entire directory, type 'yes'\n" .
-                         \ "" . currentNode.path.strForOS(0) . ": ")
+                         \ "" . currentNode.path.str() . ": ")
         let confirmed = choice ==# 'yes'
     else
         echo "Delete the current node\n" .
            \ "==========================================================\n".
            \ "Are you sure you wish to delete the node:\n" .
-           \ "" . currentNode.path.strForOS(0) . " (yN):"
+           \ "" . currentNode.path.str() . " (yN):"
         let choice = nr2char(getchar())
         let confirmed = choice ==# 'y'
     endif
@@ -141,7 +141,7 @@ function! NERDTreeDeleteNode()
 
             "if the node is open in a buffer, ask the user if they want to
             "close that buffer
-            let bufnum = bufnr(currentNode.path.str(0))
+            let bufnum = bufnr(currentNode.path.str())
             if buflisted(bufnum)
                 let prompt = "\nNode deleted.\n\nThe file is open in buffer ". bufnum . (bufwinnr(bufnum) ==# -1 ? " (hidden)" : "") .". Delete this buffer? (yN)"
                 call s:promptToDelBuffer(bufnum, prompt)
@@ -163,7 +163,7 @@ function! NERDTreeCopyNode()
     let newNodePath = input("Copy the current node\n" .
                           \ "==========================================================\n" .
                           \ "Enter the new path to copy the node to:                   \n" .
-                          \ "", currentNode.path.str(0))
+                          \ "", currentNode.path.str())
 
     if newNodePath != ""
         "strip trailing slash

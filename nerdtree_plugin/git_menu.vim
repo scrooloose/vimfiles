@@ -1,5 +1,5 @@
 " ============================================================================
-" File:        nerdtree_git_menu.vim
+" File:        git_menu.vim
 " Description: plugin for the NERD Tree that provides a git menu
 " Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
 " Last Change: 20 July, 2009
@@ -60,17 +60,17 @@ function! NERDTreeGitMenuEnabled()
 endfunction
 
 function! s:GitRepoPath()
-    return b:NERDTreeRoot.path.str(0) . ".git"
+    return b:NERDTreeRoot.path.str() . ".git"
 endfunction
 
 function! NERDTreeGitMove()
     let node = g:NERDTreeFileNode.GetSelected()
     let path = node.path
-    let p = path.strForOS(1)
+    let p = path.str({'escape': 1})
 
     let newPath = input("==========================================================\n" .
                           \ "Enter the new path for the file:                          \n" .
-                          \ "", node.path.strForOS(0))
+                          \ "", node.path.str())
     if newPath ==# ''
         call s:echo("git mv aborted.")
         return
@@ -82,24 +82,24 @@ endfunction
 function! NERDTreeGitAdd()
     let node = g:NERDTreeFileNode.GetSelected()
     let path = node.path
-    call s:execGitCmd('add ' . path.strForOS(1))
+    call s:execGitCmd('add ' . path.str({'escape': 1}))
 endfunction
 
 function! NERDTreeGitRemove()
     let node = g:NERDTreeFileNode.GetSelected()
     let path = node.path
-    call s:execGitCmd('rm ' . path.strForOS(1))
+    call s:execGitCmd('rm ' . path.str({'escape': 1}))
 endfunction
 
 function! NERDTreeGitCheckout()
     let node = g:NERDTreeFileNode.GetSelected()
     let path = node.path
-    call s:execGitCmd('checkout ' . path.strForOS(1))
+    call s:execGitCmd('checkout ' . path.str({'escape': 1}))
 endfunction
 
 function! s:execGitCmd(sub_cmd)
     let extra_options  = '--git-dir=' . s:GitRepoPath() . ' '
-    let extra_options .= '--work-tree=' . b:NERDTreeRoot.path.str(0)
+    let extra_options .= '--work-tree=' . b:NERDTreeRoot.path.str()
     let cmd = "git" . ' ' . extra_options . ' ' . a:sub_cmd
 
     let output = system(cmd)

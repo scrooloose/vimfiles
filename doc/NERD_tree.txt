@@ -210,7 +210,6 @@ i.......Open selected file in a split window.....................|NERDTree-i|
 gi......Same as i, but leave the cursor on the NERDTree..........|NERDTree-gi|
 s.......Open selected file in a new vsplit.......................|NERDTree-s|
 gs......Same as s, but leave the cursor on the NERDTree..........|NERDTree-gs|
-!.......Execute the current file.................................|NERDTree-!|
 O.......Recursively open the selected directory..................|NERDTree-O|
 x.......Close the current nodes parent...........................|NERDTree-x|
 X.......Recursively close all children of the current node.......|NERDTree-X|
@@ -336,14 +335,6 @@ The same as |NERDTree-s| except that the cursor is not moved.
 
 The key combo for this mapping is always "g" + NERDTreeMapOpenVSplit (see
 |NERDTree-s|).
-
-------------------------------------------------------------------------------
-                                                                  *NERDTree-!*
-Default key: !
-Map option: NERDTreeMapExecute
-Applies to: files.
-
-Executes the selected file, prompting for arguments first.
 
 ------------------------------------------------------------------------------
                                                                   *NERDTree-O*
@@ -575,8 +566,12 @@ The NERD tree has a menu that can be programmed via the an API (see
 |NERDTreeMenuAPI|). The idea is to simulate the "right click" menus that most
 file explorers have.
 
-The script comes with one default menu plugin that adds some basic filesystem
-operations to the menu for creating/deleting/moving/copying files and dirs.
+The script comes with two default menu plugins: exec_menuitem.vim and
+fs_menu.vim. fs_menu.vim adds some basic filesystem operations to the menu for
+creating/deleting/moving/copying files and dirs. exec_menuitem.vim provides a
+menu item to execute executable files.
+
+Related tags: |NERDTree-m| |NERDTreeApi|
 
 ==============================================================================
 3. Customisation                                             *NERDTreeOptions*
@@ -924,13 +919,25 @@ This option is used to change the size of the NERD tree when it is loaded.
 ==============================================================================
 4. The NERD tree API                                             *NERDTreeAPI*
 
-The NERD tree script allows you to add custom key mappings and menu items via a
-set of API calls. Any such scripts should be placed in ~/.vim/nerdtree_plugin/
-(*nix) or ~/vimfiles/nerdtree_plugin (windows).
+The NERD tree script allows you to add custom key mappings and menu items via
+a set of API calls. Any scripts that use this API should be placed in
+~/.vim/nerdtree_plugin/ (*nix) or ~/vimfiles/nerdtree_plugin (windows).
 
-NERDTreeRender()                                            *NERDTreeRender()*
-    Re-renders the NERD tree buffer. Useful if you change the state of the
-    tree and you want to it to be reflected in the UI.
+The script exposes some prototype objects that can be used to manipulate the
+tree and/or get information from it: >
+    g:NERDTreePath
+    g:NERDTreeDirNode
+    g:NERDTreeFileNode
+    g:NERDTreeBookmark
+<
+See the code/comments in NERD_tree.vim to find how to use these objects. The
+following code conventions are used:
+    * class members start with a capital letter
+    * instance members start with a lower case letter
+    * private members start with an underscore
+
+See this blog post for more details:
+ http://got-ravings.blogspot.com/2008/09/vim-pr0n-prototype-based-objects.html
 
 ------------------------------------------------------------------------------
 4.1. Key map API                                           *NERDTreeKeymapAPI*
@@ -938,7 +945,7 @@ NERDTreeRender()                                            *NERDTreeRender()*
 NERDTreeAddKeyMap({options})                             *NERDTreeAddKeyMap()*
     Adds a new keymapping for all NERD tree buffers.
     {options} must be a dictionary, and must contain the following keys:
-    "key" - the shortcut key for the new mapping
+    "key" - the trigger key for the new mapping
     "callback" - the function the new mapping will be bound to
     "quickhelpText" - the text that will appear in the quickhelp (see
     |NERDTree-?|)
@@ -952,7 +959,7 @@ NERDTreeAddKeyMap({options})                             *NERDTreeAddKeyMap()*
         function! NERDTreeEchoCurrentNode()
             let n = g:NERDTreeFileNode.GetSelected()
             if n != {}
-                echomsg 'Current node: ' . n.path.str(0)
+                echomsg 'Current node: ' . n.path.str()
             endif
         endfunction
 <
@@ -994,7 +1001,7 @@ NERDTreeAddMenuItem({options})                         *NERDTreeAddMenuItem()*
     "isActiveCallback" - a function that will be called to determine whether
     this menu item will be displayed or not. The callback function must return
     0 or 1.
-    "parent" - if a menu item belongs under a submenu then a parent key must be
+    "parent" - if the menu item belongs under a submenu then this key must be
     specified. This value for this key will be the object that
     was returned when the submenu was created with |NERDTreeAddSubmenu()|.
 
@@ -1042,6 +1049,11 @@ Where selecting "a (s)ub menu" will lead to a second menu: >
 When any of the 3 concrete menu items are selected the function "SomeFunction"
 will be called.
 
+------------------------------------------------------------------------------
+NERDTreeRender()                                            *NERDTreeRender()*
+    Re-renders the NERD tree buffer. Useful if you change the state of the
+    tree and you want to it to be reflected in the UI.
+
 ==============================================================================
 5. About                                                       *NERDTreeAbout*
 
@@ -1063,13 +1075,20 @@ The latest dev versions are on github
 ==============================================================================
 6. Changelog                                               *NERDTreeChangelog*
 
-Next release:
+4.0.0
+    - add a new programmable menu system (see :help NERDTreeMenu).
+    - add new APIs to add menus/menu-items to the menu system as well as
+      custom key mappings to the NERD tree buffer (see :help NERDTreeAPI).
+    - removed the old API functions
+    - added a mapping to maximize/restore the size of nerd tree window, thanks
+      to Guillaume Duranceau for the patch. See :help NERDTree-A for details.
+
     - fix a bug where secondary nerd trees (netrw hijacked trees) and
       NERDTreeQuitOnOpen didnt play nicely, thanks to Curtis Harvey.
     - fix a bug where the script ignored directories whose name ended in a dot,
       thanks to Aggelos Orfanakos for the patch.
-    - added a mapping to maximize/restore the size of nerd tree window, thanks
-      to Guillaume Duranceau for the patch. See :help NERDTree-A for details.
+    - fix a bug when using the x mapping on the tree root, thanks to Bryan
+      Venteicher for the patch.
 
 3.1.1
     - fix a bug where a non-listed no-name buffer was getting created every
