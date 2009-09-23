@@ -2,6 +2,8 @@
 "File:        syntastic.vim
 "Description: vim plugin for on the fly syntax checking
 "Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
+"Version:     1.0.0
+"Last Change: 11 Aug, 2009
 "License:     This program is free software. It comes without any warranty,
 "             to the extent permitted by applicable law. You can redistribute
 "             it and/or modify it under the terms of the Do What The Fuck You
@@ -193,7 +195,7 @@ endfunction
 "The corresponding options are set for the duration of the function call. They
 "are set with :let, so dont escape spaces.
 function! SyntasticMake(options)
-    let oldloclist = getloclist(0)
+    let old_loclist = getloclist(0)
     let old_makeprg = &makeprg
     let old_shellpipe = &shellpipe
     let old_errorformat = &errorformat
@@ -215,7 +217,7 @@ function! SyntasticMake(options)
     silent lmake!
     let errors = getloclist(0)
 
-    call setloclist(0, oldloclist)
+    call setloclist(0, old_loclist)
     let &makeprg = old_makeprg
     let &errorformat = old_errorformat
     let &shellpipe=old_shellpipe

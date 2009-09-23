@@ -1,5 +1,5 @@
 "============================================================================
-"File:        sass.vim
+"File:        javascript.vim
 "Description: Syntax checking plugin for syntastic.vim
 "Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
 "License:     This program is free software. It comes without any warranty,
@@ -9,23 +9,18 @@
 "             See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 "============================================================================
-if exists("loaded_sass_syntax_checker")
+if exists("loaded_javascript_syntax_checker")
     finish
 endif
-let loaded_sass_syntax_checker = 1
+let loaded_javascript_syntax_checker = 1
 
-"bail if the user doesnt have the sass binary installed
-if !executable("sass")
+"bail if the user doesnt have jsl installed
+if !executable("jsl")
     finish
 endif
 
-function! SyntaxCheckers_sass_GetLocList()
-    let output = system("sass -c " . expand("%"))
-    if v:shell_error != 0
-        "sass only outputs the first error, so parse it ourselves
-        let line = substitute(output, '^Syntax error on line \(\d*\):.*', '\1', '')
-        let msg = substitute(output, '^Syntax error on line \d*:\(.*\)', '\1', '')
-        return [{'lnum' : line, 'text' : msg, 'bufnr': bufnr(""), 'type': 'E' }]
-    endif
-    return []
+function! SyntaxCheckers_javascript_GetLocList()
+    let makeprg = "jsl -nologo -nofilelisting -nosummary -nocontext -process %"
+    let errorformat='%W%f(%l): lint warning: %m,%-Z%p^,%E%f(%l): SyntaxError: %m,%-Z%p^,%-G'
+    return SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
 endfunction
