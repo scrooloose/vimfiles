@@ -17,21 +17,22 @@ let b:undo_ftplugin = "setl fo< com< cms< ofu<"
 let b:cucumber_root = expand('%:p:h:s?.*[\/]\%(features\|stories\)\zs[\/].*??')
 
 if !exists("g:no_plugin_maps") && !exists("g:no_cucumber_maps")
-  nmap <silent><buffer> <C-]>       :<C-U>exe <SID>jump('edit')<CR>
-  nmap <silent><buffer> <C-W>]      :<C-U>exe <SID>jump('split')<CR>
-  nmap <silent><buffer> <C-W><C-]>  :<C-U>exe <SID>jump('split')<CR>
-  nmap <silent><buffer> <C-W>}      :<C-U>exe <SID>jump('pedit')<CR>
-  let b:undo_ftplugin .= "| sil! iunmap! <C-]>| sil! iunmap! <C-W>]| sil! iunmap! <C-W>}"
+  nmap <silent><buffer> <C-]>       :<C-U>exe <SID>jump('edit',v:count)<CR>
+  nmap <silent><buffer> <C-W>]      :<C-U>exe <SID>jump('split',v:count)<CR>
+  nmap <silent><buffer> <C-W><C-]>  :<C-U>exe <SID>jump('split',v:count)<CR>
+  nmap <silent><buffer> <C-W>}      :<C-U>exe <SID>jump('pedit',v:count)<CR>
+  let b:undo_ftplugin .= "| sil! iunmap! <C-]>| sil! iunmap! <C-W>]| sil! iunmap! <C-W><C-]>| sil! iunmap! <C-W>}"
 endif
 
-function! s:jump(command)
+function! s:jump(command,count)
   let steps = s:steps(getline('.'))
-  if len(steps) == 0
+  if len(steps) == 0 || len(steps) < a:count
     return 'echoerr "No matching step found"'
-  elseif len(steps) > 1
+  elseif len(steps) > 1 && !a:count
     return 'echoerr "Multiple matching steps found"'
   else
-    return a:command.' +'.steps[0][1].' '.escape(steps[0][0],' %#')
+    let c = a:count ? a:count-1 : 0
+    return a:command.' +'.steps[c][1].' '.escape(steps[c][0],' %#')
   endif
 endfunction
 
