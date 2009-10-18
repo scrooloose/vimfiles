@@ -1,8 +1,8 @@
 " ============================================================================
 " File:        NERD_tree.vim
 " Description: vim global plugin that provides a nice tree explorer
-" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 6 Sep, 2009
+" Maintainer:  Martin Grenfell <martin.grenfell at gmail dot com>
+" Last Change: 9 October, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -10,7 +10,7 @@
 "              See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 " ============================================================================
-let s:NERD_tree_version = '3.1.1'
+let s:NERD_tree_version = '4.0.0'
 
 " SECTION: Script init stuff {{{1
 "============================================================
@@ -80,7 +80,12 @@ endif
 let s:NERDTreeSortStarIndex = index(g:NERDTreeSortOrder, '*')
 
 if !exists('g:NERDTreeStatusline')
-    let g:NERDTreeStatusline = "%{b:NERDTreeRoot.path.str()}"
+
+    "the exists() crap here is a hack to stop vim spazzing out when
+    "loading a session that was created with an open nerd tree. It spazzes
+    "because it doesnt store b:NERDTreeRoot (its a b: var, and its a hash)
+    let g:NERDTreeStatusline = "%{exists('b:NERDTreeRoot')?b:NERDTreeRoot.path.str():''}"
+
 endif
 call s:initVariable("g:NERDTreeWinPos", "left")
 call s:initVariable("g:NERDTreeWinSize", 31)
@@ -156,7 +161,7 @@ command! -n=0 -bar NERDTreeMirror call s:initNerdTreeMirror()
 "============================================================
 augroup NERDTree
     "Save the cursor position whenever we close the nerd tree
-    exec "autocmd BufWinLeave *". s:NERDTreeBufName ." call <SID>saveScreenState()"
+    exec "autocmd BufWinLeave ". s:NERDTreeBufName ."* call <SID>saveScreenState()"
     "cache bookmarks when vim loads
     autocmd VimEnter * call s:Bookmark.CacheBookmarks(0)
 
@@ -456,7 +461,6 @@ endfunction
 
 "FUNCTION: KeyMap.Create(options) {{{3
 function! s:KeyMap.Create(options)
-    let newKeyMap = {}
     let newKeyMap = copy(self)
     let newKeyMap.key = a:options['key']
     let newKeyMap.quickhelpText = a:options['quickhelpText']
@@ -470,7 +474,11 @@ let s:MenuController = {}
 "create a new menu controller that operates on the given menu items
 function! s:MenuController.New(menuItems)
     let newMenuController =  copy(self)
-    let newMenuController.menuItems = a:menuItems
+    if a:menuItems[0].isSeparator()
+        let newMenuController.menuItems = a:menuItems[1:-1]
+    else
+        let newMenuController.menuItems = a:menuItems
+    endif
     return newMenuController
 endfunction
 
@@ -507,9 +515,7 @@ function! s:MenuController._echoPrompt()
 
     for i in range(0, len(self.menuItems)-1)
         if self.selection == i
-            echohl todo
             echo "> " . self.menuItems[i].text
-            echohl normal
         else
             echo "  " . self.menuItems[i].text
         endif
@@ -1040,7 +1046,6 @@ function! s:TreeFileNode.New(path)
     if a:path.isDirectory
         return s:TreeDirNode.New(a:path)
     else
-        let newTreeNode = {}
         let newTreeNode = copy(self)
         let newTreeNode.path = a:path
         let newTreeNode.parent = {}
@@ -1795,9 +1800,9 @@ function! s:Path.cacheDisplayString()
 endfunction
 "FUNCTION: Path.changeToDir() {{{3
 function! s:Path.changeToDir()
-    let dir = self.strForCd()
+    let dir = self.str({'format': 'Cd'})
     if self.isDirectory ==# 0
-        let dir = self.getParent().strForCd()
+        let dir = self.getParent().str({'format': 'Cd'})
     endif
 
     try
@@ -1941,7 +1946,7 @@ endfunction
 function! s:Path.delete()
     if self.isDirectory
 
-        let cmd = g:NERDTreeRemoveDirCmd . self.str('escape': 1})
+        let cmd = g:NERDTreeRemoveDirCmd . self.str({'escape': 1})
         let success = system(cmd)
 
         if v:shell_error != 0
@@ -2009,7 +2014,12 @@ endfunction
 "Return:
 "a new Path object
 function! s:Path.getParent()
-    let path = '/'. join(self.pathSegments[0:-2], '/')
+    if s:running_windows
+        let path = self.drive . '\' . join(self.pathSegments[0:-2], '\')
+    else
+        let path = '/'. join(self.pathSegments[0:-2], '/')
+    endif
+
     return s:Path.New(path)
 endfunction
 "FUNCTION: Path.getLastPathComponent(dirSlash) {{{3
@@ -2243,11 +2253,7 @@ endfunction
 "
 " returns a string that can be used with :cd
 function! s:Path._strForCd()
-    if s:running_windows
-        return self.str()
-    else
-        return self.str({'escape': 1})
-    endif
+    return escape(self.str(), s:escape_chars)
 endfunction
 "FUNCTION: Path._strForEdit() {{{3
 "
@@ -2261,6 +2267,8 @@ function! s:Path._strForEdit()
         let p = tolower(self.str())
         let cwd = tolower(getcwd())
     endif
+
+    let p = escape(p, s:escape_chars)
 
     let cwd = cwd . s:Path.Slash()
 
@@ -2421,7 +2429,7 @@ function! s:initNerdTree(name)
     "if instructed to, then change the vim CWD to the dir the NERDTree is
     "inited in
     if g:NERDTreeChDirMode != 0
-        exec 'cd ' . path.strForCd()
+        call path.changeToDir()
     endif
 
     if s:treeExistsForTab()
@@ -2544,7 +2552,7 @@ function! s:initNerdTreeMirror()
             return
         endif
 
-        let bufferName = options[keys(options)[choice-1]]
+        let bufferName = options[sort(keys(options))[choice-1]]
     elseif len(keys(options)) ==# 1
         let bufferName = values(options)[0]
     else
@@ -2652,7 +2660,7 @@ function! s:centerView()
     endif
 endfunction
 "FUNCTION: s:closeTree() {{{2
-"Closes the NERD tree window
+"Closes the primary NERD tree window for this tab
 function! s:closeTree()
     if !s:isTreeOpen()
         throw "NERDTree.NoTreeFoundError: no NERDTree is open"
@@ -2663,7 +2671,7 @@ function! s:closeTree()
         close
         call s:exec("wincmd p")
     else
-        :q
+        close
     endif
 endfunction
 
@@ -3345,10 +3353,10 @@ function! s:toggle(dir)
     if s:treeExistsForTab()
         if !s:isTreeOpen()
             call s:createTreeWin()
-            call s:restoreScreenState()
             if !&hidden
                 call s:renderView()
             endif
+            call s:restoreScreenState()
         else
             call s:closeTree()
         endif
@@ -3574,7 +3582,7 @@ function! s:closeTreeWindow()
         exec "buffer " . b:NERDTreePreviousBuf
     else
         if winnr("$") > 1
-            wincmd c
+            call s:closeTree()
         else
             call s:echo("Cannot close last window")
         endif
@@ -3920,7 +3928,7 @@ function! s:upDir(keepState)
         endif
 
         if g:NERDTreeChDirMode ==# 2
-            exec 'cd ' . b:NERDTreeRoot.path.strForCd()
+            call b:NERDTreeRoot.path.changeToDir()
         endif
 
         call s:renderView()

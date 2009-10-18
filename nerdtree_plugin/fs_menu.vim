@@ -1,8 +1,8 @@
 " ============================================================================
 " File:        fs_menu.vim
 " Description: plugin for the NERD Tree that provides a file system menu
-" Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
-" Last Change: 6 Sep, 2009
+" Maintainer:  Martin Grenfell <martin.grenfell at gmail dot com>
+" Last Change: 17 July, 2009
 " License:     This program is free software. It comes without any warranty,
 "              to the extent permitted by applicable law. You can redistribute
 "              it and/or modify it under the terms of the Do What The Fuck You
@@ -85,7 +85,7 @@ function! NERDTreeMoveNode()
     let newNodePath = input("Rename the current node\n" .
                           \ "==========================================================\n" .
                           \ "Enter the new path for the node:                          \n" .
-                          \ "", curNode.path.str()
+                          \ "", curNode.path.str())
 
     if newNodePath ==# ''
         call s:echo("Node Renaming Aborted.")

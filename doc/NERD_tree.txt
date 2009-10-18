@@ -27,7 +27,7 @@ CONTENTS                                                   *NERDTree-contents*
             2.2.2.Bookmark commands...........|NERDTreeBookmarkCommands|
             2.2.3.Invalid bookmarks...........|NERDTreeInvalidBookmarks|
         2.3.NERD tree mappings................|NERDTreeMappings|
-        2.4.The NERDT tree menu...............|NERDTreeMenu|
+        2.4.The NERD tree menu................|NERDTreeMenu|
     3.Options.................................|NERDTreeOptions|
         3.1.Option summary....................|NERDTreeOptionSummary|
         3.2.Option details....................|NERDTreeOptionDetails|
@@ -1060,10 +1060,10 @@ NERDTreeRender()                                            *NERDTreeRender()*
 The author of the NERD tree is a terrible terrible monster called Martyzilla
 who gobbles up small children with milk and sugar for breakfast.
 
-He can be reached at martin_grenfell at msn.com. He would love to hear from
-you, so feel free to send him suggestions and/or comments about this plugin.
-Don't be shy --- the worst he can do is slaughter you and stuff you in the
-fridge for later ;)
+He can be reached at martin.grenfell at gmail dot com. He would love to hear
+from you, so feel free to send him suggestions and/or comments about this
+plugin.  Don't be shy --- the worst he can do is slaughter you and stuff you in
+the fridge for later ;)
 
 The latest stable versions can be found at
     http://www.vim.org/scripts/script.php?script_id=1658
@@ -1089,6 +1089,9 @@ The latest dev versions are on github
       thanks to Aggelos Orfanakos for the patch.
     - fix a bug when using the x mapping on the tree root, thanks to Bryan
       Venteicher for the patch.
+    - fix a bug where the cursor position/window size of the nerd tree buffer
+      wasnt being stored on closing the window, thanks to Richard Hart.
+    - fix a bug where NERDTreeMirror would mirror the wrong tree
 
 3.1.1
     - fix a bug where a non-listed no-name buffer was getting created every
@@ -1182,6 +1185,7 @@ just downloaded pr0n instead.
     Lucas S. Buchala
     Curtis Harvey
     Guillaume Duranceau
+    Richard Hart (hates)
 
 ==============================================================================
 8. License                                                   *NERDTreeLicense*

@@ -1,5 +1,5 @@
 "============================================================================
-"File:        ruby.vim
+"File:        cucumber.vim
 "Description: Syntax checking plugin for syntastic.vim
 "Maintainer:  Martin Grenfell <martin_grenfell at msn dot com>
 "License:     This program is free software. It comes without any warranty,
@@ -9,19 +9,19 @@
 "             See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 "============================================================================
-if exists("loaded_ruby_syntax_checker")
+if exists("loaded_cucumber_syntax_checker")
     finish
 endif
-let loaded_ruby_syntax_checker = 1
+let loaded_cucumber_syntax_checker = 1
 
-"bail if the user doesnt have ruby installed
-if !executable("ruby")
+"bail if the user doesnt have cucumber installed
+if !executable("cucumber")
     finish
 endif
 
-function! SyntaxCheckers_ruby_GetLocList()
-    let makeprg = 'RUBYOPT= ruby -w -c %'
-    let errorformat =  '%-GSyntax OK,%E%f:%l: syntax error\, %m,%Z%p^,%W%f:%l: warning: %m,%Z%p^,%-C%.%#'
+function! SyntaxCheckers_cucumber_GetLocList()
+    let makeprg = 'cucumber --dry-run --quiet --strict --format pretty %'
+    let errorformat =  '%f:%l:%c:%m,%W      %.%# (%m),%-Z%f:%l:%.%#,%-G%.%#'
 
     return SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
 endfunction

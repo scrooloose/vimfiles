@@ -19,7 +19,7 @@ let g:loaded_syntastic_plugin = 1
 
 let s:running_windows = has("win16") || has("win32") || has("win64")
 
-if !exists("g:syntastic_enable_signs")
+if !exists("g:syntastic_enable_signs") || !has('signs')
     let g:syntastic_enable_signs = 0
 endif
 
@@ -29,6 +29,10 @@ endif
 
 if !exists("g:syntastic_quiet_warnings")
     let g:syntastic_quiet_warnings = 0
+endif
+
+if !exists("g:syntastic_disabled_filetypes")
+    let g:syntastic_disabled_filetypes = []
 endif
 
 "load all the syntax checkers
@@ -58,17 +62,16 @@ endfunction
 "
 "depends on a function called SyntaxCheckers_{&ft}_GetLocList() existing
 "elsewhere
-"
-"saves and restores some settings that the syntax checking function may wish
-"to screw with if it uses :lmake!
 function! s:CacheErrors()
     let b:syntastic_loclist = []
 
-    for ft in split(&ft, '\.')
-        if exists("*SyntaxCheckers_". ft ."_GetLocList") && filereadable(expand("%"))
-            let b:syntastic_loclist = extend(b:syntastic_loclist, SyntaxCheckers_{ft}_GetLocList())
-        endif
-    endfor
+    if filereadable(expand("%"))
+        for ft in split(&ft, '\.')
+            if s:Checkable(ft)
+                let b:syntastic_loclist = extend(b:syntastic_loclist, SyntaxCheckers_{ft}_GetLocList())
+            endif
+        endfor
+    endif
 endfunction
 
 "return true if there are cached errors/warnings for this buf
@@ -92,9 +95,11 @@ function! s:ErrorsForType(type)
     return filter(copy(b:syntastic_loclist), 'v:val["type"] ==# "' . a:type . '"')
 endfunction
 
-"use >> to display syntax errors in the sign column
-sign define SyntasticError text=>> texthl=error
-sign define SyntasticWarning text=>> texthl=todo
+if g:syntastic_enable_signs
+    "use >> to display syntax errors in the sign column
+    sign define SyntasticError text=>> texthl=error
+    sign define SyntasticWarning text=>> texthl=todo
+endif
 
 "start counting sign ids at 5000, start here to hopefully avoid conflicting
 "with any other code that places signs (not sure if this precaution is
@@ -146,7 +151,11 @@ endfunction
 function! s:ShowLocList()
     if exists("b:syntastic_loclist")
         call setloclist(0, b:syntastic_loclist)
+        let num = winnr()
         lopen
+        if num != winnr()
+            wincmd p
+        endif
     endif
 endfunction
 
@@ -223,6 +232,33 @@ function! SyntasticMake(options)
     let &shellpipe=old_shellpipe
 
     return errors
+endfunction
+
+function! s:Checkable(ft)
+    return exists("*SyntaxCheckers_". a:ft ."_GetLocList") &&
+                \ index(g:syntastic_disabled_filetypes, a:ft) == -1
+endfunction
+
+command! -nargs=? SyntasticEnable call s:Enable(<f-args>)
+command! -nargs=? SyntasticDisable call s:Disable(<f-args>)
+
+"disable syntax checking for the given filetype (defaulting to current ft)
+function! s:Disable(...)
+    let ft = a:0 ? a:1 : &filetype
+
+    if !empty(ft) && index(g:syntastic_disabled_filetypes, ft) == -1
+        call add(g:syntastic_disabled_filetypes, ft)
+    endif
+endfunction
+
+"enable syntax checking for the given filetype (defaulting to current ft)
+function! s:Enable(...)
+    let ft = a:0 ? a:1 : &filetype
+
+    let i = index(g:syntastic_disabled_filetypes, ft)
+    if i != -1
+        call remove(g:syntastic_disabled_filetypes, i)
+    endif
 endfunction
 
 " vim: set et sts=4 sw=4:
