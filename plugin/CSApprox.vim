@@ -1,17 +1,52 @@
-" CSApprox:    Make gvim-only colorschemes work terminal vim
+" CSApprox:    Make gvim-only colorschemes Just Work terminal vim
 " Maintainer:  Matthew Wozniski (mjw@drexel.edu)
-" Date:        Sat, 31 Jan 2009 04:14:27 -0500
-" Version:     3.05
+" Date:        Wed, 01 Apr 2009 22:10:19 -0400
+" Version:     3.50
 " History:     :help csapprox-changelog
-
-" Whenever you change colorschemes using the :colorscheme command, this script
-" will be executed.  If you're running in 256 color terminal or an 88 color
-" terminal, as reported by the command ":set t_Co?", it will take the colors
-" that the scheme specified for use in the gui and use an approximation
-" algorithm to try to gracefully degrade them to the closest color available.
-" If you are running in a gui or if t_Co is reported as less than 88 colors,
-" no changes are made.  Also, no changes will be made if the colorscheme seems
-" to have been high color already.
+"
+" Long Description:
+" It's hard to find colorschemes for terminal Vim.  Most colorschemes are
+" written to only support GVim, and don't work at all in terminal Vim.
+"
+" This plugin makes GVim-only colorschemes Just Work in terminal Vim, as long
+" as the terminal supports 88 or 256 colors - and most do these days.  This
+" usually requires no user interaction (but see below for what to do if things
+" don't Just Work).  After getting this plugin happily installed, any time you
+" use :colorscheme it will do its magic and make the colorscheme Just Work.
+"
+" Whenever you change colorschemes using the :colorscheme command this script
+" will be executed.  It will take the colors that the scheme specified for use
+" in the GUI and use an approximation algorithm to try to gracefully degrade
+" them to the closest color available in your terminal.  If you are running in
+" a GUI or if your terminal doesn't support 88 or 256 colors, no changes are
+" made.  Also, no changes will be made if the colorscheme seems to have been
+" high color already.
+"
+" License:
+" Copyright (c) 2009, Matthew J. Wozniski
+" All rights reserved.
+"
+" Redistribution and use in source and binary forms, with or without
+" modification, are permitted provided that the following conditions are met:
+"     * Redistributions of source code must retain the above copyright notice,
+"       this list of conditions and the following disclaimer.
+"     * Redistributions in binary form must reproduce the above copyright
+"       notice, this list of conditions and the following disclaimer in the
+"       documentation and/or other materials provided with the distribution.
+"     * The names of the contributors may not be used to endorse or promote
+"       products derived from this software without specific prior written
+"       permission.
+"
+" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ``AS IS'' AND ANY EXPRESS
+" OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+" NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT, INDIRECT,
+" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+" LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+" OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+" LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+" NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+" EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 " {>1} Basic plugin setup
 
@@ -19,19 +54,14 @@
 " Quit if the user doesn't want or need us or is missing the gui feature.  We
 " need +gui to be able to check the gui color settings; vim doesn't bother to
 " store them if it is not built with +gui.
-if ! has("gui") || exists('g:CSApprox_loaded')
-  " XXX This depends upon knowing the default for g:CSApprox_verbose_level
-  let s:verbose = 1
-  if exists("g:CSApprox_verbose_level")
-    let s:verbose  = g:CSApprox_verbose_level
-  endif
-
-  if ! has('gui') && s:verbose > 0
+if exists('g:CSApprox_loaded')
+  finish
+elseif ! has('gui')
+  " Warn unless the user set g:CSApprox_verbose_level to zero.
+  if get(g:, 'CSApprox_verbose_level', 1)
     echomsg "CSApprox needs gui support - not loading."
     echomsg "  See :help |csapprox-+gui| for possible workarounds."
   endif
-
-  unlet s:verbose
 
   finish
 endif
@@ -41,110 +71,6 @@ let g:CSApprox_loaded = 1
 
 let s:savecpo = &cpo
 set cpo&vim
-
-" {>1} Built-in approximation algorithm
-
-" {>2} Cube definitions
-let s:xterm_colors   = [ 0x00, 0x5F, 0x87, 0xAF, 0xD7, 0xFF ]
-let s:eterm_colors   = [ 0x00, 0x2A, 0x55, 0x7F, 0xAA, 0xD4 ]
-let s:konsole_colors = [ 0x00, 0x33, 0x66, 0x99, 0xCC, 0xFF ]
-let s:xterm_greys    = [ 0x08, 0x12, 0x1C, 0x26, 0x30, 0x3A,
-                       \ 0x44, 0x4E, 0x58, 0x62, 0x6C, 0x76,
-                       \ 0x80, 0x8A, 0x94, 0x9E, 0xA8, 0xB2,
-                       \ 0xBC, 0xC6, 0xD0, 0xDA, 0xE4, 0xEE ]
-
-let s:urxvt_colors   = [ 0x00, 0x8B, 0xCD, 0xFF ]
-let s:urxvt_greys    = [ 0x2E, 0x5C, 0x73, 0x8B,
-                       \ 0xA2, 0xB9, 0xD0, 0xE7 ]
-
-" {>2} Integer comparator
-" Used to sort the complete list of possible colors
-function! s:IntCompare(i1, i2)
-  return a:i1 == a:i2 ? 0 : a:i1 > a:i2 ? 1 : -1
-endfunc
-
-" {>2} Approximator
-" Takes 3 decimal values for r, g, and b, and returns the closest cube number.
-" Uses &term to determine which cube should be used, though if &term is set to
-" "xterm" the variables g:CSApprox_eterm and g:CSApprox_konsole can be used to
-" change the default palette.
-"
-" This approximator considers closeness based upon the individiual components.
-" For each of r, g, and b, it finds the closest cube component available on
-" the cube.  If the three closest matches can combine to form a valid color,
-" this color is used, otherwise we repeat the search with the greys removed,
-" meaning that the three new matches must make a valid color when combined.
-function! s:ApproximatePerComponent(r,g,b)
-  let hex = printf("%02x%02x%02x", a:r, a:g, a:b)
-
-  let greys  = (&t_Co == 88 ? s:urxvt_greys : s:xterm_greys)
-
-  if &t_Co == 88
-    let colors = s:urxvt_colors
-    let type = 'urxvt'
-  elseif ((&term ==# 'xterm' || &term =~# '^screen' || &term==# 'builtin_gui')
-       \   && exists('g:CSApprox_konsole') && g:CSApprox_konsole)
-       \ || &term =~? '^konsole'
-    let colors = s:konsole_colors
-    let type = 'konsole'
-  elseif ((&term ==# 'xterm' || &term =~# '^screen' || &term==# 'builtin_gui')
-       \   && exists('g:CSApprox_eterm') && g:CSApprox_eterm)
-       \ || &term =~? '^eterm'
-    let colors = s:eterm_colors
-    let type = 'eterm'
-  else
-    let colors = s:xterm_colors
-    let type = 'xterm'
-  endif
-
-  if !exists('s:approximator_cache_'.type)
-    let s:approximator_cache_{type} = {}
-  endif
-
-  let rv = get(s:approximator_cache_{type}, hex, -1)
-  if rv != -1
-    return rv
-  endif
-
-  " Only obtain sorted list once
-  if !exists("s:".type."_greys_colors")
-    let s:{type}_greys_colors = sort(greys + colors, "s:IntCompare")
-  endif
-
-  let greys_colors = s:{type}_greys_colors
-
-  let r = s:NearestElemInList(a:r, greys_colors)
-  let g = s:NearestElemInList(a:g, greys_colors)
-  let b = s:NearestElemInList(a:b, greys_colors)
-
-  let len = len(colors)
-  if (r == g && g == b && index(greys, r) > 0)
-    let rv = 16 + len * len * len + index(greys, r)
-  else
-    let r = s:NearestElemInList(a:r, colors)
-    let g = s:NearestElemInList(a:g, colors)
-    let b = s:NearestElemInList(a:b, colors)
-    let rv = index(colors, r) * len * len
-         \ + index(colors, g) * len
-         \ + index(colors, b)
-         \ + 16
-  endif
-
-  let s:approximator_cache_{type}[hex] = rv
-  return rv
-endfunction
-
-" {>2} Color comparator
-" Finds the nearest element to the given element in the given list
-function! s:NearestElemInList(elem, list)
-  let len = len(a:list)
-  for i in range(len-1)
-    if (a:elem <= (a:list[i] + a:list[i+1]) / 2)
-      return a:list[i]
-    endif
-  endfor
-  return a:list[len-1]
-endfunction
 
 " {>1} Collect info for the set highlights
 
@@ -168,7 +94,7 @@ endfunction
 " numbers for keys and values that are dictionaries with four keys each,
 " 'name', 'term', 'cterm', and 'gui'.  'name' holds the group name, and each
 " of the others holds highlight information for that particular mode.
-function! s:Highlights()
+function! s:Highlights(modes)
   let rv = {}
 
   let i = 0
@@ -188,30 +114,20 @@ function! s:Highlights()
     let rv[i] = {}
     let rv[i].name = synIDattr(i, "name")
 
-    for where in [ "term", "cterm", "gui" ]
+    for where in a:modes
       let rv[i][where]  = {}
       for attr in [ "bold", "italic", "reverse", "underline", "undercurl" ]
         let rv[i][where][attr] = synIDattr(i, attr, where)
       endfor
 
-      for attr in [ "fg", "bg", "sp" ]
+      for attr in [ "fg", "bg" ]
         let rv[i][where][attr] = synIDattr(i, attr.'#', where)
       endfor
 
-      if s:NeedRedirFallback()
-        redir => temp
-        exe 'sil hi ' . rv[i].name
-        redir END
-        let temp = matchstr(temp, where.'sp=\zs.*')
-        if len(temp) == 0 || temp[0] =~ '\s'
-          let temp = ""
-        else
-          " Make sure we can handle guisp='dark red'
-          let temp = substitute(temp, '[\x00].*', '', '')
-          let temp = substitute(temp, '\s*\(c\=term\|gui\).*', '', '')
-          let temp = substitute(temp, '\s*$', '', '')
-        endif
-        let rv[i][where]["sp"] = temp
+      if where == "gui"
+        let rv[i][where]["sp"] = s:SynGuiSp(i, rv[i].name)
+      else
+        let rv[i][where]["sp"] = -1
       endif
 
       for attr in [ "fg", "bg", "sp" ]
@@ -225,6 +141,39 @@ function! s:Highlights()
   return rv
 endfunction
 
+" {>2} Retrieve guisp
+
+" Get guisp using whichever method is specified by _redir_fallback
+function! s:SynGuiSp(idx, name)
+  if !s:NeedRedirFallback()
+    return s:SynGuiSpAttr(a:idx)
+  else
+    return s:SynGuiSpRedir(a:name)
+  endif
+endfunction
+
+" {>3} Implementation for retrieving guisp with redir hack
+function! s:SynGuiSpRedir(name)
+  redir => temp
+  exe 'sil hi ' . a:name
+  redir END
+  let temp = matchstr(temp, 'guisp=\zs.*')
+  if len(temp) == 0 || temp[0] =~ '\s'
+    let temp = ""
+  else
+    " Make sure we can handle guisp='dark red'
+    let temp = substitute(temp, '[\x00].*', '', '')
+    let temp = substitute(temp, '\s*\(c\=term\|gui\).*', '', '')
+    let temp = substitute(temp, '\s*$', '', '')
+  endif
+  return temp
+endfunction
+
+" {>3} Implementation for retrieving guisp with synIDattr()
+function! s:SynGuiSpAttr(idx)
+  return synIDattr(a:idx, 'sp#', 'gui')
+endfunction
+
 " {>1} Handle color names
 
 " Place to store rgb.txt name to color mappings - lazy loaded if needed
@@ -232,8 +181,9 @@ let s:rgb = {}
 
 " {>2} Builtin gui color names
 " gui_x11.c and gui_gtk_x11.c have some default colors names that are searched
-" if a color is not in rgb.txt. We'll pretend they're in rgb.txt with these
-" values, and overwrite them with a different value if we find them...
+" if the x server doesn't know about a color.  If 'showrgb' is available,
+" we'll default to using these color names and values, and overwrite them with
+" other values if 'showrgb' tells us about those colors.
 let s:rgb_defaults = { "lightred"     : "#FFBBBB",
                      \ "lightgreen"   : "#88FF88",
                      \ "lightmagenta" : "#FFBBFF",
@@ -262,57 +212,74 @@ let s:rgb_defaults = { "lightred"     : "#FFBBBB",
                      \ "gray90"       : "#E5E5E5",
                      \ "grey90"       : "#E5E5E5" }
 
-" {>2} Find and parse rgb.txt
-" Search for an rgb.txt in a set of default directories.  If the user wishes
-" to override the default search path, he can specify a list of other
-" directories to search first in g:CSApprox_extra_rgb_txt_dirs.  When rgb.txt
-" has been located, and verified to be good (by having enough non-blank
-" non-comment correctly formatted lines), the parsed information is stored to
-" the dictionary s:rgb - the keys are color names (in lowercase), the values
-" are strings representing color values (as '#rrggbb').
+" {>2} Colors that vim will use by name in one of the default schemes, either
+" for bg=light or for bg=dark.  This lets us avoid loading the entire rgb.txt
+" database when the scheme itself doesn't ask for colors by name.
+let s:rgb_presets = { "black"         : "#000000",
+                     \ "blue"         : "#0000ff",
+                     \ "brown"        : "#a52a2a",
+                     \ "cyan"         : "#00ffff",
+                     \ "darkblue"     : "#00008b",
+                     \ "darkcyan"     : "#008b8b",
+                     \ "darkgrey"     : "#a9a9a9",
+                     \ "darkmagenta"  : "#8b008b",
+                     \ "green"        : "#00ff00",
+                     \ "grey"         : "#bebebe",
+                     \ "grey40"       : "#666666",
+                     \ "grey90"       : "#e5e5e5",
+                     \ "lightblue"    : "#add8e6",
+                     \ "lightcyan"    : "#e0ffff",
+                     \ "lightgrey"    : "#d3d3d3",
+                     \ "lightmagenta" : "#ffbbff",
+                     \ "magenta"      : "#ff00ff",
+                     \ "red"          : "#ff0000",
+                     \ "seagreen"     : "#2e8b57",
+                     \ "white"        : "#ffffff",
+                     \ "yellow"       : "#ffff00" }
+
+" {>2} Find available color names
+" Find the valid named colors.  By default, use our own rgb list, but try to
+" retrieve the system's list if g:CSApprox_use_showrgb is set to true.  Store
+" the color names and color values to the dictionary s:rgb - the keys are
+" color names (in lowercase), the values are strings representing color values
+" (as '#rrggbb').
 function! s:UpdateRgbHash()
-  " Pattern for ignored lines - all blanks, or blanks then !
-  let ignorepat = '^\s*\%(!.*\)\=$'
-  " fmt is (blanks?)(red)(blanks)(green)(blanks)(blue)(blanks)(name)
-  let parsepat  = '^\s*\(\d\+\)\s\+\(\d\+\)\s\+\(\d\+\)\s\+\(.*\)$'
-
-  let user = []
-  if exists("g:CSApprox_extra_rgb_txt_dirs")
-    if type(g:CSApprox_extra_rgb_txt_dirs) == type([])
-      let user = g:CSApprox_extra_rgb_txt_dirs
-    else
-      let user = [ g:CSApprox_extra_rgb_txt_dirs ]
+  try
+    if !exists("g:CSApprox_use_showrgb") || !g:CSApprox_use_showrgb
+      throw "Not using showrgb"
     endif
-  endif
 
-  for dir in user + [ '/usr/local/share/X11',
-                    \ '/usr/share/X11',
-                    \ '/etc/X11',
-                    \ '/usr/local/lib/X11',
-                    \ '/usr/lib/X11',
-                    \ '/usr/local/X11R6/lib/X11',
-                    \ '/usr/X11R6/lib/X11' ]
-                    \ + split(globpath(&rtp, ''), '\n')
+    " We want to use the 'showrgb' program, if it's around
+    let lines = split(system('showrgb'), '\n')
+
+    if v:shell_error || !exists('lines') || empty(lines)
+      throw "'showrgb' didn't give us an rgb.txt"
+    endif
+
     let s:rgb = copy(s:rgb_defaults)
-    sil! let lines = readfile(dir . '/rgb.txt')
+
+    " fmt is (blanks?)(red)(blanks)(green)(blanks)(blue)(blanks)(name)
+    let parsepat  = '^\s*\(\d\+\)\s\+\(\d\+\)\s\+\(\d\+\)\s\+\(.*\)$'
 
     for line in lines
-      if line =~ ignorepat
-        continue " Line is blank, entirely spaces, or a comment
-      endif
       let v = matchlist(line, parsepat)
-      if len(v) > 0
-        let s:rgb[tolower(v[4])] = printf("#%02x%02x%02x", v[1], v[2], v[3])
+      if len(v) < 0
+        throw "CSApprox: Bad RGB line: " . string(line)
       endif
+      let s:rgb[tolower(v[4])] = printf("#%02x%02x%02x", v[1], v[2], v[3])
     endfor
+  catch
+    try
+      let s:rgb = csapprox#rgb()
+    catch
+      echohl ErrorMsg
+      echomsg "Can't call rgb() from autoload/csapprox.vim"
+      echomsg "Named colors will not be available!"
+      echohl None
+    endtry
+  endtry
 
-    if len(s:rgb) > 50
-      return 0 " Long enough, must have been valid
-    endif
-  endfor
-
-  let s:rgb = {}
-  throw "Failed to find a valid rgb.txt!"
+  return 0
 endfunction
 
 " {>1} Derive and set cterm attributes
@@ -329,44 +296,50 @@ endfunction
 " can look up, to string values, representing the attribute mapped to or an
 " empty string to disable the given attribute entirely.
 function! s:attr_map(attr)
-  let attr = tolower(a:attr)
+  let rv = get(g:CSApprox_attr_map, a:attr, a:attr)
 
-  if attr == 'inverse'
-    let attr = 'reverse'
-  endif
+  return rv
+endfunction
+
+function! s:NormalizeAttrMap(map)
+  let old = copy(a:map)
+  let new = filter(a:map, '0')
 
   let valid_attrs = [ 'bg', 'fg', 'sp', 'bold', 'italic',
                     \ 'reverse', 'underline', 'undercurl' ]
 
-  if index(valid_attrs, attr) == -1
-    throw "Looking up invalid attribute '" . attr . "'"
-  endif
-
-  if !exists("g:CSApprox_attr_map") || type(g:CSApprox_attr_map) != type({})
-    let g:CSApprox_attr_map = { 'italic' : 'underline', 'sp' : 'fg' }
-  endif
-
-  let rv = get(g:CSApprox_attr_map, attr, attr)
-
-  if index(valid_attrs, rv) == -1 && rv != ''
-    " The user mapped 'attr' to something invalid
-    throw "Bad attr map: '" . attr . "' to unknown attribute '" . rv . "'"
-  endif
-
   let colorattrs = [ 'fg', 'bg', 'sp' ]
-  if rv != '' && !!(index(colorattrs, attr)+1) != !!(index(colorattrs, rv)+1)
-    " The attribute the user mapped to was valid, but of a different type.
-    throw "Bad attr map: Can't map color attr to boolean (".attr."->".rv.")"
-  endif
 
-  if rv == 'inverse'
-    let rv = 'reverse' " Internally always use 'reverse' instead of 'inverse'
-  elseif rv == 'sp'
-    " Terminals can't handle the guisp attribute; disable it if it was left on
-    let rv = ''
-  endif
+  for olhs in keys(old)
+    if olhs ==? 'inverse'
+      let nlhs = 'reverse'
+    endif
 
-  return rv
+    let orhs = old[olhs]
+
+    if orhs ==? 'inverse'
+      let nrhs = 'reverse'
+    endif
+
+    let nlhs = tolower(olhs)
+    let nrhs = tolower(orhs)
+
+    try
+      if index(valid_attrs, nlhs) == -1
+        echomsg "CSApprox: Bad attr map (removing unrecognized attribute " . olhs . ")"
+      elseif nrhs != '' && index(valid_attrs, nrhs) == -1
+        echomsg "CSApprox: Bad attr map (removing unrecognized attribute " . orhs . ")"
+      elseif nrhs != '' && !!(index(colorattrs, nlhs)+1) != !!(index(colorattrs, nrhs)+1)
+        echomsg "CSApprox: Bad attr map (removing " . olhs . "; type mismatch with " . orhs . ")"
+      elseif nrhs == 'sp'
+        echomsg "CSApprox: Bad attr map (removing " . olhs . "; can't map to 'sp')"
+      else
+        let new[nlhs] = nrhs
+      endif
+    catch
+      echo v:exception
+    endtry
+  endfor
 endfunction
 
 " {>2} Normalize the GUI settings of a highlight group
@@ -395,6 +368,10 @@ endfunction
 " color, he should map it to either 'fg' or 'bg' using g:CSApprox_attr_map.
 function! s:FixupCtermInfo(highlights)
   for hl in values(a:highlights)
+
+    if !has_key(hl, 'cterm')
+      let hl["cterm"] = {}
+    endif
 
     " Find attributes to be set in the terminal
     for attr in [ "bold", "italic", "reverse", "underline", "undercurl" ]
@@ -433,6 +410,11 @@ function! s:FixupCtermInfo(highlights)
   endfor
 endfunction
 
+" {>2} Kludge around inability to reference autoload functions
+function! s:DefaultApproximator(...)
+  return call('csapprox#per_component#Approximate', a:000)
+endfunction
+
 " {>2} Set cterm colors for a highlight group
 " Given the information for a single highlight group (ie, the value of
 " one of the items in s:Highlights() already normalized with s:FixupCtermInfo
@@ -445,7 +427,7 @@ function! s:SetCtermFromGui(hl)
 
   " Set up the default approximator function, if needed
   if !exists("g:CSApprox_approximator_function")
-    let g:CSApprox_approximator_function=function("s:ApproximatePerComponent")
+    let g:CSApprox_approximator_function = function("s:DefaultApproximator")
   endif
 
   " Clear existing highlights
@@ -462,16 +444,23 @@ function! s:SetCtermFromGui(hl)
     " Try translating anything but 'fg', 'bg', #rrggbb, and rrggbb from an
     " rgb.txt color to a #rrggbb color
     if val !~? '^[fb]g$' && val !~ '^#\=\x\{6}$'
-      if empty(s:rgb)
-        call s:UpdateRgbHash()
-      endif
       try
-        let val = s:rgb[tolower(val)]
+        " First see if it is in our preset-by-vim rgb list
+        let val = s:rgb_presets[tolower(val)]
       catch
-        if &verbose
-          echomsg "CSApprox: Colorscheme uses unknown color \"" . val . "\""
+        " Then try loading and checking our real rgb list
+        if empty(s:rgb)
+          call s:UpdateRgbHash()
         endif
-        continue
+        try
+          let val = s:rgb[tolower(val)]
+        catch
+          " And then barf if we still haven't found it
+          if &verbose
+            echomsg "CSApprox: Colorscheme uses unknown color \"" . val . "\""
+          endif
+          continue
+        endtry
       endtry
     endif
 
@@ -480,9 +469,9 @@ function! s:SetCtermFromGui(hl)
       let hl.cterm[which] = val
     elseif val =~ '^#\=\x\{6}$'
       let val = substitute(val, '^#', '', '')
-      let r = str2nr(val[0] . val[1], 16)
-      let g = str2nr(val[2] . val[3], 16)
-      let b = str2nr(val[4] . val[5], 16)
+      let r = str2nr(val[0:1], 16)
+      let g = str2nr(val[2:3], 16)
+      let b = str2nr(val[4:5], 16)
       let hl.cterm[which] = g:CSApprox_approximator_function(r, g, b)
       exe 'hi ' . hl.name . ' cterm' . which . '=' . hl.cterm[which]
     else
@@ -542,21 +531,6 @@ let s:presets_256 += [224] " LightRed
 let s:presets_256 += [225] " LightMagenta
 let s:presets_256 += [229] " LightYellow
 
-" {>2} Highlight comparator
-" Comparator that sorts numbers matching the highlight id of the 'Normal'
-" group before anything else; all others stay in random order.  This allows us
-" to ensure that the Normal group is the first group we set.  If it weren't,
-" we could get E419 or E420 if a later color used guibg=bg or the likes.
-function! s:SortNormalFirst(num1, num2)
-  if a:num1 == s:hlid_normal && a:num1 != a:num2
-    return -1
-  elseif a:num2 == s:hlid_normal && a:num1 != a:num2
-    return 1
-  else
-    return 0
-  endif
-endfunction
-
 " {>2} Wrapper around :exe to allow :executing multiple commands.
 " "cmd" is the command to be :executed.
 " If the variable is a String, it is :executed.
@@ -615,11 +589,24 @@ endfunction
 " main function.  This allows us to default to a message whenever any error,
 " even a recoverable one, occurs, meaning the user quickly finds out when
 " something's wrong, but makes it very easy for the user to make us silent.
-function! s:CSApprox()
+function! s:CSApprox(...)
   try
+    if a:0 == 1 && a:1
+      if !exists('s:inhibit_hicolor_test')
+        let s:inhibit_hicolor_test = 0
+      endif
+      let s:inhibit_hicolor_test += 1
+    endif
+
     let savelz  = &lz
 
     set lz
+
+    if exists("g:CSApprox_attr_map") && type(g:CSApprox_attr_map) == type({})
+      call s:NormalizeAttrMap(g:CSApprox_attr_map)
+    else
+      let g:CSApprox_attr_map = { 'italic' : 'underline', 'sp' : 'fg' }
+    endif
 
     " colors_name must be unset and reset, or vim will helpfully reload the
     " colorscheme when we set the background for the Normal group.
@@ -660,6 +647,13 @@ function! s:CSApprox()
     endif
 
     let &lz   = savelz
+
+    if a:0 == 1 && a:1
+      let s:inhibit_hicolor_test -= 1
+      if s:inhibit_hicolor_test == 0
+        unlet s:inhibit_hicolor_test
+      endif
+    endif
   endtry
 endfunction
 
@@ -680,7 +674,7 @@ function! s:CSApproxImpl()
   endif
 
   " Get the current highlight colors
-  let highlights = s:Highlights()
+  let highlights = s:Highlights(["gui"])
 
   let hinums = keys(highlights)
 
@@ -692,17 +686,17 @@ function! s:CSApproxImpl()
   " XXX: s:inhibit_hicolor_test allows this test to be skipped for snapshots
   if !exists("s:inhibit_hicolor_test") || !s:inhibit_hicolor_test
     for hlid in hinums
-      let val = highlights[hlid]
-      if   (    val.cterm.bg > 15
-            \ && index(s:presets_{&t_Co}, str2nr(val.cterm.bg)) < 0)
-            \ || (    val.cterm.fg > 15
-            \ && index(s:presets_{&t_Co}, str2nr(val.cterm.fg)) < 0)
-        " The value is set above 15, and wasn't set by vim.
-        if &verbose >= 2
-          echomsg 'CSApprox: Exiting - high color found for' val.name
+      for type in [ 'bg', 'fg' ]
+        let color = synIDattr(hlid, type, 'cterm')
+
+        if color > 15 && index(s:presets_{&t_Co}, str2nr(color)) < 0
+          " The value is set above 15, and wasn't set by vim.
+          if &verbose >= 2
+            echomsg 'CSApprox: Exiting - high' type 'color found for' highlights[hlid].name
+          endif
+          return
         endif
-        return
-      endif
+      endfor
     endfor
   endif
 
@@ -710,7 +704,7 @@ function! s:CSApproxImpl()
   call s:FixupCtermInfo(highlights)
 
   " We need to set the Normal group first so 'bg' and 'fg' work as colors
-  call sort(hinums, "s:SortNormalFirst")
+  call insert(hinums, remove(hinums, index(hinums, string(s:hlid_normal))))
 
   " then set each color's cterm attributes to match gui
   for hlid in hinums
@@ -782,10 +776,10 @@ function! s:CSApproxSnapshot(file, overwrite)
     let lines += [ 'endif' ]
     let lines += [ '' ]
     let lines += [ 'if v:version < 700' ]
-    let lines += [ '    let g:colors_name = ' . string(fnamemodify(file, ':t:r')) ]
+    let lines += [ '    let g:colors_name = expand("<sfile>:t:r")' ]
     let lines += [ '    command! -nargs=+ CSAHi exe "hi" substitute(substitute(<q-args>, "undercurl", "underline", "g"), "guisp\\S\\+", "", "g")' ]
     let lines += [ 'else' ]
-    let lines += [ '    let g:colors_name = ' . string(fnamemodify(file, ':t:r')) ]
+    let lines += [ '    let g:colors_name = expand("<sfile>:t:r")' ]
     let lines += [ '    command! -nargs=+ CSAHi exe "hi" <q-args>' ]
     let lines += [ 'endif' ]
     let lines += [ '' ]
@@ -807,7 +801,9 @@ function! s:CSApproxSnapshot(file, overwrite)
         set t_Co=256
       endif
 
-      let highlights = s:Highlights()
+      call s:CSApprox()
+
+      let highlights = s:Highlights(["term", "cterm", "gui"])
       call s:FixupGuiInfo(highlights)
 
       if round == 'konsole' || round == 'eterm'
@@ -820,7 +816,11 @@ function! s:CSApproxSnapshot(file, overwrite)
         let lines += [ 'elseif has("gui_running") || &t_Co == ' . &t_Co ]
       endif
 
-      for hlnum in sort(keys(highlights), "s:SortNormalFirst")
+      let hinums = keys(highlights)
+
+      call insert(hinums, remove(hinums, index(hinums, string(s:hlid_normal))))
+
+      for hlnum in hinums
         let hl = highlights[hlnum]
         let line = '    CSAHi ' . hl.name
         for type in [ 'term', 'cterm', 'gui' ]
@@ -846,7 +846,7 @@ function! s:CSApproxSnapshot(file, overwrite)
     call writefile(lines, file)
   finally
     let &t_Co = save_t_Co
-    unlet s:inhibit_hicolor_test
+
     if exists("save_CSApprox_konsole")
       let g:CSApprox_konsole = save_CSApprox_konsole
     endif
@@ -862,12 +862,19 @@ function! s:CSApproxSnapshot(file, overwrite)
     if exists("syntax_cmd")
       let g:syntax_cmd = syntax_cmd
     endif
+
+    call s:CSApprox()
+
+    unlet s:inhibit_hicolor_test
   endtry
 endfunction
 
 " {>2} Snapshot user command
 command! -bang -nargs=1 -complete=file -bar CSApproxSnapshot
         \ call s:CSApproxSnapshot(<f-args>, strlen("<bang>"))
+
+" {>2} Manual updates
+command -bang -bar CSApprox call s:CSApprox(strlen("<bang>"))
 
 " {>1} Hooks
 

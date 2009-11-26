@@ -8,7 +8,7 @@
                 \___//___//_/ |_|/ .__// .__//_/   \___//_\_\  ~
                                 /_/   /_/                      ~
                                                   For Vim version 7.0 or newer
-                                                      Last changed 31 Jan 2009
+                                                      Last changed 01 Apr 2009
 
                                By Matt Wozniski
                                 mjw@drexel.edu
@@ -17,7 +17,7 @@
 
                                                                 *csapprox-toc*
 
-1. Description                                        |csapprox-intro|
+1. Introduction                                       |csapprox-intro|
 2. Requirements                                       |csapprox-requirements|
 3. Configuration                                      |csapprox-configure|
 4. Rationale/Design                                   |csapprox-design|
@@ -32,48 +32,37 @@ variable in your |vimrc| file: >
     :let g:CSApprox_loaded = 1
 
 ==============================================================================
-1. Description                                                *csapprox-intro*
+1. Introduction                                               *csapprox-intro*
 
-There is a wealth of colorschemes available for Vim.  Unfortunately, since
-traditional terminal emulators have only supported 2, 8 or 16 colors,
-colorscheme authors have tended to avoid writing colorschemes for terminal
-Vim, sticking instead to GVim.  Even now that nearly every popular terminal
-supports either 88 or 256 colors, few colorschemes are written to support
-them.  This may be because the terminal color codes are just numbers from 0 to
-87 or 255 with no semantic meaning, or because the same number doesn't yield
-the same color in all terminals, or simply because the colorscheme author
-doesn't use the terminal and doesn't want to take the time to support
-terminals.
+It's hard to find colorschemes for terminal Vim.  Most colorschemes are
+written to only support GVim, and don't work at all in terminal Vim.
 
-Whatever the reason, this leaves users of many modern terminal emulators in
-the awkward position of having a terminal emulator that supports many colors,
-but having very few colorschemes that were written to utilize those colors.
+This plugin makes GVim-only colorschemes Just Work in terminal Vim, as long
+as the terminal supports 88 or 256 colors - and most do these days.  This
+usually requires no user interaction (but see below for what to do if things
+don't Just Work).  After getting this plugin happily installed, any time you
+use :colorscheme it will do its magic and make the colorscheme Just Work.
 
-This is where CSApprox comes in.  It attempts to fill this void allowing GVim
-colorschemes to be used in terminal Vim.  CSApprox has two distinct modes of
-operation.  In the first mode, it attempts to make GVim colorschemes
-transparently backwards compatible with terminal Vim in a high color terminal.
-Basically, whenever a colorscheme is run it should set some colors for the
-GUI, and this script will then run and attempt to figure out the closest color
-available in the terminal's color palette to the color the scheme author asked
-for.  Unfortunately, this does not work well all the time, and it has some
-limitations (see |csapprox-limitations|).  Most of the time, however, this
-gives a very close approximation to the GVim colors without requiring any
-changes to the colorscheme, or any user interaction.  It only requires that
-the plugin be installed on the machine where Vim is being run, and that the
-user's environment meets the needs specified at |csapprox-requirements|.
+Whenever you change colorschemes using the :colorscheme command this script
+will be executed.  It will take the colors that the scheme specified for use
+in the GUI and use an approximation algorithm to try to gracefully degrade
+them to the closest color available in your terminal.  If you are running in
+a GUI or if your terminal doesn't support 88 or 256 colors, no changes are
+made.  Also, no changes will be made if the colorscheme seems to have been
+high color already.
 
+If for some reason this transparent method isn't suitable to you (for instance
+if your environment can't be configured to meet the |csapprox-requirements|,
+or you need to work in Vim 6), another option is also available: using the
+|:CSApproxSnapshot| command to create a new GUI/88-/256-color terminal
+colorscheme.  To use this command, a user would generally start GVim, choose a
+colorscheme that sets up the desired colors, and then use |:CSApproxSnapshot|
+to create a new colorscheme based on those colors that works in high color
+terminals.  This method is more flexible than the transparent mode and works
+in more places, but also requires more user intervention, and makes it harder
+to deal with colorschemes being updated and such.
                                                            *:CSApproxSnapshot*
-The other mode of operation allows creating a colorscheme suitable for use in
-high color terminals from the colorscheme currently in use.  To use this mode,
-a user would generally start GVim, choose a colorscheme that sets up the
-desired colors, and then use |:CSApproxSnapshot| to create a new colorscheme
-based on those colors that works in high color terminals.  This method has
-several advantages over the transparent mode of operation - for example, it
-doesn't cause any extra slowdown in Vim's starting and doesn't require a "vim"
-built with +gui on the machine where the scheme is used - but it requires
-action on the part of the user and can't be done transparently, making it much
-less convenient.  The syntax for the command is: >
+The full syntax for the command is: >
     :CSApproxSnapshot[!] /path/to/new/colorscheme
 <       For example: >
     :CSApproxSnapshot ~/.vim/colors/foobar.vim
@@ -90,6 +79,18 @@ NOTE: Although :CSApproxSnapshot can be used in both GVim and terminal Vim,
       I can find no way around this; Vim internally sets different colors when
       running in a terminal than running in the GUI, and there's no way for
       terminal Vim to figure out what color would have been used in GVim.
+
+                                                                   *:CSApprox*
+A command is also provided to run the approximation manually.  This might be
+useful if some colors were set outside of a colorscheme file, for instance.
+By default, it will not change any colors unless no highlight group is set to
+a color above 15, which is CSApprox's normal behavior.  This probably isn't
+useful in most use cases, though.  On the other hand, if a ! is provided,
+CSApprox will skip that test and update the cterm value for every highlight
+group from the corresponding gui color.  Syntax:
+>
+    :CSApprox[!]
+<
 
 ==============================================================================
 2. Requirements                                        *csapprox-requirements*
@@ -157,10 +158,18 @@ To turn on high color support without fixing $TERM, you can change t_Co in
 your .vimrc, and set either CSApprox_konsole or CSApprox_eterm if appropriate.
 One way would be to put something like this into your |vimrc|:
 >
-    if (&term == 'xterm' || &term =? '^screen') && hostname() == 'my-machine'
+    if (&term == 'xterm' || &term =~? '^screen') && hostname() == 'my-machine'
         " On my machine, I use Konsole with 256 color support
         set t_Co=256
         let g:CSApprox_konsole = 1
+    endif
+
+Gnome Terminal, as of the time that I am writing this, doesn't support having
+the terminal emulator set $TERM to something adequately descriptive.  In cases
+like this, something like the following would be appropriate:
+>
+    if &term =~ '^\(xterm\|screen\)$' && $COLORTERM == 'gnome-terminal'
+      set t_Co=256
     endif
 
 ==============================================================================
@@ -292,24 +301,13 @@ g:CSApprox_hook_{scheme}_post                                 *csapprox-hooks*
           colorscheme named "123 foo_bar-baz456.vim", the hook searched for
           will be, eg, g:CSApprox_hook_foo_barbaz456_post
 
-g:CSApprox_extra_rgb_txt_dirs                  *g:CSApprox_extra_rgb_txt_dirs*
-    When the colorscheme author uses a color by name, CSApprox needs to figure
-    out what #rrggbb value it stands for.  When not running in GVim, Vim can't
-    tell it, so it does this by parsing rgb.txt - but first needs to locate
-    it.  It has a default search path included, and will also search in any
-    directory in the user's 'runtimepath', but first any directory included in
-    this variable will be searched.  Failing to find any valid rgb.txt is an
-    unrecoverable error, but it should never happen since CSApprox includes an
-    rgb.txt in its distribution.  The only reason for preferring other rgb.txt
-    files on the system to the one distributed with CSApprox is that they
-    might more accurately reflect the colors used in GVim; different rgb.txt
-    files might have different values for some colors.  Default search path:
->
-    [ /usr/local/share/X11, /usr/share/X11, /etc/X11, /usr/local/lib/X11,
-      /usr/lib/X11, /usr/local/X11R6/lib/X11, /usr/X11R6/lib/X11 ]
-<
-    Snapshotted schemes will never contain colors by name, so this option is
-    unneeded and won't be used.
+g:CSApprox_use_showrgb                                *g:CSApprox_use_showrgb*
+    By default, CSApprox will use a built in mapping of color names to values.
+    This optimization greatly helps speed, but means that colors addressed by
+    name might not match up perfectly between gvim (which uses the system's
+    real rgb database) and CSApprox (which uses the builtin database).  To
+    force CSApprox to try the systemwide database first, and only fall back on
+    the builtin database if it isn't available, set this variable non-zero.
 
 g:CSApprox_approximator_function            *g:CSApprox_approximator_function*
     If the default approximation function doesn't work well enough, the user
@@ -336,6 +334,37 @@ g:CSApprox_redirfallback                            *g:CSApprox_redirfallback*
 ==============================================================================
 4. Rationale/Design                                          *csapprox-design*
 
+There is a wealth of colorschemes available for Vim.  Unfortunately, since
+traditional terminal emulators have only supported 2, 8 or 16 colors,
+colorscheme authors have tended to avoid writing colorschemes for terminal
+Vim, sticking instead to GVim.  Even now that nearly every popular terminal
+supports either 88 or 256 colors, few colorschemes are written to support
+them.  This may be because the terminal color codes are just numbers from 0 to
+87 or 255 with no semantic meaning, or because the same number doesn't yield
+the same color in all terminals, or simply because the colorscheme author
+doesn't use the terminal and doesn't want to take the time to support
+terminals.
+
+Whatever the reason, this leaves users of many modern terminal emulators in
+the awkward position of having a terminal emulator that supports many colors,
+but having very few colorschemes that were written to utilize those colors.
+
+This is where CSApprox comes in.  It attempts to fill this void allowing GVim
+colorschemes to be used in terminal Vim.  CSApprox has two distinct modes of
+operation.  In the first mode, it attempts to make GVim colorschemes
+transparently backwards compatible with terminal Vim in a high color terminal.
+Basically, whenever a colorscheme is run it should set some colors for the
+GUI, and this script will then run and attempt to figure out the closest color
+available in the terminal's color palette to the color the scheme author asked
+for.  Unfortunately, this does not work well all the time, and it has some
+limitations (see |csapprox-limitations|).  Most of the time, however, this
+gives a very close approximation to the GVim colors without requiring any
+changes to the colorscheme, or any user interaction.  It only requires that
+the plugin be installed on the machine where Vim is being run, and that the
+user's environment meets the needs specified at |csapprox-requirements|.  In
+the event that this doesn't work, a second option - using :CSApproxSnapshot
+to create a new, 88-/256-color capable colorscheme - is available.
+
 Ideally, the aim is for CSApprox to be completely transparent to the user.
 This is why the approach I take is entirely different from the GuiColorScheme
 script, which will break on any but the simplest colorschemes.  Unfortunately,
@@ -348,9 +377,11 @@ to make it easy to override my choice of defaults when necessary (through
 g:CSApprox_approximator_function, g:CSApprox_konsole, g:CSApprox_eterm,
 g:CSApprox_attr_map, etc).
 
-In the event that the transparent solution is undesirable, |:CSApproxSnapshot|
-should provide a workable alternative - less cool, and less flexible, but it
-will work in more environments, and the snapshot will even work in Vim 6.
+In the event that the transparent solution is undesirable, or that the user's
+environment can't be configured to allow it (no GVim and no Vim with +gui, for
+instance), |:CSApproxSnapshot| should provide a workable alternative - less
+cool, and less flexible, but it will work in more environments, and the
+snapshotted colorscheme will even work in Vim 6.
 
 If any of my design choices seem to be causing extra work with no real
 advantages, though, I'd like to hear about it.  Feel free to email me with any
@@ -405,6 +436,17 @@ Transparently adapting schemes is slow.
   on this time in future versions.  Snapshotted schemes are faster to use,
   since all of the hard evaluations are made when they're made instead of when
   they're used.
+
+  NOTE: As of CSApprox 3.50, the overhead is down to about 0.10 seconds on my
+        test machine.
+
+It isn't possible to approximate only a particular set of groups.
+
+  Unfortunately, the :CSApprox command will always update all groups, even if
+  only a small set of groups has changed.  A future improvement would be to
+  provide a function called, say, CSApprox(), that takes an optional list of
+  highlight groups (default: all) and only does approximation for those
+  groups.
 
 ==============================================================================
 6. Appendix - Terminals and Palettes                  *csapprox-terminal-list*
@@ -506,6 +548,29 @@ kterm (as of version 6.2.0)
 
 ==============================================================================
 7. Changelog                                              *csapprox-changelog*
+
+ 3.50   01 Apr 2009   Fix a major regression that prevented the Eterm and
+                      Konsole colors from being correctly snapshotted
+
+                      Fix a related bug causing incorrect terminal colors
+                      after calling :CSApproxSnapshot
+
+                      Fix a bug causing black to be used instead of dark grey
+
+                      Have snapshots calculate g:colors_name programmatically
+
+                      Introduce many tweaks for better speed
+
+                      Clarify some things at :help csapprox-terminal-example
+
+                      Default to using our own list of rgb.txt colors rather
+                      than searching, for performance.  Add a new variable,
+                      g:CSApprox_use_showrgb, which forces us to try finding
+                      the colors using the "showrgb" program instead, and fall
+                      back on our own list if it isn't available
+
+                      Remove g:CSApprox_extra_rgb_txt_dirs - not needed in
+                      light of the above change
 
  3.05   31 Jan 2009   Fix a harmless "Undefined variable" error in
                       :CSApproxSnapshot
