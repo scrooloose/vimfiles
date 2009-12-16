@@ -24,10 +24,13 @@ CONTENTS                                                  *syntastic-contents*
         2.1.The statusline flag...............|syntastic-statusline-flag|
         2.2.Error signs.......................|syntastic-error-signs|
         2.3.Error window......................|syntastic-error-window|
-    3.Options.................................|syntastic-options|
-    4.Writing syntax checkers.................|syntastic-syntax-checkers|
-    5.About...................................|syntastic-about|
-    6.License.................................|syntastic-license|
+    3.Commands................................|syntastic-commands|
+    4.Options.................................|syntastic-options|
+    5.Writing syntax checkers.................|syntastic-syntax-checkers|
+    6.About...................................|syntastic-about|
+    7.Changelog...............................|syntastic-changelog|
+    8.Credits.................................|syntastic-credits|
+    9.License.................................|syntastic-license|
 
 
 ==============================================================================
@@ -104,8 +107,21 @@ in the |location-list|.
 Note that when you use :Errors, the current location list is overwritten with
 Syntastic's own location list.
 
+
 ==============================================================================
-3. Options                                                 *syntastic-options*
+3. Commands                                               *syntastic-commands*
+
+:SyntasticDisable [filetype]                               *:SyntasticDisable*
+    Disables syntax checking for the the given filetype (if specified), or the
+    current filetype.
+
+:SyntasticEnable [filetype]                                *:SyntasticEnable*
+    Enables syntax checking for the the given filetype (if specified), or the
+    current filetype.
+
+
+==============================================================================
+4. Options                                                 *syntastic-options*
 
                                                     *'syntastic_enable_signs'*
 Use this option to tell syntastic to use the |:sign| interface to mark syntax
@@ -133,8 +149,16 @@ this option has the following effects:
 >
     let g:syntastic_quiet_warnings=1
 <
+
+                                              *'syntastic_disabled_filetypes'*
+Use this option to disable syntax checking on selected filetypes by default.
+Should be set to a list of filetypes, e.g. >
+    let g:syntastic_disabled_filetypes = ['ruby', 'php']
+<
+Syntax checking can be enabled again via |:SyntasticEnable|.
+
 ==============================================================================
-4. Writing syntax checkers                         *syntastic-syntax-checkers*
+5. Writing syntax checkers                         *syntastic-syntax-checkers*
 
 
 A syntax checker plugin is really nothing more than a single function.  You
@@ -174,7 +198,7 @@ SyntasticMake({options})                                     *SyntasticMake()*
 
 
 ==============================================================================
-5. About                                                     *syntastic-about*
+6. About                                                     *syntastic-about*
 
 The author of syntastic is a mighty wild stallion, hear him roar! >
      _   _ _____ _____ ___ ___ ___ ____ _   _ _
@@ -185,8 +209,8 @@ The author of syntastic is a mighty wild stallion, hear him roar! >
 
 <
 He likes to trot around in the back yard reading his emails and sipping a
-scolding hot cup of Earl Grey. Email him at martin_grenfell at msn dot com. He
-can also be found trolling the #vim channel on the freenode IRC network as
+scolding hot cup of Earl Grey. Email him at martin.grenfell at gmail dot com.
+He can also be found trolling the #vim channel on the freenode IRC network as
 scrooloose.
 
 Bug reports, feedback, suggestions etc are welcomed.
@@ -198,7 +222,36 @@ The latest dev versions are on github
     http://github.com/scrooloose/syntastic
 
 ==============================================================================
-6. License                                                 *syntastic-license*
+7. Changelog                                             *syntastic-changelog*
+
+1.1.0 [codenamed: tpimp]
+    - Dont load rubygems for ruby/eruby syntax checkers. Thanks tpope.
+    - Improve the javascript syntax checker to catch some warnings that were
+      getting missed. Thanks tpope.
+    - Dont automatically focus the error window. Thanks tpope.
+    - Add support for cucumber [tpope], haskell & perl [Anthony Carapetis],
+      and xhtml
+    - Add commands to enable/disable syntax checking at runtime. See :help
+      syntastic-commands.
+    - Add an option to specifiy syntax checkers that should be disabled by
+      default. See :help syntastic_disabled_filetypes.
+    - Dont use :signs if vim wasnt compiled with support for them.
+
+
+==============================================================================
+8. Credits                                                 *syntastic-credits*
+
+Thanks to the following people for testing, bug reports, patches etc. They own,
+hard.
+
+    Tim Carey-Smith (halorgium)
+    Tim Pope (tpope)
+    Travis Jeffery
+    Anthony Carapetis
+
+
+==============================================================================
+9. License                                                 *syntastic-license*
 
 Syntastic is released under the wtfpl.
 See http://sam.zoy.org/wtfpl/COPYING.
