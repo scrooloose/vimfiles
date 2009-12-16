@@ -1,12 +1,13 @@
-*bufexplorer.txt*              Buffer Explorer       Last Change: 19 Nov 2008
+*bufexplorer.txt*              Buffer Explorer       Last Change: 15 Dec 2009
 
 Buffer Explorer                                *buffer-explorer* *bufexplorer*
-                                Version 7.2.2
+                                Version 7.2.3
 
 Plugin for easily exploring (or browsing) Vim |:buffers|.
 
-|bufexplorer-usage|          Usage
 |bufexplorer-installation|   Installation
+|bufexplorer-usage|          Usage
+|bufexplorer-windowlayout|   Window Layout
 |bufexplorer-customization|  Customization
 |bufexplorer-changelog|      Change Log
 |bufexplorer-todo|           Todo
@@ -27,7 +28,7 @@ To install:
   - Start Vim or goto an existing instance of Vim.
   - Execute the following command:
 >
-      :helptag <your runtime directory/doc
+      :helptag <your runtime directory>/doc
 <
     This will generate all the help tags for any file located in the doc
     directory.
@@ -36,11 +37,11 @@ To install:
 USAGE                                                      *bufexplorer-usage*
 
 To start exploring in the current window, use: >
- \be   OR  :BufExplorer
+ \be   or   :BufExplorer
 To start exploring in a newly split horizontal window, use: >
- \bs  or  :HSBufExplorer
+ \bs   or   :BufExplorerHorizontalSplit
 To start exploring in a newly split vertical window, use: >
- \bv  or  :VSBufExplorer
+ \bv   or   :BufExplorerVerticalSplit
 
 If you would like to use something other than '\', you may simply change the
 leader (see |mapleader|).
@@ -51,24 +52,27 @@ Note: If the current buffer is modified when bufexplorer started, the current
 
 Commands to use once exploring:
 
+ <F1>          Toggle help information.
  <enter>       Opens the buffer that is under the cursor into the current
                window.
- <F1>          Toggle help information.
  <leftmouse>   Opens the buffer that is under the cursor into the current
                window.
  <shift-enter> Opens the buffer that is under the cursor in another tab.
- d             |:wipeout| the buffer under the cursor from the list.
-               When a buffers is wiped, it will not be shown when unlisted
-               buffer are displayed.
- D             |:delete| the buffer under the cursor from the list.
-               The buffer's 'buflisted' is cleared. This allows for the buffer
-               to be displayed again using the 'show unlisted' command.
+ D            |:delete|the buffer under the cursor from the list.  The
+               buffer's 'buflisted' is cleared. This allows for the buffer to
+               be displayed again using the 'show unlisted' command.
+ R             Toggles relative path/absolute path.
+ T             Toggles to show only buffers for this tab or not.
+ d            |:wipeout|the buffer under the cursor from the list.  When a
+               buffers is wiped, it will not be shown when unlisted buffer are
+               displayed.
  f             Toggles whether you are taken to the active window when
                selecting a buffer or not.
+ o             Opens the buffer that is under the cursor into the current
+               window.
  p             Toggles the showing of a split filename/pathname.
  q             Quit exploring.
  r             Reverses the order the buffers are listed in.
- R             Toggles relative path/absolute path.
  s             Selects the order the buffers are listed in. Either by buffer
                number, file name, file extension, most recently used (MRU), or
                full path.
@@ -81,6 +85,23 @@ able to move the cursor to the line containing the buffer's name you are
 wanting to act upon. Once you have selected the buffer you would like,
 you can then either open it, close it(delete), resort the list, reverse
 the sort, quit exploring and so on...
+
+===============================================================================
+WINDOW LAYOUT                                       *bufexplorer-windowlayout*
+
+-------------------------------------------------------------------------------
+" Press <F1> for Help
+" Sorted by mru | Locate buffer | Absolute Split path
+"=
+ 01 %a    bufexplorer.txt      C:\Vim\vimfiles\doc       line 87
+ 02 #     bufexplorer.vim      c:\Vim\vimfiles\plugin    line 1
+-------------------------------------------------------------------------------
+  | |     |                    |                         |
+  | |     |                    |                         +-- Current Line #.
+  | |     |                    +-- Relative/Full Path
+  | |     +-- Buffer Name.
+  | +-- Buffer Attributes. See|:buffers|for more information.
+  +-- Buffer Number. See|:buffers|for more information.
 
 ===============================================================================
 CUSTOMIZATION                                       *bufexplorer-customization*
@@ -161,14 +182,37 @@ current window, use: >
   let g:bufExplorerSplitRight=1        " Split right.
 The default is to use the global &splitright.
 
+                                                   *g:bufExplorerShowTabBuffer*
+To control weither or not to show buffers on for the specific tab or not, use: >
+  let g:bufExplorerShowTabBuffer=0        " No.
+  let g:bufExplorerShowTabBuffer=1        " Yes.
+The default is not to show.
+
 ===============================================================================
 CHANGE LOG                                              *bufexplorer-changelog*
 
-7.2.2  - Fix:
+7.2.3  - Enhancements:
+         * Thanks to David Fishburn for helping me out with a much needed
+           code overhaul as well as some awesome performance enhancements.
+           He also reworked the handling of tabs.
+         * Thanks to Vladimir Dobriakov for making the suggestions on
+           enhancing the documentation to include a better explaination of
+           what is contained in the main bufexplorer window.
+         * Thanks to Yuriy Ershov for added code that when the bufexplorer
+           window is opened, the cursor is now positioned at the line with the
+           active buffer (useful in non-MRU sort modes).
+         * Yuriy also added the abiltiy to cycle through the sort fields in
+           reverse order.
+         Fixes:
+         * Thanks to Michael Henry for supplying a patch that allows
+           bufexplorer to be opened even when there is one buffer or less.
+         * Thanks to Godefroid Chapelle for supplying a patch that fixed
+           MRU sort order after loading a session.
+7.2.2  - Fixes:
          * Thanks to David L. Dight for spotting and fixing an issue when
            using ctrl^. bufexplorer would incorrectly handle the previous
            buffer so that when ctrl^ was pressed the incorrect file was opened.
-7.2.1  - Fix:
+7.2.1  - Fixes:
          * Thanks to Dimitar for spotting and fixing a feature that was
            inadvertently left out of the previous version. The feature was
            when bufexplorer was used together with WinManager, you could use
@@ -419,14 +463,13 @@ CHANGE LOG                                              *bufexplorer-changelog*
          *compliant*, adding default keymappings of <Leader>be and <Leader>bs
          as well as fixing the 'w:sortDirLabel not being defined' bug.
 6.0.3  - Added sorting capabilities. Sort taken from explorer.vim.
-6.0.2  - Can't remember.
+6.0.2  - Can't remember. (2001-07-25)
 6.0.1  - Initial release.
 
 ===============================================================================
 TODO                                                         *bufexplorer-todo*
 
-- The issuing of a ':bd' command does not always remove the buffer number from
-  the MRU list.
+- Nothing as of now, buf if you have any suggestions, drop me an email.
 
 ===============================================================================
 CREDITS                                                   *bufexplorer-credits*
