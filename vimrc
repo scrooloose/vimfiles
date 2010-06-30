@@ -108,21 +108,12 @@ function! StatuslineTabWarning()
         endif
 
         let tabs = search('^\t', 'nw') != 0
-        let spaces = search('^ ', 'nw') != 0
 
+        "find spaces that arent used as alignment in the first indent column
+        let spaces = search('^ \{' . &ts . ',}[^\t]', 'nw') != 0
 
         if tabs && spaces
-
-            if &et
-                let b:statusline_tab_warning =  '[mixed-indenting]'
-            else
-                "if using tabs, allow alignment at the start of the line
-                "of up to one &ts width
-                if search('^ \{' . &ts . ',}', 'nw') != 0
-                    let b:statusline_tab_warning =  '[mixed-indenting]'
-                endif
-            endif
-
+            let b:statusline_tab_warning =  '[mixed-indenting]'
         elseif (spaces && !&et) || (tabs && &et)
             let b:statusline_tab_warning = '[&et]'
         endif
