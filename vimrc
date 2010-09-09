@@ -189,6 +189,8 @@ endfunction
 set undodir=~/.vim/undofiles
 set undofile
 
+set colorcolumn=+1
+
 "indent settings
 set shiftwidth=4
 set softtabstop=4
