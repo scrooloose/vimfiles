@@ -20,20 +20,14 @@ if !executable("sass")
 endif
 
 function! SyntaxCheckers_sass_GetLocList()
-    let output = system("sass -c " . expand("%"))
-    if v:shell_error != 0
-        "sass only outputs the first error, so parse it ourselves
+    let makeprg='sass --check %'
+    let errorformat = '%Wwarning on line %l:,%Z%m,Syntax %trror on line %l: %m'
+    let loclist = SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
 
-        let makeprg='sass --check %'
-        let errorformat = '%Wwarning on line %l:,%Z%m,Syntax %trror on line %l: %m'
-        let loclist = SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
+    let bn = bufnr("")
+    for i in loclist
+        let i['bufnr'] = bn
+    endfor
 
-        let bn = bufnr("")
-        for i in loclist
-            let i['bufnr'] = bn
-        endfor
-
-        return loclist
-    endif
-    return []
+    return loclist
 endfunction
