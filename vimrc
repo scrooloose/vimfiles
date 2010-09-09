@@ -185,6 +185,10 @@ function! s:Median(nums)
     endif
 endfunction
 
+"undo settings
+set undodir=~/.vim/undofiles
+set undofile
+
 "indent settings
 set shiftwidth=4
 set softtabstop=4
