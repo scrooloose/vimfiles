@@ -185,11 +185,13 @@ function! s:Median(nums)
     endif
 endfunction
 
-"undo settings
-set undodir=~/.vim/undofiles
-set undofile
+if v:version >= 703
+    "undo settings
+    set undodir=~/.vim/undofiles
+    set undofile
 
-set colorcolumn=+1
+    set colorcolumn=+1
+endif
 
 "indent settings
 set shiftwidth=4
