@@ -2,3 +2,4 @@ tags
 *~
 *.swp
 .VimballRecord
+undofiles/*
