@@ -299,6 +299,9 @@ function! SetCursorPosition()
     end
 endfunction
 
+"spell check when writing commit logs
+autocmd filetype svn,*commit* set spell
+
 "define :HighlightLongLines command to highlight the offending parts of
 "lines that are longer than the specified length (defaulting to 80)
 command! -nargs=? HighlightLongLines call s:HighlightLongLines('<args>')
