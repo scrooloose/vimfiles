@@ -193,6 +193,10 @@ if v:version >= 703
     set colorcolumn=+1
 endif
 
+"activate pathogen
+call pathogen#runtime_append_all_bundles()
+call pathogen#helptags()
+
 "indent settings
 set shiftwidth=4
 set softtabstop=4
