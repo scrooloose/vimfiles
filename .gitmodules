@@ -40,3 +40,6 @@
 [submodule "bundle/taglist"]
 	path = bundle/taglist
 	url = https://github.com/vim-scripts/taglist.vim.git
+[submodule "bundle/indexed-search"]
+	path = bundle/indexed-search
+	url = https://github.com/vim-scripts/IndexedSearch.git
