@@ -49,3 +49,6 @@
 [submodule "bundle/matchit"]
 	path = bundle/matchit
 	url = https://github.com/vim-scripts/matchit.zip.git
+[submodule "bundle/markdown-runtime"]
+	path = bundle/markdown-runtime
+	url = https://github.com/tpope/vim-markdown.git
