@@ -245,7 +245,7 @@ endfunction
 
 "syntastic settings
 let g:syntastic_enable_signs=1
-let g:syntastic_auto_loc_list=1
+let g:syntastic_auto_loc_list=2
 
 "snipmate settings
 let g:snips_author = "Martin Grenfell"
@@ -260,6 +260,7 @@ let Tlist_Use_Right_Window=1
 let Tlist_GainFocus_On_ToggleOpen = 1
 let Tlist_Display_Tag_Scope = 1
 let Tlist_Process_File_Always = 1
+let Tlist_Show_One_File = 1
 
 "nerdtree settings
 let g:NERDTreeMouseMode = 2
