@@ -73,3 +73,6 @@
 [submodule "bundle/tabular"]
 	path = bundle/tabular
 	url = https://github.com/godlygeek/tabular.git
+[submodule "bundle/unimpared"]
+	path = bundle/unimpared
+	url = https://github.com/tpope/vim-unimpaired.git
