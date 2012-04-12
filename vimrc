@@ -3,8 +3,7 @@
 set nocompatible
 
 "activate pathogen
-call pathogen#runtime_append_all_bundles()
-call pathogen#helptags()
+call pathogen#infect()
 
 "allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -20,7 +19,6 @@ set number      "show line numbers
 "display tabs and trailing spaces
 set list
 set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
-
 
 set incsearch   "find the next match as we type the search
 set hlsearch    "hilight searches by default
@@ -245,25 +243,6 @@ function! s:Median(nums)
     endif
 endfunction
 
-"syntastic settings
-let g:syntastic_enable_signs=1
-let g:syntastic_auto_loc_list=2
-
-"snipmate settings
-let g:snips_author = "Martin Grenfell"
-
-"taglist settings
-let Tlist_Compact_Format = 1
-let Tlist_Enable_Fold_Column = 0
-let Tlist_Exit_OnlyWindow = 0
-let Tlist_WinWidth = 35
-let tlist_php_settings = 'php;c:class;f:Functions'
-let Tlist_Use_Right_Window=1
-let Tlist_GainFocus_On_ToggleOpen = 1
-let Tlist_Display_Tag_Scope = 1
-let Tlist_Process_File_Always = 1
-let Tlist_Show_One_File = 1
-
 "nerdtree settings
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
@@ -271,7 +250,7 @@ let g:NERDTreeWinSize = 40
 "explorer mappings
 nnoremap <f1> :BufExplorer<cr>
 nnoremap <f2> :NERDTreeToggle<cr>
-nnoremap <f3> :TlistToggle<cr>
+nnoremap <f3> :TagbarToggle<cr>
 
 "source project specific config files
 runtime! projects/**/*.vim
