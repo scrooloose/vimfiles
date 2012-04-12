@@ -74,7 +74,9 @@ set t_Co=256
 set hidden
 
 "statusline setup
-set statusline=%f       "tail of the filename
+set statusline =%#identifier#
+set statusline+=[%t]    "tail of the filename
+set statusline+=%*
 
 "display a warning if fileformat isnt unix
 set statusline+=%#warningmsg#
@@ -88,8 +90,16 @@ set statusline+=%*
 
 set statusline+=%h      "help file flag
 set statusline+=%y      "filetype
-set statusline+=%r      "read only flag
-set statusline+=%m      "modified flag
+
+"read only flag
+set statusline+=%#identifier#
+set statusline+=%r
+set statusline+=%*
+
+"modified flag
+set statusline+=%#identifier#
+set statusline+=%m
+set statusline+=%*
 
 set statusline+=%{fugitive#statusline()}
 
