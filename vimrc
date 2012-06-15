@@ -34,6 +34,8 @@ if v:version >= 703
     set colorcolumn=+1 "mark the ideal max text width
 endif
 
+set directory=~/.vim/swapfiles//
+
 "default indent settings
 set shiftwidth=4
 set softtabstop=4
