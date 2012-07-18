@@ -263,6 +263,7 @@ let g:NERDTreeWinSize = 40
 nnoremap <f1> :BufExplorer<cr>
 nnoremap <f2> :NERDTreeToggle<cr>
 nnoremap <f3> :TagbarToggle<cr>
+nnoremap <c-f> :CtrlP<cr>
 
 "source project specific config files
 runtime! projects/**/*.vim
