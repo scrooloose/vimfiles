@@ -17,8 +17,8 @@ set showmode    "show current mode down the bottom
 set number      "show line numbers
 
 "display tabs and trailing spaces
-set list
-set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
+"set list
+"set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
 
 set incsearch   "find the next match as we type the search
 set hlsearch    "hilight searches by default
@@ -37,8 +37,11 @@ endif
 "default indent settings
 set shiftwidth=4
 set softtabstop=4
-set expandtab
+"set expandtab
 set autoindent
+set tabstop=4
+set shiftwidth=4
+filetype indent plugin on
 
 "folding settings
 set foldmethod=indent   "fold based on indent
@@ -312,3 +315,6 @@ let g:solarized_termcolors=256
 "let g:solarized_contrast = "high"
 colorscheme solarized
 
+"only exec emmet in html and css
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
