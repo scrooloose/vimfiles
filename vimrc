@@ -250,8 +250,6 @@ let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
 
 "explorer mappings
-nnoremap <f1> :BufExplorer<cr>
-nnoremap <f2> :NERDTreeToggle<cr>
 nnoremap <f3> :TagbarToggle<cr>
 
 "source project specific config files
@@ -318,3 +316,5 @@ colorscheme solarized
 "only exec emmet in html and css
 let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
+hi ColorColumn ctermfg=none
+hi ColorColumn ctermbg=none
