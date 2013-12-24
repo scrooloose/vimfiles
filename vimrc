@@ -307,14 +307,18 @@ autocmd BufReadPost fugitive://*
   \   nnoremap <buffer> .. :edit %:h<CR> |
   \ endif
 
-set background=dark
-let g:solarized_termcolors=256
-"let g:solarized_visibility = "high"
-"let g:solarized_contrast = "high"
-colorscheme solarized
+"set background=dark
+"let g:rehash256 = 1
+"let g:molokai_original = 1
+let g:solarized_termcolors = 256
+let g:solarized_visibility = "high"
+let g:solarized_contrast = "normal"
+let g:solarized_termtrans = 0
+let g:solarized_degrade = 0
+colorscheme solarized "railscasts
 
 "only exec emmet in html and css
 let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
+autocmd FileType html,css,xml EmmetInstall
 hi ColorColumn ctermfg=none
 hi ColorColumn ctermbg=none

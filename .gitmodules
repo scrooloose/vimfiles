@@ -97,3 +97,6 @@
 [submodule "bundle/tcomment"]
 	path = bundle/tcomment
 	url = https://github.com/tomtom/tcomment_vim.git
+[submodule "bundle/molokai"]
+	path = bundle/molokai
+	url = https://github.com/tomasr/molokai.git
