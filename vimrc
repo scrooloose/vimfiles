@@ -17,8 +17,8 @@ set showmode    "show current mode down the bottom
 set number      "show line numbers
 
 "display tabs and trailing spaces
-"set list
-"set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
+set list
+set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
 
 set incsearch   "find the next match as we type the search
 set hlsearch    "hilight searches by default
