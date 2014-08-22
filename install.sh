@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ln -s ~/.vim/vimrc ~/.vimrc
 pushd ~/.vim
 git submodule init
