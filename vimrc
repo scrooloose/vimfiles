@@ -246,6 +246,9 @@ endfunction
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
 
+"ctrlp settings
+let g:ctrlp_map = '<c-f>'
+
 "explorer mappings
 nnoremap <f1> :BufExplorer<cr>
 nnoremap <f2> :NERDTreeToggle<cr>
