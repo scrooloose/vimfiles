@@ -60,8 +60,10 @@ set sidescroll=1
 filetype plugin on
 filetype indent on
 
-"turn on syntax highlighting
+"turn on syntax highlighting and set color scheme
 syntax on
+set background=dark
+colorscheme solarized
 
 "some stuff to get the mouse going in term
 set mouse=a
