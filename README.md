@@ -9,6 +9,8 @@ Clone the repo:
 Grab the plugin submodules:
 `cd ~/.vim && git submodule init && git submodule update`
 
+Update plugins to latest version:
+`cd ~/.vim && git submodule foreach git pull origin master`
 
 Make sure vim finds the vimrc file by either symlinking it:
 `ln -s ~/.vim/vimrc ~/.vimrc`
