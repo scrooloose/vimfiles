@@ -2,8 +2,35 @@
 "This must be first, because it changes other options as a side effect.
 set nocompatible
 
-"activate pathogen
-call pathogen#infect()
+"set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+"let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+Plugin 'jlanzarotta/bufexplorer'
+Plugin 'godlygeek/csapprox'
+Plugin 'kien/ctrlp.vim'
+Plugin 'tpope/vim-endwise'
+Plugin 'henrik/vim-indexed-search'
+Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'scrooloose/nerdcommenter'
+Plugin 'scrooloose/syntastic'
+Plugin 'tpope/vim-rails'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-fugitive'
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
+Plugin 'mbbill/undotree'
+Plugin 'vim-scripts/YankRing.vim'
+Plugin 'majutsushi/tagbar'
+Plugin 'kien/rainbow_parentheses.vim'
+Plugin 'file:///home/marty/projects/nerdtree-project-plugin/'
+
+"All of your Plugins must be added before the following line
+call vundle#end()
 
 "allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -72,12 +99,19 @@ set ttymouse=xterm2
 "tell the term has 256 colors
 set t_Co=256
 
+colorscheme github
+
 "hide buffers when not displayed
 set hidden
 
+iabbrev teh the
+
+set ignorecase
+set smartcase
+
 "statusline setup
 set statusline =%#identifier#
-set statusline+=[%t]    "tail of the filename
+set statusline+=[%f]    "tail of the filename
 set statusline+=%*
 
 "display a warning if fileformat isnt unix
@@ -99,7 +133,7 @@ set statusline+=%r
 set statusline+=%*
 
 "modified flag
-set statusline+=%#identifier#
+set statusline+=%#warningmsg#
 set statusline+=%m
 set statusline+=%*
 
@@ -255,14 +289,20 @@ function! s:Median(nums)
     endif
 endfunction
 
+"syntastic settings
+let syntastic_stl_format = '[Syntax: %E{line:%fe }%W{#W:%w}%B{ }%E{#E:%e}]'
+
 "nerdtree settings
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
+let g:NERDTreeChDirMode=2
+let g:NERDTreeMinimalUI=1
 
 "explorer mappings
 nnoremap <f1> :BufExplorer<cr>
 nnoremap <f2> :NERDTreeToggle<cr>
 nnoremap <f3> :TagbarToggle<cr>
+nnoremap <f4> :NERDTreeFind<cr>
 nnoremap <c-f> :CtrlP<cr>
 
 "source project specific config files
@@ -303,7 +343,9 @@ function! SetCursorPosition()
             exe "normal! g`\""
             normal! zz
         endif
-    end
+    else
+        call cursor(1,1)
+    endif
 endfunction
 
 "spell check when writing commit logs
@@ -320,3 +362,28 @@ autocmd BufReadPost fugitive://*
   \   nnoremap <buffer> .. :edit %:h<CR> |
   \ endif
 
+
+"for rails specs, toggle `focus: true` on the current spec/describe block with F7
+autocmd bufreadpre,bufnewfile *_spec.rb nnoremap <F7> :call <SID>FocusSpecToggle()<cr>
+function! s:FocusSpecToggle() abort
+    let oldpos = getpos(".")
+    call search('^\s*\(scenario \|it \|feature \|describe \|context \)', 'b')
+
+    if match(getline("."), 'focus: true') == -1
+        s/.*\zs\s\+do/, focus: true do/
+    else
+        s/,\s*focus: true\s*do/ do/
+    endif
+
+    call setpos(".", oldpos)
+    write
+endfunction
+
+"activate rainbow parens for clojure
+autocmd syntax clojure call s:ActivateRainbowParens()
+function s:ActivateRainbowParens() abort
+    RainbowParenthesesToggle
+    RainbowParenthesesLoadRound
+    RainbowParenthesesLoadSquare
+    RainbowParenthesesLoadBraces
+endfunction
