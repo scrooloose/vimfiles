@@ -40,8 +40,11 @@ set softtabstop=4
 set expandtab
 set autoindent
 set tabstop=4
-set shiftwidth=4
 filetype indent plugin on
+
+autocmd Filetype ruby setlocal ts=2 sts=2 sw=2 expandtab
+autocmd Filetype html setlocal ts=2 sts=2 sw=2 expandtab
+autocmd Filetype css setlocal ts=2 sts=2 sw=2 expandtab
 
 "folding settings
 set foldmethod=indent   "fold based on indent
@@ -322,3 +325,5 @@ let g:user_emmet_install_global = 0
 autocmd FileType html,css,xml EmmetInstall
 hi ColorColumn ctermfg=none
 hi ColorColumn ctermbg=none
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlP'
