@@ -21,16 +21,22 @@ Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-ragtag'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'mbbill/undotree'
 Plugin 'vim-scripts/YankRing.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'kien/rainbow_parentheses.vim'
-Plugin 'file:///home/marty/projects/nerdtree-project-plugin/'
+Plugin 'Valloric/MatchTagAlways'
+Plugin 'EinfachToll/DidYouMean'
+Plugin 'AndrewRadev/splitjoin.vim'
+Plugin 'michaeljsmith/vim-indent-object'
 
 "All of your Plugins must be added before the following line
 call vundle#end()
+
+runtime macros/matchit.vim
 
 "allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -352,6 +358,9 @@ autocmd BufReadPost fugitive://*
   \ endif
 
 
+"ruby settings
+let g:ruby_indent_access_modifier_style = 'outdent'
+
 "for rails specs, toggle `focus: true` on the current spec/describe block with F7
 autocmd bufreadpre,bufnewfile *_spec.rb nnoremap <F7> :call <SID>FocusSpecToggle()<cr>
 function! s:FocusSpecToggle() abort
@@ -375,4 +384,24 @@ function s:ActivateRainbowParens() abort
     RainbowParenthesesLoadRound
     RainbowParenthesesLoadSquare
     RainbowParenthesesLoadBraces
+endfunction
+
+"when copying/pasting from the term into :e from a git diff or rspec or
+"similar we edit things like
+"
+"./app/models/foo.rb:10:in
+"
+"Save the time of stripping trailing shit and just make this edit and go to
+"line 10.
+autocmd bufenter * call s:checkForLnum()
+function! s:checkForLnum() abort
+    let fname = expand("%:f")
+    if fname =~ ':\d\+\(:.*\)\?$'
+        let lnum = substitute(fname, '^.*:\(\d\+\)\(:.*\)\?$', '\1', '')
+        let realFname = substitute(fname, '^\(.*\):\d\+\(:.*\)\?$', '\1', '')
+        bwipeout
+        exec "edit " . realFname
+        doautocmd bufread
+        call cursor(lnum, 1)
+    endif
 endfunction
