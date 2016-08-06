@@ -1,5 +1,3 @@
-"Use Vim settings, rather then Vi settings (much better!).
-"This must be first, because it changes other options as a side effect.
 set nocompatible
 
 "set the runtime path to include Vundle and initialize
@@ -11,8 +9,9 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'jlanzarotta/bufexplorer'
 Plugin 'godlygeek/csapprox'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'tpope/vim-endwise'
+Plugin 'tpope/vim-markdown'
 Plugin 'henrik/vim-indexed-search'
 Plugin 'scrooloose/nerdtree'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
@@ -32,6 +31,19 @@ Plugin 'Valloric/MatchTagAlways'
 Plugin 'EinfachToll/DidYouMean'
 Plugin 'AndrewRadev/splitjoin.vim'
 Plugin 'michaeljsmith/vim-indent-object'
+Plugin 'vim-utils/vim-ruby-fold'
+Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'chrisbra/csv.vim'
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'godlygeek/tabular'
+Plugin 'NLKNguyen/papercolor-theme'
+Plugin 'kana/vim-textobj-user'
+Plugin 'nelstrom/vim-textobj-rubyblock'
+Plugin 'dhruvasagar/vim-table-mode'
+Plugin 'mattn/webapi-vim'
+Plugin 'mattn/gist-vim'
+Plugin 'aklt/plantuml-syntax'
 
 "All of your Plugins must be added before the following line
 call vundle#end()
@@ -194,7 +206,6 @@ function! StatuslineTrailingSpaceWarning()
     return b:statusline_trailing_space_warning
 endfunction
 
-
 "return the syntax highlight group under the cursor ''
 function! StatuslineCurrentHighlight()
     let name = synIDattr(synID(line('.'),col('.'),1),'name')
@@ -286,13 +297,33 @@ function! s:Median(nums)
     endif
 endfunction
 
+
+"plantuml conf
+let g:plantuml_executable_script = "$HOME/.vim/plantuml/uml.sh"
+
+"make wrapped lines more intuitive
+noremap <silent> k gk
+noremap <silent> j gj
+noremap <silent> 0 g0
+noremap <silent> $ g$
+
+"vim-gist settings
+let g:gist_post_private = 1
+let g:gist_browser_command = 'sensible-browser %URL%'
+
+"add new words (via zg) here
+setlocal spellfile+=~/.vim/spell/en.utf-8.add
+
+"make table-mode tables github-markdown compat
+let g:table_mode_corner="|"
+autocmd Filetype markdown TableModeEnable
+
 "syntastic settings
 let syntastic_stl_format = '[Syntax: %E{line:%fe }%W{#W:%w}%B{ }%E{#E:%e}]'
 
 "nerdtree settings
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
-let g:NERDTreeChDirMode=2
 let g:NERDTreeMinimalUI=1
 
 "explorer mappings
@@ -300,7 +331,12 @@ nnoremap <f1> :BufExplorer<cr>
 nnoremap <f2> :NERDTreeToggle<cr>
 nnoremap <f3> :TagbarToggle<cr>
 nnoremap <f4> :NERDTreeFind<cr>
+nnoremap <f5> :e %:h<cr>
 nnoremap <c-f> :CtrlP<cr>
+nnoremap <c-b> :CtrlPBuffer<cr>
+
+"ultisnips settings
+let g:UltiSnipsListSnippets = "<c-s>"
 
 "source project specific config files
 runtime! projects/**/*.vim
@@ -309,6 +345,13 @@ runtime! projects/**/*.vim
 if !has("gui")
     let g:CSApprox_loaded = 1
 endif
+
+"ruby block textobj conf - remap from ar/ir to ab/ib
+let g:textobj_rubyblock_no_default_key_mappings = 1
+xmap ab  <Plug>(textobj-rubyblock-a)
+omap ab  <Plug>(textobj-rubyblock-a)
+xmap ib  <Plug>(textobj-rubyblock-i)
+omap ib  <Plug>(textobj-rubyblock-i)
 
 "make <c-l> clear the highlight as well as redraw
 nnoremap <C-L> :nohls<CR><C-L>
@@ -329,6 +372,17 @@ function! s:VSetSearch()
 endfunction
 vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
 vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
+
+"gutentags settings
+let g:gutentags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
+
+"tmux-vim-navigator setup
+let g:tmux_navigator_no_mappings = 1
+nnoremap <silent> <m-h> :TmuxNavigateLeft<cr>
+nnoremap <silent> <m-j> :TmuxNavigateDown<cr>
+nnoremap <silent> <m-k> :TmuxNavigateUp<cr>
+nnoremap <silent> <m-l> :TmuxNavigateRight<cr>
+nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
 
 
 "jump to last cursor position when opening a file
@@ -379,6 +433,19 @@ function! s:FocusSpecToggle() abort
     write
 endfunction
 
+"add :Efactory and Eadmin etc for rails
+let g:rails_projections = {
+    \ "spec/factories/*.rb": {
+    \   "command": "factory",
+    \   "template":
+    \     ["FactoryGirl.define do", "  factory :{} do", "  end", "end"]
+    \ },
+    \ "app/admin/*.rb": {
+    \   "command": "admin",
+    \   "template":
+    \     ["ActiveAdmin.register {singular|capitalize} do", "end"],
+    \ }}
+
 "activate rainbow parens for clojure
 autocmd syntax clojure call s:ActivateRainbowParens()
 function s:ActivateRainbowParens() abort
@@ -405,5 +472,26 @@ function! s:checkForLnum() abort
         exec "edit " . realFname
         doautocmd bufread
         call cursor(lnum, 1)
+    endif
+endfunction
+
+"toggle a markdown notes file in a fixed window on the right with f12
+nnoremap <F12> :NotesToggle<cr>
+command! -nargs=0 NotesToggle call <sid>toggleNotes()
+function! s:toggleNotes() abort
+    let winnr = bufwinnr("notes.md")
+    if winnr > 0
+        exec winnr . "wincmd c"
+    else
+        botright 78vs notes.md
+        setl wfw
+        setl nonu
+
+        "hack to make nerdtree et al not split the window
+        setl previewwindow
+
+        "for some reason this doesnt get run automatically and the cursor
+        "position doesn't get set
+        doautocmd bufreadpost %
     endif
 endfunction
