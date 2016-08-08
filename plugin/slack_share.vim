@@ -23,14 +23,14 @@ function! s:token() abort
 endfunction
 
 function! s:chanNames() abort
-    if exists("g:GetSlackChansCache")
-        return g:GetSlackChansCache
+    if exists("s:chanNamesCache")
+        return s:chanNamesCache
     endif
 
     let channels = json_decode(system('curl -s https://slack.com/api/channels.list?token=' . s:token()))
-    let g:GetSlackChansCache = map(channels["channels"], 'v:val["name"]')
+    let s:chanNamesCache = map(channels["channels"], 'v:val["name"]')
 
-    return g:GetSlackChansCache
+    return s:chanNamesCache
 endfunction
 
 function s:upload(chan, line1, line2) abort
