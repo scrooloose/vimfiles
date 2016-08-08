@@ -4,7 +4,7 @@ endif
 let g:slack_share_loaded=1
 
 command -complete=customlist,s:chanNameComplete -nargs=1 -range=% SlackUpload call s:upload(<f-args>, <line1>, <line2>)
-function! s:chanNameComplete(A, L, P)
+function! s:chanNameComplete(A, L, P) abort
     let rv = []
     for c in s:chanNames()
         if stridx(c, a:A) == 0
