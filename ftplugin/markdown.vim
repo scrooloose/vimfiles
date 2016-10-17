@@ -32,9 +32,9 @@ call textobj#user#plugin('markdown', {
       \ })
 
 
-autocmd insertleave <buffer> call <SID>CheckToRealignTable()
+nnoremap <silent> <buffer> <esc> :call <SID>CheckToRealignTable()<cr>
+inoremap <silent> <buffer> <esc> <esc>:call <SID>CheckToRealignTable()<cr>
 function! s:CheckToRealignTable() abort
-    echomsg "CheckToRealignTable"
     if getline(line(".")) =~ '^|.*|.*|'
         TableModeRealign
     endif
