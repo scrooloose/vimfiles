@@ -301,11 +301,18 @@ endfunction
 "plantuml conf
 let g:plantuml_executable_script = "$HOME/.vim/plantuml/uml.sh"
 
+"use space as leader in sensible modes
+nmap <space> <Leader>
+vmap <space> <Leader>
+
 "make wrapped lines more intuitive
 noremap <silent> k gk
 noremap <silent> j gj
 noremap <silent> 0 g0
 noremap <silent> $ g$
+
+"fix for yankring and neovim
+let g:yankring_clipboard_monitor=0
 
 "vim-gist settings
 let g:gist_post_private = 1
@@ -328,10 +335,10 @@ let g:NERDTreeMinimalUI=1
 
 "explorer mappings
 nnoremap <f1> :BufExplorer<cr>
-nnoremap <f2> :NERDTreeToggle<cr>
-nnoremap <f3> :TagbarToggle<cr>
-nnoremap <f4> :NERDTreeFind<cr>
-nnoremap <f5> :e %:h<cr>
+nnoremap <leader>nt :NERDTreeToggle<cr>
+nnoremap <leader>nf :NERDTreeFind<cr>
+nnoremap <leader>nd :e %:h<cr>
+nnoremap <leader>] :TagbarToggle<cr>
 nnoremap <c-f> :CtrlP<cr>
 nnoremap <c-b> :CtrlPBuffer<cr>
 
@@ -417,16 +424,30 @@ autocmd BufReadPost fugitive://*
 "ruby settings
 let g:ruby_indent_access_modifier_style = 'outdent'
 
-"for rails specs, toggle `focus: true` on the current spec/describe block with F7
-autocmd bufreadpre,bufnewfile *_spec.rb nnoremap <F7> :call <SID>FocusSpecToggle()<cr>
-function! s:FocusSpecToggle() abort
+"for rails specs, cycle between `focus: true` / pending / and standard format
+"on the current spec/describe block with F7
+autocmd bufreadpre,bufnewfile *_spec.rb nnoremap <buffer> <leader>f :call <SID>SpecCycle()<cr>
+function! s:SpecCycle() abort
     let oldpos = getpos(".")
-    call search('^\s*\(scenario \|it \|feature \|describe \|context \)', 'b')
+    normal! $
+    call search('^\s*\(scenario\|it\|feature\|describe\|context\|pending\) ', 'b')
 
-    if match(getline("."), 'focus: true') == -1
-        s/.*\zs\s\+do/, focus: true do/
-    else
+    let line = getline(".")
+
+    "focus -> pending
+    if match(line, 'focus: true') >= 0
         s/,\s*focus: true\s*do/ do/
+        s/^\s*\zs\(it\|scenario\)/pending/
+
+    "pending -> normal
+    elseif match(line, '^\s*pending') >= 0
+        let replace = search('^\s*#\?\s*scenario', 'wn') ? 'scenario' : 'it'
+        exec 's/^\s*\zspending/' . replace . '/'
+
+    "normal -> focus
+    else
+        s/.*\zs\s\+do/, focus: true do/
+
     endif
 
     call setpos(".", oldpos)
@@ -448,7 +469,7 @@ let g:rails_projections = {
 
 "activate rainbow parens for clojure
 autocmd syntax clojure call s:ActivateRainbowParens()
-function s:ActivateRainbowParens() abort
+function! s:ActivateRainbowParens() abort
     RainbowParenthesesToggle
     RainbowParenthesesLoadRound
     RainbowParenthesesLoadSquare
@@ -471,6 +492,7 @@ function! s:checkForLnum() abort
         bwipeout
         exec "edit " . realFname
         doautocmd bufread
+        doautocmd bufreadpre
         call cursor(lnum, 1)
     endif
 endfunction
@@ -482,16 +504,19 @@ function! s:toggleNotes() abort
     let winnr = bufwinnr("notes.md")
     if winnr > 0
         exec winnr . "wincmd c"
-    else
-        botright 78vs notes.md
-        setl wfw
-        setl nonu
-
-        "hack to make nerdtree et al not split the window
-        setl previewwindow
-
-        "for some reason this doesnt get run automatically and the cursor
-        "position doesn't get set
-        doautocmd bufreadpost %
+        return
     endif
+
+    botright 100vs notes.md
+    setl wfw
+    setl nonu
+
+    "hack to make nerdtree et al not split the window
+    setl previewwindow
+
+    "for some reason this doesnt get run automatically and the cursor
+    "position doesn't get set
+    doautocmd bufreadpost %
+
+    normal zMzO
 endfunction
