@@ -3,7 +3,9 @@ if exists("g:slack_share_loaded")
 endif
 let g:slack_share_loaded=1
 
-command -complete=customlist,s:chanNameComplete -nargs=1 -range=% SlackUpload call s:upload(<f-args>, <line1>, <line2>)
+command -complete=customlist,s:chanNameComplete -nargs=1 -range=% SlackUploadText call s:upload(<f-args>, <line1>, <line2>)
+command -complete=customlist,s:chanNameComplete -nargs=1 SlackUploadFile call s:uploadFile(<f-args>, expand("%:p"))
+
 function! s:chanNameComplete(A, L, P) abort
     let rv = []
     for c in s:chanNames()
@@ -34,14 +36,13 @@ function! s:chanNames() abort
 endfunction
 
 function s:upload(chan, line1, line2) abort
-    let tmpfile = tempname() . "-" . expand("%:t.")
+    let tmpfile = tempname() . "-" . expand("%:t:r") . '.txt'
     exec a:line1 . "," . a:line2 . "write " . tmpfile
-    let cmd = 'curl -s -F file=@'.tmpfile.' -F channels='.a:chan.' -F token='.s:token().' https://slack.com/api/files.upload'
-    let output = json_decode(system(cmd))
+    let output = s:uploadFile(a:chan, tmpfile)
+    echo output
+endfunction
 
-    if output["ok"] == 1
-        echomsg "OK"
-    else
-        echoerr "Failed"
-    endif
+function! s:uploadFile(chan, fname) abort
+    let cmd = 'curl -s -F file=@'.a:fname.' -F channels='.a:chan.' -F token='.s:token().' https://slack.com/api/files.upload'
+    return json_decode(system(cmd))
 endfunction
