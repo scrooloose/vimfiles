@@ -489,3 +489,14 @@ function! s:toggleNotes() abort
 
     normal zMzO
 endfunction
+
+"command to filter :scriptnames output by a regex
+command! -nargs=1 Scriptnames call <sid>scriptnames(<f-args>)
+function! s:scriptnames(re) abort
+    redir => scriptnames
+        silent scriptnames
+    redir END
+
+    let filtered = filter(split(scriptnames, "\n"), "v:val =~ '" . a:re . "'")
+    echo join(filtered, "\n")
+endfunction
