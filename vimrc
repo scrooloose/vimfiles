@@ -43,9 +43,8 @@ Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'dhruvasagar/vim-table-mode'
 Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
+Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'aklt/plantuml-syntax'
-
-"All of your Plugins must be added before the following line
 call vundle#end()
 
 runtime macros/matchit.vim
