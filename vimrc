@@ -323,7 +323,6 @@ setlocal spellfile+=~/.vim/spell/en.utf-8.add
 
 "make table-mode tables github-markdown compat
 let g:table_mode_corner="|"
-autocmd Filetype markdown TableModeEnable
 
 "syntastic settings
 let syntastic_stl_format = '[Syntax: %E{line:%fe }%W{#W:%w}%B{ }%E{#E:%e}]'
