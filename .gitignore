@@ -7,3 +7,4 @@ projects/*
 .netrwhist
 UltiSnips/*
 bundle/*
+spell/*.add*
