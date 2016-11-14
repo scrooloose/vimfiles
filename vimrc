@@ -423,36 +423,6 @@ autocmd BufReadPost fugitive://*
 "ruby settings
 let g:ruby_indent_access_modifier_style = 'outdent'
 
-"for rails specs, cycle between `focus: true` / pending / and standard format
-"on the current spec/describe block with F7
-autocmd bufreadpre,bufnewfile *_spec.rb nnoremap <buffer> <leader>f :call <SID>SpecCycle()<cr>
-function! s:SpecCycle() abort
-    let oldpos = getpos(".")
-    normal! $
-    call search('^\s*\(scenario\|it\|feature\|describe\|context\|pending\) ', 'b')
-
-    let line = getline(".")
-
-    "focus -> pending
-    if match(line, 'focus: true') >= 0
-        s/,\s*focus: true\s*do/ do/
-        s/^\s*\zs\(it\|scenario\)/pending/
-
-    "pending -> normal
-    elseif match(line, '^\s*pending') >= 0
-        let replace = search('^\s*#\?\s*scenario', 'wn') ? 'scenario' : 'it'
-        exec 's/^\s*\zspending/' . replace . '/'
-
-    "normal -> focus
-    else
-        s/.*\zs\s\+do/, focus: true do/
-
-    endif
-
-    call setpos(".", oldpos)
-    write
-endfunction
-
 "add :Efactory and Eadmin etc for rails
 let g:rails_projections = {
     \ "spec/factories/*.rb": {
