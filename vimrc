@@ -332,14 +332,32 @@ let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
 let g:NERDTreeMinimalUI=1
 
+"tagbar settings
+let g:tagbar_sort = 0
+
 "explorer mappings
-nnoremap <f1> :BufExplorer<cr>
+nnoremap <leader>bb :BufExplorer<cr>
+nnoremap <leader>bs :BufExplorerHorizontalSplit<cr>
+nnoremap <leader>bv :BufExplorerVerticalSplit<cr>
 nnoremap <leader>nt :NERDTreeToggle<cr>
 nnoremap <leader>nf :NERDTreeFind<cr>
+nnoremap <leader>nn :e .<cr>
 nnoremap <leader>nd :e %:h<cr>
 nnoremap <leader>] :TagbarToggle<cr>
 nnoremap <c-f> :CtrlP<cr>
 nnoremap <c-b> :CtrlPBuffer<cr>
+
+"command abbrevs we can use `:E<space>` (and similar) to edit a file in the
+"same dir as current file
+cabbrev E <c-r>="e "  . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+cabbrev Sp <c-r>="sp " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+cabbrev SP <c-r>="sp " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+cabbrev Vs <c-r>="vs " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+cabbrev VS <c-r>="vs " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+function! s:Eatchar(pat)
+  let c = nr2char(getchar(0))
+  return (c =~ a:pat) ? '' : c
+endfunc
 
 "ultisnips settings
 let g:UltiSnipsListSnippets = "<c-s>"
@@ -389,7 +407,6 @@ nnoremap <silent> <m-j> :TmuxNavigateDown<cr>
 nnoremap <silent> <m-k> :TmuxNavigateUp<cr>
 nnoremap <silent> <m-l> :TmuxNavigateRight<cr>
 nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
-
 
 "jump to last cursor position when opening a file
 "dont do it when writing a commit log entry
