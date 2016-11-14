@@ -41,3 +41,26 @@ function! s:CheckToRealignTable() abort
         TableModeRealign
     endif
 endfunction
+
+
+
+"Generate github flavoured markdown for the current buf.
+"
+"Note: the npm package 'marked' is used.
+command! -buffer GenGFM call s:GenGFM()
+
+"Note: use the same width as gist
+let s:gfm_head = '<html><head><meta charset="utf-8"></head>'
+let s:gfm_head .= '<style type="text/css" media="screen"> body { width: 888px } </style>'
+let s:gfm_head .= '<link rel="stylesheet" href="https://sindresorhus.com/github-markdown-css/github-markdown.css" type="text/css">'
+let s:gfm_head .= '<div class="markdown-body">'
+let s:gfm_tail  = '</div></html>'
+function! s:GenGFM() abort
+    let fname = expand('%:p:r') . '.html'
+
+    let cmd  = 'echo '''. s:gfm_head . ''' > ' . fname
+    let cmd .= ' && marked ' . expand('%:p') . ' >> ' . fname
+    let cmd .= ' && echo ''' . s:gfm_tail . ''' >> ' . fname
+
+    call system(cmd)
+endfunction
