@@ -46,6 +46,8 @@ Plugin 'mattn/gist-vim'
 Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'aklt/plantuml-syntax'
 Plugin 'AndrewRadev/sideways.vim'
+Plugin 'kassio/neoterm'
+Plugin 'janko-m/vim-test'
 Plugin 'flazz/vim-colorschemes'
 call vundle#end()
 
@@ -344,6 +346,17 @@ let g:NERDTreeMinimalUI=1
 
 "tagbar settings
 let g:tagbar_sort = 0
+
+"neoterm and test mapping settings
+let g:neoterm_split_on_tnew=0
+
+"vim-test settings
+let test#strategy = "neoterm"
+nnoremap <leader>tt :TestNearest<cr>
+nnoremap <leader>tf :TestFile<cr>
+nnoremap <leader>ta :TestSuite<cr>
+nnoremap <leader>tl :TestLast<cr>
+nnoremap <leader>tg :TestVisit<cr>
 
 "explorer mappings
 nnoremap <leader>bb :BufExplorer<cr>
