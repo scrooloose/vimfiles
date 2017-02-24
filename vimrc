@@ -45,6 +45,7 @@ Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
 Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'aklt/plantuml-syntax'
+Plugin 'AndrewRadev/sideways.vim'
 Plugin 'flazz/vim-colorschemes'
 call vundle#end()
 
@@ -297,6 +298,15 @@ function! s:Median(nums)
     endif
 endfunction
 
+"sideways conf - for swapping arguments around
+nnoremap <leader>sh :SidewaysLeft<cr>
+nnoremap <leader>sl :SidewaysRight<cr>
+
+"text objects for function args
+omap aa <Plug>SidewaysArgumentTextobjA
+xmap aa <Plug>SidewaysArgumentTextobjA
+omap ia <Plug>SidewaysArgumentTextobjI
+xmap ia <Plug>SidewaysArgumentTextobjI
 
 "plantuml conf
 let g:plantuml_executable_script = "$HOME/.vim/plantuml/uml.sh"
