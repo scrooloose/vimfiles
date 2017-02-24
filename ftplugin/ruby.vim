@@ -1,6 +1,18 @@
 setl et sts=2 sw=2
 
-if expand("%") =~ '_spec.rb$'
+function! s:rails() abort
+    return filereadable("config/boot.rb")
+endfunction
+
+function! s:rspec() abort
+    return expand("%") =~ '_spec.rb$\|shared_examples'
+endfunction
+
+if s:rails()
+    nnoremap <buffer> <leader>rr :silent !touch tmp/restart.txt<cr>
+endif
+
+if s:rspec()
     nnoremap <buffer> <leader>f :call <SID>SpecToggleFocus()<cr>
     nnoremap <buffer> <leader>p :call <SID>SpecTogglePending()<cr>
 endif
@@ -16,7 +28,7 @@ function! s:SpecTogglePending() abort
         s/^\s*\zs\(it\|scenario\)/pending/
 
     else
-        let replace = search('^\s*#\?\s*scenario', 'wn') ? 'scenario' : 'it'
+        let replace = search('^\s*#\?\s*\(scenario\|feature\)', 'wn') ? 'scenario' : 'it'
         exec 's/^\s*\zspending/' . replace . '/'
     endif
 
