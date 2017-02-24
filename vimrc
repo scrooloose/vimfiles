@@ -45,6 +45,7 @@ Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
 Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'aklt/plantuml-syntax'
+Plugin 'flazz/vim-colorschemes'
 call vundle#end()
 
 runtime macros/matchit.vim
