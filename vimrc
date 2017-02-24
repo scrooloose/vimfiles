@@ -310,6 +310,9 @@ xmap aa <Plug>SidewaysArgumentTextobjA
 omap ia <Plug>SidewaysArgumentTextobjI
 xmap ia <Plug>SidewaysArgumentTextobjI
 
+"csv settings
+let g:csv_nomap_space=1
+
 "plantuml conf
 let g:plantuml_executable_script = "$HOME/.vim/plantuml/uml.sh"
 
