@@ -398,7 +398,7 @@ vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
 vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
 
 "gutentags settings
-let g:gutentags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
+let g:gutentags_ctags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
 
 "tmux-vim-navigator setup
 let g:tmux_navigator_no_mappings = 1
