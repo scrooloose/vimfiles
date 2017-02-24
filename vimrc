@@ -384,6 +384,10 @@ endfunc
 
 "ultisnips settings
 let g:UltiSnipsListSnippets = "<c-s>"
+augroup Ultisnips
+    autocmd bufenter,bufnewfile */factories/*.rb UltiSnipsAddFiletypes factory_girl
+    autocmd bufenter,bufnewfile */app/admin/*.rb,*/app/views/activeadmin/*.{rb,arb},*.erb UltiSnipsAddFiletypes formtastic
+augroup END
 
 if has("nvim")
     tnoremap <silent> <Esc> <C-\><C-n>`.$
