@@ -1,0 +1,46 @@
+snippet uml "Generic UML"
+@startuml
+$0
+@enduml
+endsnippet
+
+snippet uml "Domain Model" b
+@startuml
+
+$0
+
+hide empty members
+hide empty methods
+hide circle
+skinparam groupInheritance 3
+'no-preview
+@enduml
+endsnippet
+
+snippet uml "State Machine" b
+@startuml
+
+[*] --> $0
+
+hide empty description
+@enduml
+endsnippet
+
+snippet c
+class ${1:name} {
+	$2
+}$0
+endsnippet
+
+snippet titl
+class Titl as "Title"
+endsnippet
+
+snippet hm
+-- "*" $0
+endsnippet
+
+snippet bt
+"*"-- $0
+endsnippet
+

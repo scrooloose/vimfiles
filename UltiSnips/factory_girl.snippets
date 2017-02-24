@@ -1,0 +1,13 @@
+snippet a
+association :${1:other}
+endsnippet
+
+snippet s
+sequence(:${1:field}) { |n| "$2#{n}" }$0
+endsnippet
+
+snippet t
+trait :${1:name} do
+	$0
+end
+endsnippet

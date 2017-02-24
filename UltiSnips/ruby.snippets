@@ -1,0 +1,16 @@
+#------------------------------------------------------------------------------
+# Ruby basic object stuff
+
+snippet @
+@${1:var} = $1$0
+endsnippet
+
+snippet "^(\s*attr_reader .*)" "attr_reader: add another" r
+`!p snip.rv = match.group(1).rstrip(",")`, :$0
+endsnippet
+
+snippet "^(\s*)(@\w* = \S*)" "Instance var init: add another" r
+`!p snip.rv = match.group(1) + match.group(2)`
+`!p snip.rv = match.group(1)`@${1:var} = $1$0
+endsnippet
+

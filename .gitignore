@@ -5,6 +5,5 @@ tags
 undofiles/*
 projects/*
 .netrwhist
-UltiSnips/*
 bundle/*
 spell/*.add*

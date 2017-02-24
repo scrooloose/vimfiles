@@ -1,0 +1,72 @@
+snippet sop
+save_and_open_page
+endsnippet
+
+snippet expecterr
+expect(${1:thing}).to have_at_least(${2:1}).error_on(:${3:field})$0
+endsnippet
+
+snippet rnie
+raise(NotImplementedError)$0
+endsnippet
+
+#------------------------------------------------------------------------------
+# Rails validation
+
+snippet v
+validates :${1:field}$0
+endsnippet
+
+snippet "^(\s*validates.*)\bp" "presence validator" r
+`!p snip.rv = match.group(1).rstrip()` presence: true
+endsnippet
+
+snippet "^(\s*validates.*)\bu" "uniqueness validator" r
+`!p snip.rv = match.group(1).rstrip()` uniqueness: true
+endsnippet
+
+snippet "^(\s*validates.*)\bi" "inclusion validator" r
+`!p snip.rv = match.group(1).rstrip()` inclusion: { in: ${1:collection_or_lambda} }
+endsnippet
+
+snippet "^(\s*validates.*uniqueness:\s*{[^}]*)\bc" "uniqueness case sensitivity" r
+`!p snip.rv = match.group(1).rstrip()` case_sensitive: ${1:false}
+endsnippet
+
+snippet "^(\s*validates.*uniqueness:\s*{[^}]*)\bs" "uniqueness scope" r
+`!p snip.rv = match.group(1).rstrip()` scope: :${1:field}
+endsnippet
+
+snippet "^(\s*validates.*)\bm" "validation message" r
+`!p snip.rv = match.group(1).rstrip()` message: "${1:can't be screwed}"
+endsnippet
+
+snippet "^(\s*validates.*)\bo" "on create/update" r
+`!p snip.rv = match.group(1).rstrip()` on: :${1:create}
+endsnippet
+
+snippet "^(\s*validates.*)\bab" "allow blank" r
+`!p snip.rv = match.group(1).rstrip()`, allow_blank: true
+endsnippet
+
+#------------------------------------------------------------------------------
+# ActiveRecord has_many
+
+snippet hm "has_many"
+has_many :${1:things}
+endsnippet
+
+snippet "^(\s*has_many.*)\bt" "has_many through:" r
+`!p snip.rv = match.group(1).rstrip()` through: :${1:things}
+endsnippet
+
+#------------------------------------------------------------------------------
+# ActiveRecord belongs_to
+
+snippet bt "belongs_to"
+belongs_to :${1:thing}
+endsnippet
+
+snippet "^(\s*belongs_to.*)\bp" "belongs_to polymorphic: true" r
+`!p snip.rv = match.group(1).rstrip()` polymorphic: true$0
+endsnippet

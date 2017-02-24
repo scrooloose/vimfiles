@@ -1,0 +1,16 @@
+snippet it
+it("${1:desc}", function() {
+	$0
+});
+endsnippet
+
+snippet spec
+var chai = require('chai');
+var expect = chai.expect;
+var ${1:ClassName} = require('${2:filepath}');
+
+describe('$1', function() {
+$0
+});
+endsnippet
+

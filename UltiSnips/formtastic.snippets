@@ -1,0 +1,36 @@
+#------------------------------------------------------------------------------
+# Formtastic / Activeadmin
+
+
+#------------------------------------------------------------------------------
+#Inside `input_html: { }`
+snippet "^(.*\.input.*)\bih" "input_html" r
+`!p snip.rv = match.group(1).rstrip()` input_html: { $1 }$0
+endsnippet
+
+snippet "^(.*input_html: {[^}]*)r" "readonly" r
+`!p snip.rv = match.group(1).rstrip()` readonly: true
+endsnippet
+
+snippet "^(.*input_html: {[^}]*)d" "disabled" r
+`!p snip.rv = match.group(1).rstrip()` disabled: true
+endsnippet
+
+snippet "^(.*input_html: {[^}]*)v" "value" r
+`!p snip.rv = match.group(1).rstrip()` value: $0
+endsnippet
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+#Inside `input:`
+snippet "^(.*\.input.*)\bh" "hint" r
+`!p snip.rv = match.group(1).rstrip(" ,")`, hint: "$1"$0
+endsnippet
+
+snippet "^(.*\.input.*)\bl" "label" r
+`!p snip.rv = match.group(1).rstrip()` label: "$1"$0
+endsnippet
+
+snippet "^(.*\.input.*)ib" "include_blank" r
+`!p snip.rv = match.group(1).rstrip()` include_blank: true$0
+endsnippet
