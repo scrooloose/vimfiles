@@ -1,4 +1,11 @@
 silent TableModeEnable
+setl sw=4 sts=4 et
+setl conceallevel=2
+setl foldmethod=expr foldexpr=MarkdownFold()
+setl spell
+
+"tell markdown ftplugin to enable its magic folding
+let g:markdown_folding=1
 
 nnoremap <leader>= :s/.*/\=repeat("=", len(getline(line(".") - 1)))/<cr> <bar> :noh<cr>
 nnoremap <leader>- :s/.*/\=repeat("-", len(getline(line(".") - 1)))/<cr> <bar> :noh<cr>

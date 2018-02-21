@@ -13,42 +13,48 @@ if s:rails()
 endif
 
 if s:rspec()
-    nnoremap <buffer> <leader>f :call <SID>SpecToggleFocus()<cr>
-    nnoremap <buffer> <leader>p :call <SID>SpecTogglePending()<cr>
+    nnoremap <buffer> <leader>p :call <SID>SpecToggle("Pending")<cr>
+    nnoremap <buffer> <leader>j :call <SID>SpecToggle("JS")<cr>
+    nnoremap <buffer> <leader>f :call <SID>SpecToggle("Focus")<cr>
 endif
 
-function! s:SpecTogglePending() abort
+function! s:SpecToggle(subfunc) abort
+    let oldhls = &hls
+    set nohls
     let oldpos = getpos(".")
+
     normal! $
     call search('^\s*\(scenario\|it\|feature\|describe\|context\|pending\) ', 'b')
 
-    let line = getline(".")
+    exec "call s:Toggle" . a:subfunc . "()"
 
-    if match(line, '^\s*\zs\(it\|scenario\)') >= 0
+    write
+
+    call setpos(".", oldpos)
+    let &hls = oldhls
+endfunction
+
+function! s:TogglePending() abort
+    if match(getline("."), '^\s*\zs\(it\|scenario\)') >= 0
         s/^\s*\zs\(it\|scenario\)/pending/
-
     else
         let replace = search('^\s*#\?\s*\(scenario\|feature\)', 'wn') ? 'scenario' : 'it'
         exec 's/^\s*\zspending/' . replace . '/'
     endif
-
-    call setpos(".", oldpos)
-    write
 endfunction
 
-function! s:SpecToggleFocus() abort
-    let oldpos = getpos(".")
-    normal! $
-    call search('^\s*\(scenario\|it\|feature\|describe\|context\|pending\) ', 'b')
-
-    let line = getline(".")
-
-    if match(line, 'focus: true') >= 0
-        s/,\s*focus: true\s*do/ do/
+function! s:ToggleFocus() abort
+    if match(getline("."), 'focus: true') >= 0
+        s/,\s*focus: true//
     else
         s/.*\zs\s\+do/, focus: true do/
     endif
+endfunction
 
-    call setpos(".", oldpos)
-    write
+function! s:ToggleJS() abort
+    if match(getline("."), 'js: true') >= 0
+        s/,\s*js: true\s*/ /
+    else
+        s/.*\zs\s\+\zedo/, js: true /
+    endif
 endfunction

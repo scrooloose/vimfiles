@@ -10,11 +10,25 @@ autocmd syntax <buffer> syn keyword plantumlKeyword Title
 nnoremap <buffer> <f10> :call <sid>ViewPNG()<cr>
 command! -buffer Automake autocmd BufWritePost <buffer> silent make
 
+if exists("s:loaded")
+    finish
+endif
+let s:loaded = 1
+
 function! s:ViewPNG() abort
-    let fname = expand("%:p:r") . ".png"
-    call system("rm " . fname)
+    let bnum = bufnr("")
+    let fname = tempname() . ".uml"
+
+    noautocmd exec "write " . fname
+    exec "edit " . fname
+    silent call s:mungePlantUML()
+    noautocmd write
+
+    let imgFname = expand("%:p:r") . ".png"
+    call system("rm " . imgFname)
     call system("java -jar ~/.vim/plantuml/plantuml.jar -tpng " . expand("%:p"))
-    call system("gnome-open " . fname)
+    call system("gnome-open " . imgFname)
+    exec "b " . bnum
 endfunction
 
 command! -buffer ToggleMembers call s:toggle("members")
@@ -33,4 +47,9 @@ nnoremap <buffer> <leader>ur :call <SID>insertSeqReturn()<cr>A
 function! s:insertSeqReturn() abort
     let rv = substitute(getline("."), '^\(.*\)->\(.*\):.*$', '\1<--\2: ', '')
     exec 'normal o' . rv
+endfunction
+
+function! s:mungePlantUML()
+    %s/^\(.*\) ->+ \(\w*\)\(.*\)/\1 -> \2\3\ractivate \2/e
+    %s/^\(.*\) -<-- \(\w*\)\(.*\)/\1 -> \2\3\rdeactivate \2/e
 endfunction

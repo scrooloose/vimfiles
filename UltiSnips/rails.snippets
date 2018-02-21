@@ -46,7 +46,7 @@ snippet "^(\s*validates.*)\bo" "on create/update" r
 endsnippet
 
 snippet "^(\s*validates.*)\bab" "allow blank" r
-`!p snip.rv = match.group(1).rstrip()`, allow_blank: true
+`!p snip.rv = match.group(1).rstrip()` allow_blank: true
 endsnippet
 
 #------------------------------------------------------------------------------
@@ -69,4 +69,15 @@ endsnippet
 
 snippet "^(\s*belongs_to.*)\bp" "belongs_to polymorphic: true" r
 `!p snip.rv = match.group(1).rstrip()` polymorphic: true$0
+endsnippet
+
+#------------------------------------------------------------------------------
+# Paperclip
+
+snippet paperclip
+has_attached_file :${1:name}$0
+validates_attachment :$1,
+	presence: true,
+	content_type: { content_type: /\A${2:image}\/.*\Z/ },
+	size: { in: 0..5.megabytes }
 endsnippet

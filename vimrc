@@ -35,6 +35,8 @@ Plugin 'vim-utils/vim-ruby-fold'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'chrisbra/csv.vim'
 Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'godlygeek/tabular'
 Plugin 'NLKNguyen/papercolor-theme'
@@ -48,7 +50,13 @@ Plugin 'aklt/plantuml-syntax'
 Plugin 'AndrewRadev/sideways.vim'
 Plugin 'kassio/neoterm'
 Plugin 'janko-m/vim-test'
+Plugin 'machakann/vim-highlightedyank'
 Plugin 'flazz/vim-colorschemes'
+Plugin 'pseewald/nerdtree-tagbar-combined'
+Plugin 'mattn/emmet-vim'
+Plugin 'rust-lang/rust.vim'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
 call vundle#end()
 
 runtime macros/matchit.vim
@@ -339,6 +347,8 @@ setlocal spellfile+=~/.vim/spell/en.utf-8.add
 "make table-mode tables github-markdown compat
 let g:table_mode_corner="|"
 
+map <leader>T <Plug>(table-mode-tableize)
+
 "syntastic settings
 let syntastic_stl_format = '[Syntax: %E{line:%fe }%W{#W:%w}%B{ }%E{#E:%e}]'
 
@@ -489,7 +499,10 @@ let g:rails_projections = {
     \ "app/admin/*.rb": {
     \   "command": "admin",
     \   "template":
-    \     ["ActiveAdmin.register {singular|capitalize} do", "end"],
+    \     ["ActiveAdmin.register {camelcase|singular|capitalize} do", "end"],
+    \ },
+    \ "app/controllers/api/v5/*.rb": {
+    \   "command": "api"
     \ }}
 
 "activate rainbow parens for clojure
@@ -514,11 +527,16 @@ function! s:checkForLnum() abort
     if fname =~ ':\d\+\(:.*\)\?$'
         let lnum = substitute(fname, '^.*:\(\d\+\)\(:.*\)\?$', '\1', '')
         let realFname = substitute(fname, '^\(.*\):\d\+\(:.*\)\?$', '\1', '')
-        bwipeout
         exec "edit " . realFname
-        doautocmd bufread
-        doautocmd bufreadpre
+
+        if bufnr(fname) != -1
+            exec "bdelete " . bufnr(fname)
+        endif
+
+        silent doautocmd bufread
+        silent doautocmd bufreadpre
         call cursor(lnum, 1)
+        normal! zz
     endif
 endfunction
 
