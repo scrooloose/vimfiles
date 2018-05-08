@@ -81,3 +81,16 @@ validates_attachment :$1,
 	content_type: { content_type: /\A${2:image}\/.*\Z/ },
 	size: { in: 0..5.megabytes }
 endsnippet
+
+#------------------------------------------------------------------------------
+# Rspec
+
+snippet spec "snippet template" b
+require 'rails_helper'
+
+RSpec.describe ${1:ClassName} do
+	describe "${2:something}" do
+		$0
+	end
+end
+endsnippet

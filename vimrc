@@ -7,7 +7,6 @@ call vundle#begin()
 "let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'jlanzarotta/bufexplorer'
 Plugin 'godlygeek/csapprox'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'tpope/vim-endwise'
@@ -19,17 +18,14 @@ Plugin 'scrooloose/nerdcommenter'
 Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-ragtag'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'mbbill/undotree'
 Plugin 'vim-scripts/YankRing.vim'
 Plugin 'majutsushi/tagbar'
-Plugin 'kien/rainbow_parentheses.vim'
 Plugin 'Valloric/MatchTagAlways'
 Plugin 'EinfachToll/DidYouMean'
-Plugin 'AndrewRadev/splitjoin.vim'
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'vim-utils/vim-ruby-fold'
 Plugin 'christoomey/vim-tmux-navigator'
@@ -50,11 +46,10 @@ Plugin 'aklt/plantuml-syntax'
 Plugin 'AndrewRadev/sideways.vim'
 Plugin 'kassio/neoterm'
 Plugin 'janko-m/vim-test'
+Plugin 'jgdavey/tslime.vim'
 Plugin 'machakann/vim-highlightedyank'
 Plugin 'flazz/vim-colorschemes'
 Plugin 'pseewald/nerdtree-tagbar-combined'
-Plugin 'mattn/emmet-vim'
-Plugin 'rust-lang/rust.vim'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 call vundle#end()
@@ -360,11 +355,9 @@ let g:NERDTreeMinimalUI=1
 "tagbar settings
 let g:tagbar_sort = 0
 
-"neoterm and test mapping settings
-let g:neoterm_split_on_tnew=0
-
 "vim-test settings
-let test#strategy = "neoterm"
+let test#strategy = "tslime"
+let g:test#ruby#use_spring_binstub=1
 nnoremap <leader>tt :TestNearest<cr>
 nnoremap <leader>tf :TestFile<cr>
 nnoremap <leader>ta :TestSuite<cr>
@@ -390,6 +383,7 @@ cabbrev Sp <c-r>="sp " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
 cabbrev SP <c-r>="sp " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
 cabbrev Vs <c-r>="vs " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
 cabbrev VS <c-r>="vs " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
+cabbrev R <c-r>="r " . expand("%:h") . "/"<cr><c-r>=<SID>Eatchar(' ')<cr>
 function! s:Eatchar(pat)
   let c = nr2char(getchar(0))
   return (c =~ a:pat) ? '' : c
@@ -487,7 +481,7 @@ autocmd BufReadPost fugitive://*
 
 
 "ruby settings
-let g:ruby_indent_access_modifier_style = 'outdent'
+let g:ruby_indent_access_modifier_style = 'normal'
 
 "add :Efactory and Eadmin etc for rails
 let g:rails_projections = {
