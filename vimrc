@@ -285,6 +285,13 @@ endfunction
 vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
 vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
 
+"indexed search settings
+"
+"disable defaults, otherwise it blows away the * and # mappings above
+let g:indexed_search_mappings=0
+nnoremap n n:ShowSearchIndex<cr>
+nnoremap N N:ShowSearchIndex<cr>
+
 "gutentags settings
 let g:gutentags_ctags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
 
