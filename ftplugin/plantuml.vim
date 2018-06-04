@@ -27,7 +27,7 @@ function! s:ViewPNG() abort
     let imgFname = expand("%:p:r") . ".png"
     call system("rm " . imgFname)
     call system("java -jar ~/.vim/plantuml/plantuml.jar -tpng " . expand("%:p"))
-    call system("gnome-open " . imgFname)
+    call system("xdg-open " . imgFname)
     exec "b " . bnum
 endfunction
 

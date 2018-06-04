@@ -11,6 +11,7 @@ Plugin 'godlygeek/csapprox'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'tpope/vim-endwise'
 Plugin 'tpope/vim-markdown'
+Plugin 'tpope/vim-fugitive'
 Plugin 'henrik/vim-indexed-search'
 Plugin 'scrooloose/nerdtree'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
@@ -52,7 +53,11 @@ Plugin 'flazz/vim-colorschemes'
 Plugin 'pseewald/nerdtree-tagbar-combined'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
+Plugin 'FooSoft/vim-argwrap'
 call vundle#end()
+
+"not sure why this is getting unset by vundle
+set rtp+=~/.vim
 
 runtime macros/matchit.vim
 
@@ -199,6 +204,19 @@ let g:NERDTreeMinimalUI=1
 
 "tagbar settings
 let g:tagbar_sort = 0
+if executable("ripper-tags")
+    let g:tagbar_type_ruby = {
+                \ 'kinds' : [
+                    \ 'm:modules',
+                    \ 'c:classes',
+                    \ 'f:methods',
+                    \ 'F:singleton methods',
+                    \ 'C:constants'
+                \ ],
+                \ 'ctagsbin':  'ripper-tags',
+                \ 'ctagsargs': ['-f', '-']
+                \ }
+endif
 
 "vim-test settings
 let test#strategy = "tslime"
@@ -233,6 +251,9 @@ function! s:Eatchar(pat)
   let c = nr2char(getchar(0))
   return (c =~ a:pat) ? '' : c
 endfunc
+
+"argwrap settings
+nnoremap <leader>w :ArgWrap<cr>
 
 "ultisnips settings
 let g:UltiSnipsListSnippets = "<c-s>"
