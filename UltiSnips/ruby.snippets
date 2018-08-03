@@ -14,3 +14,14 @@ snippet "^(\s*)(@\w* = \S*)" "Instance var init: add another" r
 `!p snip.rv = match.group(1)`@${1:var} = $1$0
 endsnippet
 
+snippet defmm "Method Missing Delegator"
+def method_missing(method, *args, &block)
+	${1:target}.send(method, *args, &block)
+end
+endsnippet
+
+snippet cla<
+class ${1:`!v substitute(vim_snippets#Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ${2:ApplicationRecord}
+	$0
+end
+endsnippet

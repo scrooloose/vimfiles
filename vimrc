@@ -116,6 +116,10 @@ function! MyFoldText()
     return line . spacer . rhs
 endfunction
 
+"This is mostly for airline - this was causing lag when moving the cursor
+"between windows
+set lazyredraw
+
 set wildmode=list:longest   "make cmdline tab completion similar to bash
 set wildmenu                "enable ctrl-n and ctrl-p to scroll thru matches
 set wildignore=*.o,*.obj,*~ "stuff to ignore when tab completing
@@ -236,6 +240,8 @@ nnoremap <leader>nf :NERDTreeFind<cr>
 nnoremap <leader>nn :e .<cr>
 nnoremap <leader>nd :e %:h<cr>
 nnoremap <leader>] :TagbarToggle<cr>
+nnoremap <leader>f :CtrlP<cr>
+nnoremap <leader>b :CtrlPBuffer<cr>
 nnoremap <c-f> :CtrlP<cr>
 nnoremap <c-b> :CtrlPBuffer<cr>
 
