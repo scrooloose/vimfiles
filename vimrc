@@ -28,7 +28,6 @@ Plugin 'majutsushi/tagbar'
 Plugin 'Valloric/MatchTagAlways'
 Plugin 'EinfachToll/DidYouMean'
 Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'vim-utils/vim-ruby-fold'
 Plugin 'christoomey/vim-tmux-navigator'
 Plugin 'chrisbra/csv.vim'
 Plugin 'ludovicchabant/vim-gutentags'
@@ -147,7 +146,10 @@ endif
 "tell the term has 256 colors
 "set t_Co=256
 
-colorscheme github
+set background=dark
+colorscheme peaksea
+hi Normal guibg=NONE ctermbg=NONE
+hi EndOfBuffer guibg=NONE ctermbg=NONE
 
 "hide buffers when not displayed
 set hidden
@@ -329,6 +331,9 @@ nnoremap <silent> <m-j> :TmuxNavigateDown<cr>
 nnoremap <silent> <m-k> :TmuxNavigateUp<cr>
 nnoremap <silent> <m-l> :TmuxNavigateRight<cr>
 nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
+
+"ctrlp settings
+let g:ctrlp_custom_ignore = '\v\/vendor\/bundle'
 
 "jump to last cursor position when opening a file
 "dont do it when writing a commit log entry
