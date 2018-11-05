@@ -9,8 +9,13 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'godlygeek/csapprox'
 Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'fisadev/vim-ctrlp-cmdpalette'
 Plugin 'tpope/vim-endwise'
+
 Plugin 'tpope/vim-markdown'
+Plugin 'rhysd/vim-gfm-syntax'
+Plugin 'mzlogin/vim-markdown-toc'
+
 Plugin 'tpope/vim-fugitive'
 Plugin 'henrik/vim-indexed-search'
 Plugin 'scrooloose/nerdtree'
@@ -35,21 +40,17 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'godlygeek/tabular'
-Plugin 'NLKNguyen/papercolor-theme'
 Plugin 'kana/vim-textobj-user'
 Plugin 'nelstrom/vim-textobj-rubyblock'
 Plugin 'dhruvasagar/vim-table-mode'
 Plugin 'mattn/webapi-vim'
 Plugin 'mattn/gist-vim'
-Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'aklt/plantuml-syntax'
 Plugin 'AndrewRadev/sideways.vim'
-Plugin 'kassio/neoterm'
 Plugin 'janko-m/vim-test'
 Plugin 'jgdavey/tslime.vim'
 Plugin 'machakann/vim-highlightedyank'
 Plugin 'flazz/vim-colorschemes'
-Plugin 'pseewald/nerdtree-tagbar-combined'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 Plugin 'FooSoft/vim-argwrap'
@@ -119,11 +120,11 @@ endfunction
 "between windows
 set lazyredraw
 
-set wildmode=list:longest   "make cmdline tab completion similar to bash
-set wildmenu                "enable ctrl-n and ctrl-p to scroll thru matches
-set wildignore=*.o,*.obj,*~ "stuff to ignore when tab completing
+set wildmode=list:longest,full   "make cmdline tab completion similar to bash
+set wildmenu                     "enable ctrl-n and ctrl-p to scroll thru matches
+set wildignore=*.o,*.obj,*~      "stuff to ignore when tab completing
 
-set formatoptions-=o "dont continue comments when pushing o/O
+set formatoptions-=o "dont continue comments when pushing /O
 
 "vertical/horizontal scroll off settings
 set scrolloff=3
@@ -244,6 +245,7 @@ nnoremap <leader>nd :e %:h<cr>
 nnoremap <leader>] :TagbarToggle<cr>
 nnoremap <leader>f :CtrlP<cr>
 nnoremap <leader>b :CtrlPBuffer<cr>
+nnoremap <leader>p :CtrlPCmdPalette<cr>
 nnoremap <c-f> :CtrlP<cr>
 nnoremap <c-b> :CtrlPBuffer<cr>
 
@@ -303,6 +305,9 @@ noremap Q gq
 
 "make Y consistent with C and D
 nnoremap Y y$
+
+"make & highlight the current word, but not move cursor
+nnoremap & :let @/='\V\<'.escape(expand('<cword>'), '\').'\>'<cr>:set hls<cr>
 
 "visual search mappings
 function! s:VSetSearch()
@@ -366,6 +371,9 @@ autocmd BufReadPost fugitive://*
 
 "ruby settings
 let g:ruby_indent_access_modifier_style = 'normal'
+
+"markdown settings
+let g:markdown_fenced_languages = ['ruby', 'json']
 
 "add :Efactory and Eadmin etc for rails
 let g:rails_projections = {
@@ -439,7 +447,9 @@ function! s:toggleNotes() abort
     "position doesn't get set
     doautocmd bufreadpost %
 
-    normal zMzO
+    setf markdown
+
+    silent! normal zMzO
 endfunction
 
 "command to filter :scriptnames output by a regex

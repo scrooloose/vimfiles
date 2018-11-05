@@ -8,6 +8,9 @@ function! s:rspec() abort
     return expand("%") =~ '_spec.rb$\|shared_examples'
 endfunction
 
+
+nnoremap <buffer> <leader>ll :exec "Tmux rubocop " . expand("%")<cr>
+
 if s:rails()
     nnoremap <buffer> <leader>rr :silent !touch tmp/restart.txt<cr>
 endif

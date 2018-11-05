@@ -94,3 +94,7 @@ RSpec.describe ${1:ClassName} do
 	end
 end
 endsnippet
+
+snippet afterall
+after(:all) { DatabaseCleaner.clean_with(:deletion) }
+endsnippet
