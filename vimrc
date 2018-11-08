@@ -462,3 +462,24 @@ function! s:scriptnames(re) abort
     let filtered = filter(split(scriptnames, "\n"), "v:val =~ '" . a:re . "'")
     echo join(filtered, "\n")
 endfunction
+
+function! ToCamel(str) abort
+    if a:str =~ '_'
+        return substitute(a:str, '\(\%(\<\l\+\)\%(_\)\@=\)\|_\(\l\)', '\u\1\2', 'g')
+    else
+        return substitute(a:str, '^\(.\)', '\u\1', '')
+    endif
+endfunction
+
+" set the arglist to all conflicting files in the current repo
+command! GitLoadConflicts call s:loadGitConfictsIntoArglist()
+function! s:loadGitConfictsIntoArglist() abort
+    argdel *
+    let conflicted_files = system('git diff --name-only --diff-filter=U | tr "\n" " "')
+    exec 'argadd ' . conflicted_files
+    rewind
+    call search('=======')
+    echomsg "Use <leader>gn to Gwrite and go to next conflict"
+endfunction
+
+nnoremap <leader>gn :Gwrite \| next \| call search('=======')<cr>
