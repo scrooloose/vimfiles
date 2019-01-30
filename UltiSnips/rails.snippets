@@ -98,3 +98,15 @@ endsnippet
 snippet afterall
 after(:all) { DatabaseCleaner.clean_with(:deletion) }
 endsnippet
+
+snippet letbc
+let(:${1:name}) do
+	create(:$1)
+end
+endsnippet
+
+snippet letbs
+let(:stubbed_${1:name}) do
+	build_stubbed(:$1)
+end
+endsnippet

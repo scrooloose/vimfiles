@@ -307,7 +307,7 @@ noremap Q gq
 nnoremap Y y$
 
 "make & highlight the current word, but not move cursor
-nnoremap & :let @/='\V\<'.escape(expand('<cword>'), '\').'\>'<cr>:set hls<cr>
+nnoremap + :let @/='\V\<'.escape(expand('<cword>'), '\').'\>'<cr>:set hls<cr>:ShowSearchIndex<cr>
 
 "visual search mappings
 function! s:VSetSearch()
@@ -316,8 +316,9 @@ function! s:VSetSearch()
     let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
     let @@ = temp
 endfunction
-vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>
-vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>
+vnoremap * :<C-u>call <SID>VSetSearch()<CR>//<CR>:ShowSearchIndex<CR>
+vnoremap # :<C-u>call <SID>VSetSearch()<CR>??<CR>:ShowSearchIndex<CR>
+vnoremap + :<C-u>call <SID>VSetSearch()<CR>:set hls<CR>:ShowSearchIndex<CR>
 
 "indexed search settings
 "
@@ -339,6 +340,7 @@ nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
 
 "ctrlp settings
 let g:ctrlp_custom_ignore = '\v\/vendor\/bundle'
+let g:ctrlp_max_files = 30000
 
 "jump to last cursor position when opening a file
 "dont do it when writing a commit log entry
@@ -474,7 +476,7 @@ endfunction
 " set the arglist to all conflicting files in the current repo
 command! GitLoadConflicts call s:loadGitConfictsIntoArglist()
 function! s:loadGitConfictsIntoArglist() abort
-    argdel *
+    silent! argdel *
     let conflicted_files = system('git diff --name-only --diff-filter=U | tr "\n" " "')
     exec 'argadd ' . conflicted_files
     rewind
