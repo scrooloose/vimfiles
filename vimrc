@@ -192,7 +192,9 @@ set statusline+=%#error#
 set statusline+=%{StatuslineTabWarning()}
 set statusline+=%*
 
+set statusline+=%#error#
 set statusline+=%{StatuslineTrailingSpaceWarning()}
+set statusline+=%*
 
 set statusline+=%{StatuslineLongLineWarning()}
 
@@ -236,6 +238,10 @@ endfunction
 
 "return the syntax highlight group under the cursor ''
 function! StatuslineCurrentHighlight()
+    if !exists('g:statusline_show_current_highlight')
+        return ''
+    endif
+
     let name = synIDattr(synID(line('.'),col('.'),1),'name')
     if name == ''
         return ''
