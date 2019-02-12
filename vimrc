@@ -413,7 +413,7 @@ endfunction
 autocmd bufenter * call s:checkForLnum()
 function! s:checkForLnum() abort
     let fname = expand("%:f")
-    if fname =~ ':\d\+\(:.*\)\?$'
+    if fname =~ ':\d*\(:.*\)\?$'
         let lnum = substitute(fname, '^.*:\(\d\+\)\(:.*\)\?$', '\1', '')
         let realFname = substitute(fname, '^\(.*\):\d\+\(:.*\)\?$', '\1', '')
         exec "edit " . realFname
