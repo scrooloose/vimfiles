@@ -7,6 +7,7 @@ call vundle#begin()
 "let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'derekwyatt/vim-fswitch'
 Plugin 'godlygeek/csapprox'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'fisadev/vim-ctrlp-cmdpalette'
@@ -330,6 +331,11 @@ function! s:Median(nums)
         return (nums[l/2] + nums[(l/2)-1]) / 2
     endif
 endfunction
+
+"fswitch settings
+command! -nargs=0 A FSHere
+command! -nargs=0 AS FSSplitAbove
+command! -nargs=0 AV FSSplitLeft
 
 "sideways conf - for swapping arguments around
 nnoremap <leader>sh :SidewaysLeft<cr>
