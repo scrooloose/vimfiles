@@ -159,9 +159,7 @@ set ignorecase
 set smartcase
 
 "statusline setup
-set statusline =%#identifier#
-set statusline+=[%f]    "tail of the filename
-set statusline+=%*
+set statusline=%t\   "tail of the filename
 
 "display a warning if fileformat isnt unix
 set statusline+=%#warningmsg#
@@ -173,9 +171,6 @@ set statusline+=%#warningmsg#
 set statusline+=%{(&fenc!='utf-8'&&&fenc!='')?'['.&fenc.']':''}
 set statusline+=%*
 
-set statusline+=%h      "help file flag
-set statusline+=%y      "filetype
-
 "read only flag
 set statusline+=%#identifier#
 set statusline+=%r
@@ -185,8 +180,6 @@ set statusline+=%*
 set statusline+=%#warningmsg#
 set statusline+=%m
 set statusline+=%*
-
-set statusline+=%{fugitive#statusline()}
 
 "display a warning if &et is wrong, or we have mixed-indenting
 set statusline+=%#error#
