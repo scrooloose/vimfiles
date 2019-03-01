@@ -509,8 +509,15 @@ nnoremap <silent> <m-l> :TmuxNavigateRight<cr>
 nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
 
 "ctrlp settings
-let g:ctrlp_custom_ignore = '\v\/vendor\/bundle'
+let g:ctrlp_custom_ignore = '\(\/vendor\/bundle\|db\/migrate\)'
 let g:ctrlp_max_files = 30000
+let g:ctrlp_user_command = {
+\ 'types': {
+  \ 1: ['.git', 'cd %s && git ls-files'],
+  \ 2: ['.hg', 'hg --cwd %s locate -I .'],
+  \ },
+\ 'fallback': 'find %s -type f'
+\ }
 
 "jump to last cursor position when opening a file
 "dont do it when writing a commit log entry
@@ -572,32 +579,6 @@ function! s:ActivateRainbowParens() abort
     RainbowParenthesesLoadBraces
 endfunction
 
-"when copying/pasting from the term into :e from a git diff or rspec or
-"similar we edit things like
-"
-"./app/models/foo.rb:10:in
-"
-"Save the time of stripping trailing shit and just make this edit and go to
-"line 10.
-autocmd bufenter * call s:checkForLnum()
-function! s:checkForLnum() abort
-    let fname = expand("%:f")
-    if fname =~ ':\d*\(:.*\)\?$'
-        let lnum = substitute(fname, '^.*:\(\d\+\)\(:.*\)\?$', '\1', '')
-        let realFname = substitute(fname, '^\(.*\):\d\+\(:.*\)\?$', '\1', '')
-        exec "edit " . realFname
-
-        if bufnr(fname) != -1
-            exec "bdelete " . bufnr(fname)
-        endif
-
-        silent doautocmd bufread
-        silent doautocmd bufreadpre
-        call cursor(lnum, 1)
-        normal! zz
-    endif
-endfunction
-
 "toggle a markdown notes file in a fixed window on the right with f12
 nnoremap <F12> :NotesToggle<cr>
 command! -nargs=0 NotesToggle call <sid>toggleNotes()
@@ -655,3 +636,6 @@ function! s:loadGitConfictsIntoArglist() abort
 endfunction
 
 nnoremap <leader>gn :Gwrite \| next \| call search('=======')<cr>
+
+" I typo this enough to be worthwhile aliasing it
+command! W :write
