@@ -159,7 +159,7 @@ set ignorecase
 set smartcase
 
 "statusline setup
-set statusline=%t\   "tail of the filename
+set statusline=%f\   "tail of the filename
 
 "display a warning if fileformat isnt unix
 set statusline+=%#warningmsg#
