@@ -159,7 +159,8 @@ set ignorecase
 set smartcase
 
 "statusline setup
-set statusline=%f\   "tail of the filename
+set statusline=%{expand('%:.')}
+set statusline+=\ "whitespace
 
 "display a warning if fileformat isnt unix
 set statusline+=%#warningmsg#
