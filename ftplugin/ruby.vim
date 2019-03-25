@@ -12,6 +12,8 @@ endfunction
 nnoremap <buffer> <leader>ll :exec "Tmux bundle exec rubocop " . expand("%")<cr>
 nnoremap <buffer> <leader>mf :exec "Tmux flog " . expand("%")<cr>
 nnoremap <buffer> <leader>ml :exec "Tmux flay " . expand("%")<cr>
+nnoremap <buffer> <leader>tp :Tmux rake parallel:spec<cr>
+nnoremap <buffer> <leader>ta :Tmux rake db:migrate db:test:prepare parallel:prepare parallel:spec<cr>
 
 if s:rails()
     nnoremap <buffer> <leader>rr :silent !touch tmp/restart.txt<cr>
