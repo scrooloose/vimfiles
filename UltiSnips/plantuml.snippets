@@ -1,4 +1,4 @@
-snippet uml "Generic UML"
+snippet uml "Generic UML" b
 @startuml
 $0
 @enduml
@@ -26,6 +26,20 @@ hide empty description
 @enduml
 endsnippet
 
+snippet uml "ER diagram" b
+@startuml
+
+$0
+
+hide empty members
+hide empty methods
+hide circle
+skinparam linetype ortho
+skinparam nodesep 100
+'nopreview
+@enduml
+endsnippet
+
 snippet c
 class ${1:name} {
 	$2
@@ -43,4 +57,3 @@ endsnippet
 snippet bt
 "*"-- $0
 endsnippet
-
