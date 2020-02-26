@@ -553,7 +553,7 @@ autocmd BufReadPost fugitive://*
 let g:ruby_indent_access_modifier_style = 'normal'
 
 "markdown settings
-let g:markdown_fenced_languages = ['ruby', 'json']
+let g:markdown_fenced_languages = ['ruby', 'json', 'python']
 
 "add :Efactory and Eadmin etc for rails
 let g:rails_projections = {
@@ -590,7 +590,7 @@ function! s:toggleNotes() abort
         return
     endif
 
-    botright 100vs notes.md
+    botright silent 100vs ~/notes.md
     setl wfw
     setl nonu
 

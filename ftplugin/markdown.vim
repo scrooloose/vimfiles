@@ -1,6 +1,6 @@
 silent TableModeEnable
 setl sw=4 sts=4 et
-setl conceallevel=2
+setl conceallevel=0
 setl foldmethod=expr foldexpr=MarkdownFold()
 setl spell
 
