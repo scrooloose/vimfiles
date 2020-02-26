@@ -48,10 +48,12 @@ Plugin 'AndrewRadev/sideways.vim'
 Plugin 'janko-m/vim-test'
 Plugin 'jgdavey/tslime.vim'
 Plugin 'machakann/vim-highlightedyank'
-Plugin 'flazz/vim-colorschemes'
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
 Plugin 'FooSoft/vim-argwrap'
+
+"colours
+Plugin 'morhetz/gruvbox'
 call vundle#end()
 
 "not sure why this is getting unset by vundle
@@ -144,11 +146,12 @@ endif
 
 "tell the term has 256 colors
 "set t_Co=256
-
+set termguicolors
 set background=dark
-colorscheme peaksea
+colorscheme gruvbox
 hi Normal guibg=NONE ctermbg=NONE
 hi EndOfBuffer guibg=NONE ctermbg=NONE
+hi SpellBad ctermbg=NONE ctermfg=167 cterm=underline
 
 "hide buffers when not displayed
 set hidden
