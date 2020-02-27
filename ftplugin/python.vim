@@ -17,12 +17,12 @@ function! s:setup_qa_test_maps() abort
 endfunction
 
 function! s:file_in_qa_framework() abort
-    return expand("%:p") !~ "platform-wrapper\/qa"
+    return expand("%:p") =~ "platform-wrapper\/qa"
 endfunction
 
-function! s:run_test(type) abort
+function! s:run_test(test_scope) abort
     let position = { 'file': expand("%"), 'col': col("."), 'line': line(".") }
-    let test_location = test#python#pyunit#build_position(a:type, position)[0]
+    let test_location = test#python#pyunit#build_position(a:test_scope, position)[0]
 
     call Send_to_Tmux(
     \ "sed -i -e \"s/^\\( \\+'test_subset': \\)'.*'/\\1'". test_location ."'/\" configs/test_config.py\n"
