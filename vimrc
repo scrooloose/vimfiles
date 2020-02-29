@@ -377,11 +377,15 @@ map <leader>T <Plug>(table-mode-tableize)
 
 "syntastic settings
 let syntastic_stl_format = '[Syntax: %E{line:%fe }%W{#W:%w}%B{ }%E{#E:%e}]'
+let g:syntastic_mode_map = {
+    \ "mode": "active",
+    \ "passive_filetypes": ["python"] }
 
 "nerdtree settings
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeWinSize = 40
 let g:NERDTreeMinimalUI=1
+let g:NERDTreeIgnore=['\~$', '__pycache__']
 
 "tagbar settings
 let g:tagbar_sort = 0
