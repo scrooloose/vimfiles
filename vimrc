@@ -49,6 +49,7 @@ Plugin 'sheerun/vim-polyglot'
 
 "colours
 Plugin 'morhetz/gruvbox'
+Plugin 'flazz/vim-colorschemes'
 call vundle#end()
 
 "not sure why this is getting unset by vundle
