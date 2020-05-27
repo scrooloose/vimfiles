@@ -586,30 +586,18 @@ function! s:ActivateRainbowParens() abort
     RainbowParenthesesLoadBraces
 endfunction
 
-"toggle a markdown notes file in a fixed window on the right with f12
 nnoremap <F12> :NotesToggle<cr>
 command! -nargs=0 NotesToggle call <sid>toggleNotes()
 function! s:toggleNotes() abort
-    let winnr = bufwinnr("notes.md")
-    if winnr > 0
-        exec winnr . "wincmd c"
-        return
-    endif
-
-    botright silent 100vs ~/notes.md
+    botright silent 90vs ~/notes
     setl wfw
-    setl nonu
 
     "hack to make nerdtree et al not split the window
-    setl previewwindow
+    silent! setl previewwindow
 
     "for some reason this doesnt get run automatically and the cursor
     "position doesn't get set
     doautocmd bufreadpost %
-
-    setf markdown
-
-    silent! normal zMzO
 endfunction
 
 "command to filter :scriptnames output by a regex
