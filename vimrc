@@ -654,3 +654,13 @@ nnoremap <leader>gn :Gwrite \| next \| call search('=======')<cr>
 
 " I typo this enough to be worthwhile aliasing it
 command! W :write
+
+" Decode the big blobs of base64 encoded saml that we get in the logs
+" Install xmllint on ubuntu with: apt-get install libxml2-utils
+nnoremap <leader>sd "+p:SamlDecode<cr>
+command! SamlDecode :call s:SamlDecode()
+function! s:SamlDecode() abort
+    %!base64 -d
+    %!xmllint --format -
+    setf xml
+endfunction
