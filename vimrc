@@ -413,16 +413,8 @@ endif
 "vim-test settings
 let test#strategy = "tslime"
 let g:test#ruby#use_spring_binstub=1
-nnoremap <leader>tt :TestNearest<cr>
-nnoremap <leader>tf :TestFile<cr>
-nnoremap <leader>ta :TestSuite<cr>
-nnoremap <leader>tl :TestLast<cr>
-nnoremap <leader>tg :TestVisit<cr>
 
 "explorer mappings
-nnoremap <leader>bb :BufExplorer<cr>
-nnoremap <leader>bs :BufExplorerHorizontalSplit<cr>
-nnoremap <leader>bv :BufExplorerVerticalSplit<cr>
 nnoremap <leader>nt :NERDTreeToggle<cr>
 nnoremap <leader>nf :NERDTreeFind<cr>
 nnoremap <leader>nn :e .<cr>
@@ -629,14 +621,6 @@ function! s:scriptnames(re) abort
 
     let filtered = filter(split(scriptnames, "\n"), "v:val =~ '" . a:re . "'")
     echo join(filtered, "\n")
-endfunction
-
-function! ToCamel(str) abort
-    if a:str =~ '_'
-        return substitute(a:str, '\(\%(\<\l\+\)\%(_\)\@=\)\|_\(\l\)', '\u\1\2', 'g')
-    else
-        return substitute(a:str, '^\(.\)', '\u\1', '')
-    endif
 endfunction
 
 " set the arglist to all conflicting files in the current repo
