@@ -20,6 +20,7 @@ Plugin 'scrooloose/vim-slumlord'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/vim-orgymode'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-ragtag'
@@ -55,6 +56,8 @@ call vundle#end()
 "not sure why this is getting unset by vundle
 set rtp+=~/.vim
 
+set rtp+=~/code/vim-colon-therapy
+
 runtime macros/matchit.vim
 
 "allow backspacing over everything in insert mode
@@ -74,6 +77,9 @@ set listchars=tab:▷⋅,trail:⋅,nbsp:⋅
 
 set incsearch   "find the next match as we type the search
 set hlsearch    "hilight searches by default
+if has("nvim")
+    set inccommand=nosplit
+endif
 
 set wrap        "dont wrap lines
 set linebreak   "wrap lines at convenient points
@@ -127,6 +133,10 @@ set scrolloff=3
 set sidescrolloff=7
 set sidescroll=1
 
+"dont show epic message for swapfiles (most of these are bogus for me).
+"Use :recover when we actually need to recover from swapfile
+set shortmess+=A
+
 "load ftplugins and indent files
 filetype plugin on
 filetype indent on
@@ -140,9 +150,6 @@ if !has("nvim")
     set ttymouse=xterm2
 endif
 
-"tell the term has 256 colors
-"set t_Co=256
-set termguicolors
 set background=dark
 colorscheme gruvbox
 hi Normal guibg=NONE ctermbg=NONE
@@ -156,6 +163,10 @@ iabbrev teh the
 
 set ignorecase
 set smartcase
+
+if filereadable('/usr/share/dict/words')
+    set dictionary=/usr/share/dict/words
+endif
 
 "statusline setup
 set statusline=%{expand('%:.')}
