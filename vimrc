@@ -150,6 +150,7 @@ if !has("nvim")
     set ttymouse=xterm2
 endif
 
+set termguicolors
 set background=dark
 colorscheme gruvbox
 hi Normal guibg=NONE ctermbg=NONE
