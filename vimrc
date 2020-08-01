@@ -8,7 +8,6 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'derekwyatt/vim-fswitch'
-Plugin 'godlygeek/csapprox'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'fisadev/vim-ctrlp-cmdpalette'
 Plugin 'tpope/vim-endwise'
@@ -47,9 +46,11 @@ Plugin 'jgdavey/tslime.vim'
 Plugin 'machakann/vim-highlightedyank'
 Plugin 'FooSoft/vim-argwrap'
 Plugin 'sheerun/vim-polyglot'
+Plugin 'dkarter/bullets.vim'
 
 "colours
 Plugin 'morhetz/gruvbox'
+Plugin 'danilo-augusto/vim-afterglow'
 Plugin 'flazz/vim-colorschemes'
 call vundle#end()
 
@@ -151,11 +152,13 @@ if !has("nvim")
 endif
 
 set termguicolors
-set background=dark
-colorscheme gruvbox
-hi Normal guibg=NONE ctermbg=NONE
-hi EndOfBuffer guibg=NONE ctermbg=NONE
-hi SpellBad ctermbg=NONE ctermfg=167 cterm=underline
+"set background=dark
+"colorscheme gruvbox
+"hi Normal guibg=NONE ctermbg=NONE
+"hi EndOfBuffer guibg=NONE ctermbg=NONE
+"hi SpellBad ctermbg=NONE ctermfg=167 cterm=underline
+let g:afterglow_inherit_background=1
+color afterglow
 
 "hide buffers when not displayed
 set hidden
@@ -397,23 +400,30 @@ let g:NERDTreeIgnore=['\~$', '__pycache__']
 
 "tagbar settings
 let g:tagbar_sort = 0
-if executable("ripper-tags")
+if executable('ripper-tags')
     let g:tagbar_type_ruby = {
-                \ 'kinds' : [
-                    \ 'm:modules',
-                    \ 'c:classes',
-                    \ 'f:methods',
-                    \ 'F:singleton methods',
-                    \ 'C:constants'
-                \ ],
-                \ 'ctagsbin':  'ripper-tags',
-                \ 'ctagsargs': ['-f', '-']
-                \ }
+        \ 'kinds'      : ['m:modules',
+                        \ 'c:classes',
+                        \ 'C:constants',
+                        \ 'F:singleton methods',
+                        \ 'f:methods',
+                        \ 'a:aliases'],
+        \ 'kind2scope' : { 'c' : 'class',
+                         \ 'm' : 'class' },
+        \ 'scope2kind' : { 'class' : 'c' },
+        \ 'ctagsbin'   : 'ripper-tags',
+        \ 'ctagsargs'  : ['-f', '-']
+        \ }
 endif
 
 "vim-test settings
 let test#strategy = "tslime"
 let g:test#ruby#use_spring_binstub=1
+nnoremap <leader>tt :TestNearest<cr>
+nnoremap <leader>tf :TestFile<cr>
+nnoremap <leader>ta :TestSuite<cr>
+nnoremap <leader>tl :TestLast<cr>
+nnoremap <leader>tg :TestVisit<cr>
 
 "explorer mappings
 nnoremap <leader>nt :NERDTreeToggle<cr>
@@ -561,6 +571,12 @@ let g:ruby_indent_access_modifier_style = 'normal'
 
 "markdown settings
 let g:markdown_fenced_languages = ['ruby', 'json', 'python']
+
+" these things are handled by bullets.vim
+let g:vim_markdown_auto_insert_bullets = 0
+let g:vim_markdown_new_list_item_indent = 0
+
+let g:bullets_outline_levels = ['ROM', 'ABC', 'num', 'abc', 'rom', 'std*', 'std-']
 
 "add :Efactory and Eadmin etc for rails
 let g:rails_projections = {
