@@ -425,6 +425,12 @@ nnoremap <leader>ta :TestSuite<cr>
 nnoremap <leader>tl :TestLast<cr>
 nnoremap <leader>tg :TestVisit<cr>
 
+autocmd bufenter,bufnewfile $HOME/code/labforge/tests/*.py call s:setup_labforge_tests()
+function! s:setup_labforge_tests() abort
+    let g:test#python#nose2#executable="python3 -munittest"
+    let g:test#python#runner="Nose2"
+endfunction
+
 "explorer mappings
 nnoremap <leader>nt :NERDTreeToggle<cr>
 nnoremap <leader>nf :NERDTreeFind<cr>
