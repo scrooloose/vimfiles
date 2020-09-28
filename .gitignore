@@ -7,3 +7,4 @@ projects/*
 .netrwhist
 bundle/*
 spell/*.add*
+swapfiles/*
