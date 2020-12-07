@@ -596,6 +596,18 @@ let g:rails_projections = {
     \   "template":
     \     ["ActiveAdmin.register {camelcase|singular|capitalize} do", "end"],
     \ },
+    \ "app/graphql/resolvers/*.rb": {
+    \   "command": "resolver"
+    \ },
+    \ "app/graphql/inputs/*.rb": {
+    \   "command": "input"
+    \ },
+    \ "app/graphql/types/*.rb": {
+    \   "command": "type"
+    \ },
+    \ "app/graphql/mutations/*.rb": {
+    \   "command": "mutation"
+    \ },
     \ "app/controllers/api/v5/*.rb": {
     \   "command": "api"
     \ }}
