@@ -24,9 +24,9 @@ function! s:ViewPNG() abort
     silent call s:mungePlantUML()
     noautocmd write
 
-    let imgFname = expand("%:p:r") . ".png"
+    let imgFname = expand("%:p:r") . ".svg"
     call system("rm " . imgFname)
-    call system("java -jar ~/.vim/plantuml/plantuml.jar -tpng " . expand("%:p"))
+    call system("java -jar ~/.vim/plantuml/plantuml.jar -tsvg " . expand("%:p"))
     call system("xdg-open " . imgFname)
     exec "b " . bnum
 endfunction
