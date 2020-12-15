@@ -523,6 +523,7 @@ nnoremap N N:ShowSearchIndex<cr>
 
 "gutentags settings
 let g:gutentags_ctags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
+let g:gutentags_generate_on_missing=0
 
 "tmux-vim-navigator setup
 let g:tmux_navigator_no_mappings = 1
