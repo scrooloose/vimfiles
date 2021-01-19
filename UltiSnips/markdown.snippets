@@ -1,9 +1,50 @@
 snippet --
 ${1:title}
 ${1/./-/g}
+
+$0
 endsnippet
 
 snippet ==
 ${1:title}
 ${1/./=/g}
+
+$0
+endsnippet
+
+
+snippet xp
+| Thing        | Count | Each | Total |
+|--------------|:-----:|-----:|------:|
+| $0
+|--------------|-------|------|-------|
+| Total XP     |       |      |       |
+| Per Player   |       |      |       |
+>  tmf: \$4=float2nr(\$2*\$3);\$-2,4=float2nr(Sum(1:-2));\$-1,4=float2nr(\$-2,4/${1:player_count})
+>  Eval with <space>tfe
+endsnippet
+
+snippet dnd
+Start
+=====
+$0
+
+Potential scenes
+================
+
+Secrets
+=======
+
+Locations
+=========
+
+Treasure
+========
+
+Monsters
+========
+
+Summary
+=======
+
 endsnippet
