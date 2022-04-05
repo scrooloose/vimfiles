@@ -524,6 +524,7 @@ nnoremap N N:ShowSearchIndex<cr>
 "gutentags settings
 let g:gutentags_ctags_exclude = ['vendor/*', 'tmp/*', 'log/*', 'coverage/*', 'doc/*']
 let g:gutentags_generate_on_missing=0
+let g:gutentags_generate_on_new=0
 
 "tmux-vim-navigator setup
 let g:tmux_navigator_no_mappings = 1
@@ -535,7 +536,7 @@ nnoremap <silent> <m-w> :TmuxNavigatePrevious<cr>
 
 "ctrlp settings
 let g:ctrlp_custom_ignore = '\(\/vendor\/bundle\|db\/migrate\)'
-let g:ctrlp_max_files = 30000
+let g:ctrlp_max_files = 40000
 let g:ctrlp_user_command = {
 \ 'types': {
   \ 1: ['.git', 'cd %s && git ls-files'],
