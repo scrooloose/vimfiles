@@ -3,24 +3,26 @@ if exists('g:loaded_snakey_camel')
 endif
 let g:loaded_snakey_camel = 1
 
-nnoremap <leader>ss :call SnakeyCamel("toSnake", 0)<cr>
-nnoremap <leader>sS :call SnakeyCamel("toSnake", 1)<cr>
-nnoremap <leader>sS :call SnakeyCamel("toSnake", 1)<cr>
-nnoremap <leader>sc :call SnakeyCamel("toCamel", 0)<cr>
-nnoremap <leader>sC :call SnakeyCamel("toCamel", 1)<cr>
-nnoremap <leader>sk :call SnakeyCamel("toKebab", 0)<cr>
-nnoremap <leader>sK :call SnakeyCamel("toKebab", 1)<cr>
+nnoremap <leader>ss :call <SID>SnakeyCamel("toSnake", 0)<cr>
+nnoremap <leader>sS :call <SID>SnakeyCamel("toSnake", 1)<cr>
+nnoremap <leader>sS :call <SID>SnakeyCamel("toSnake", 1)<cr>
+nnoremap <leader>sc :call <SID>SnakeyCamel("toCamel", 0)<cr>
+nnoremap <leader>sC :call <SID>SnakeyCamel("toCamel", 1)<cr>
+nnoremap <leader>sk :call <SID>SnakeyCamel("toKebab", 0)<cr>
+nnoremap <leader>sK :call <SID>SnakeyCamel("toKebab", 1)<cr>
 
-function! SnakeyCamel(convertFunc, convertFuncArg) abort
+function! s:SnakeyCamel(convertFunc, convertFuncArg) abort
     let oldIskeyword = &iskeyword
     set iskeyword+=-
-
     let cword = expand("<cword>")
-    let replacement = call("s:" . a:convertFunc, [cword, a:convertFuncArg])
-    exec "normal ciw" . replacement
-    normal b
 
-    exec 'set iskeyword=' . oldIskeyword
+    try
+        let replacement = call("s:" . a:convertFunc, [cword, a:convertFuncArg])
+        exec "normal ciw" . replacement
+        normal b
+    finally
+        exec 'set iskeyword=' . oldIskeyword
+    endtry
 endfunction
 
 function! s:toCamel(word, leadingCap) abort
