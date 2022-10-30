@@ -1,1 +1,0 @@
-/home/marty/.vimrc
