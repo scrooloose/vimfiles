@@ -663,3 +663,20 @@ function! s:SamlDecode() abort
     %!xmllint --format -
     setf xml
 endfunction
+
+
+autocmd bufnewfile * ++nested call s:ProcessTrailingLineNum()
+function! s:ProcessTrailingLineNum()
+    let fname = expand("%")
+    if filereadable(fname)
+        return
+    endif
+
+    if fname =~ ':\d*$'
+        let lnum = substitute(fname, '.*:\(\d*$\)', '\1', '')
+        let fnameWithoutLnum = substitute(fname, '\(.*\):\d*$', '\1', '')
+
+        exec "edit " . fnameWithoutLnum
+        exec lnum
+    endif
+endfunction
