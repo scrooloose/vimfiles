@@ -672,9 +672,9 @@ function! s:ProcessTrailingLineNum()
         return
     endif
 
-    if fname =~ ':\d*$'
-        let lnum = substitute(fname, '.*:\(\d*$\)', '\1', '')
-        let fnameWithoutLnum = substitute(fname, '\(.*\):\d*$', '\1', '')
+    if fname =~ ':\d*'
+        let lnum = substitute(fname, '.*:\(\d*\).*$', '\1', '')
+        let fnameWithoutLnum = substitute(fname, '\(.*\):\d*.*$', '\1', '')
 
         exec "edit " . fnameWithoutLnum
         exec lnum
