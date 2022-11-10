@@ -86,6 +86,7 @@ endif
 
 set wrap        "dont wrap lines
 set linebreak   "wrap lines at convenient points
+set breakindent "wrap lines such that vertical indent is not broken
 
 if v:version >= 703
     "undo settings
@@ -665,7 +666,7 @@ function! s:SamlDecode() abort
 endfunction
 
 
-autocmd bufnewfile * ++nested call s:ProcessTrailingLineNum()
+autocmd bufnewfile,bufenter * ++nested call s:ProcessTrailingLineNum()
 function! s:ProcessTrailingLineNum()
     let fname = expand("%")
     if filereadable(fname)
